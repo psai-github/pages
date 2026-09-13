@@ -30,8 +30,6 @@ sticky_rank: 1
         <option value="2026-2027" selected>2026/2027</option>
         <option value="2025-2026">2025/2026</option>
       </select>
-      <a href="{% post_url 2026-06-01-README-capstone %}" class="ocs__btn" title="Open Capstone Home Documentation">📄 README</a>
-      <a href="/capstone/games/" class="ocs__btn alert-green fill" title="Browse all OCS Games">🎮 Games Directory</a>
     </div>
   </div>
 </div>
@@ -367,11 +365,11 @@ document.addEventListener('DOMContentLoaded', function(){
 
    <!-- RFID + Camera-Correlated Classroom Presence -->
    <div class="ocs__grid-cell CSH" data-year="2026-2027">
-     <a href="{% post_url capstone/2026-08-28-rfid-presence-capstone %}">
+     <a href="{% post_url capstone/RFID/2026-09-12-rfid-presence-capstone %}">
        <div class="ocs__image-frame ocs__image-frame--thumbnail capstone-card-placeholder" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);">RFID</div>
      </a>
      <div>
-       <h3><a href="{% post_url capstone/2026-08-28-rfid-presence-capstone %}">RFID + Camera-Correlated Classroom Presence</a></h3>
+       <h3><a href="{% post_url capstone/RFID/2026-09-12-rfid-presence-capstone %}">RFID + Camera-Correlated Classroom Presence</a></h3>
        <p>A low-cost Raspberry Pi UHF RFID system that tracks device presence at the doorway and correlates it with an existing face-scanning camera system to determine true student presence, period by period.</p>
        <p>Team: Ruta Sirdeshmukh, Vibha Mandayam, Kush Shah</p>
      </div>

@@ -12,9 +12,10 @@
 // Capstone Infograph Styles (centralized)
 // All individual capstone infograph SCSS has been unified into one file to provide a consistent B/W theme.
 @import "capstone/infograph";
-
-// Classroom Presence System capstone project styles
-@import "capstone/rfid-presence";
+// Capstone document primitives override generic infograph suffix selectors.
+@import "open-coding/elements/capstone/main";
+@import "open-coding/elements/capstone/checklists";
+@import "open-coding/elements/capstone/status-pills";
 
 // Jarvis Camera Setup & Object Detection capstone project styles
 @import "capstone/jarvis";
