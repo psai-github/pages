@@ -29,6 +29,10 @@ DEFAULT_UID = os.getenv("PAGES_BOT_UID", "pages-bot")
 DEFAULT_PASSWORD = os.getenv("PAGES_BOT_PASSWORD", "")
 
 
+class AssignmentFrontmatterError(ValueError):
+    """Raised when assignment-specific frontmatter cannot be synchronized safely."""
+
+
 def find_files(root: Path):
     exts = {".md", ".markdown", ".html", ".htm", ".ipynb"}
     for p in root.rglob("*"):
@@ -100,6 +104,31 @@ def determine_content_url(root: Path, path: Path, fm: dict):
     return rel
 
 
+def read_creator_uids(fm: dict, path: Path | None = None):
+    """Return a normalized creator list while keeping legacy assignments valid."""
+    creator_uids = fm.get("assignment_creator_uids")
+    if creator_uids is None:
+        return []
+
+    location = f" in {path}" if path is not None else ""
+    if not isinstance(creator_uids, list) or not creator_uids:
+        raise AssignmentFrontmatterError(
+            f"assignment_creator_uids must be a non-empty YAML list{location}"
+        )
+
+    normalized = []
+    for creator_uid in creator_uids:
+        if not isinstance(creator_uid, str) or not creator_uid.strip():
+            raise AssignmentFrontmatterError(
+                f"assignment_creator_uids must contain only non-empty strings{location}"
+            )
+        uid = creator_uid.strip()
+        if uid not in normalized:
+            normalized.append(uid)
+
+    return normalized
+
+
 def authenticate(session: requests.Session, base_url: str, uid: str, password: str):
     resp = session.post(f"{base_url}/authenticate", json={"uid": uid, "password": password}, timeout=20)
     if resp.status_code != 200:
@@ -119,12 +148,17 @@ def create_assignment(
     description: str = "auto-created on deploy",
     points=None,
     due_date=None,
+    creator_uids=None,
 ):
     payload = {"name": name, "contentUrl": content_url, "description": description}
     if points is not None:
         payload["points"] = points
     if due_date:
         payload["dueDate"] = due_date
+    if creator_uids:
+        # Requests encodes a list value as repeated creatorUids form fields,
+        # which Spring can bind directly to List<String>.
+        payload["creatorUids"] = creator_uids
     # Use form-encoded to match frontend
     resp = session.post(f"{base_url}/api/assignments/auto-create", data=payload, timeout=30)
     return resp
@@ -177,15 +211,24 @@ def main():
             description = fm.get("description") or "auto-created from frontmatter"
             points = fm.get("points")
             due_date = fm.get("dueDate") or fm.get("due_date") or fm.get("due")
-            candidates.append((f, content_url, name, description, points, due_date))
+            try:
+                creator_uids = read_creator_uids(fm, f)
+            except AssignmentFrontmatterError as error:
+                print(f"Invalid assignment frontmatter: {error}", file=sys.stderr)
+                return 2
+            candidates.append((f, content_url, name, description, points, due_date, creator_uids))
 
     if not candidates:
         print("No pages with assignment: true found.")
         return 0
 
     print(f"Found {len(candidates)} pages with assignment: true")
-    for path, content_url, name, description, points, due_date in candidates:
-        print(f"-> {path} -> contentUrl={content_url} name={name}")
+    for path, content_url, name, description, points, due_date, creator_uids in candidates:
+        creator_summary = ",".join(creator_uids) if creator_uids else "legacy/unassigned"
+        print(
+            f"-> {path} -> contentUrl={content_url} name={name} "
+            f"creatorUids={creator_summary}"
+        )
         if args.dry_run and not args.create:
             continue
 
@@ -226,7 +269,16 @@ def main():
             if args.dry_run:
                 continue
             try:
-                resp = create_assignment(session, args.base_url, name, content_url, description, points, due_date)
+                resp = create_assignment(
+                    session,
+                    args.base_url,
+                    name,
+                    content_url,
+                    description,
+                    points,
+                    due_date,
+                    creator_uids,
+                )
                 print(f"  {resp.status_code} {resp.text[:200]}")
             except Exception as e:
                 print(f"  ERROR: {e}")
