@@ -1,7 +1,7 @@
 ---
 layout: post
 title: SASS Containers Grammar
-description: Explore the Open Coding Society container grammar through living examples.
+description: Learn and explore Open Coding Society container grammar through living examples.
 categories: [SASS, Containers]
 lesson_language: SASS
 lesson_topic: Containers
