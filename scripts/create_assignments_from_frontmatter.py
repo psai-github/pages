@@ -17,6 +17,7 @@ import os
 import re
 import sys
 from pathlib import Path
+from urllib.parse import quote
 
 import requests
 import yaml
@@ -83,25 +84,80 @@ def read_frontmatter(path: Path):
     return parse_frontmatter_text(text)
 
 
+def canonicalize_content_url(content_url):
+    """Collapse a URL to the form Spring stores: no repeated, leading or trailing slashes.
+
+    Mirrors AssignmentContentUrls.canonicalize on the Spring side exactly. The file
+    extension and letter case are left alone on purpose, so the stored key stays identical
+    to the URL Jekyll actually serves. Keep the two implementations in step.
+    """
+    if not isinstance(content_url, str):
+        return None
+    collapsed = re.sub(r"/{2,}", "/", content_url.strip()).strip("/")
+    return collapsed or None
+
+
+def post_categories(rel: str, fm: dict):
+    """Categories Jekyll prefixes onto a post's default permalink.
+
+    Verified against a Jekyll build rather than assumed, because the rule is asymmetric:
+    only directories *above* `_posts` become categories. `CatAbove/_posts/x.md` is in
+    category `CatAbove`, while `_posts/CSH/x.md` has no category at all and resolves to
+    /2026/07/27/x.html. Frontmatter `categories`/`category` overrides the directory, and a
+    string form is split on whitespace the way Jekyll splits it.
+
+    Jekyll lowercases each category and URL-encodes it, leaving `-` and `_` intact
+    (`B-tools_and_equipment` -> `b-tools_and_equipment`, `Foo Bar` -> `foo%20bar`).
+    """
+    declared = None
+    if fm is not None:
+        declared = fm.get("categories")
+        if declared is None:
+            declared = fm.get("category")
+
+    if isinstance(declared, str):
+        categories = [c for c in declared.replace(",", " ").split() if c]
+    elif isinstance(declared, list):
+        categories = [str(c).strip() for c in declared if str(c).strip()]
+    else:
+        # Directories above _posts only; anything nested under _posts is not a category.
+        categories = [s for s in rel.partition("_posts/")[0].split("/") if s]
+
+    return [quote(c.lower(), safe="") for c in categories]
+
+
 def determine_content_url(root: Path, path: Path, fm: dict):
-    # Prefer explicit permalink if present
+    """The URL Jekyll will serve this page at, in Spring's canonical form.
+
+    This has to agree byte for byte with what the browser posts from _layouts/post.html
+    (`{{ page.url }}`), because Spring dedups assignments on that string. Deriving it
+    differently here is what previously produced two assignment rows per page: one holding
+    the submissions, the other holding the frontmatter-declared creators.
+    """
+    # An explicit permalink is used by Jekyll verbatim as page.url.
     if fm is not None and isinstance(fm.get("permalink"), str) and fm.get("permalink").strip():
-        perm = fm.get("permalink").strip()
-        return perm.lstrip("/")
-    # Otherwise compute a path relative to root
+        return canonicalize_content_url(fm.get("permalink"))
+
     rel = path.relative_to(root).as_posix()
-    # Remove leading index filenames and extensions
-    rel = re.sub(r"(^|/)index\.(md|markdown|html)$", r"\1", rel, flags=re.I)
-    rel = re.sub(r"\.(md|markdown|html|ipynb)$", "", rel, flags=re.I)
-    # Prefix with pages/ if the file is under pages/ or _posts
-    if rel.startswith("pages/"):
-        return rel
-    if rel.startswith("_posts/"):
-        # Map _posts/YYYY-MM-DD-title.md -> posts/title
-        parts = Path(rel).name
-        name = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", parts)
-        return "posts/" + name
-    return rel
+
+    # Posts without a permalink use Jekyll's default style,
+    # /:categories/:year/:month/:day/:title.html, built from the filename's date and slug.
+    # _config.yml sets no `permalink` and no `defaults`, so that default is in force.
+    if "_posts/" in rel or rel.startswith("_posts/"):
+        stem = re.sub(r"\.(md|markdown|html|htm|ipynb)$", "", Path(rel).name, flags=re.I)
+        dated = re.match(r"^(\d{4})-(\d{2})-(\d{2})-(.+)$", stem)
+        if dated:
+            year, month, day, slug = dated.groups()
+            parts = post_categories(rel, fm) + [year, month, day, slug]
+            return canonicalize_content_url("/".join(parts) + ".html")
+
+    # Ordinary pages keep their source path with an .html extension; index.* becomes its
+    # own directory. Note that Jekyll excludes _notebooks, so an .ipynb marked
+    # `assignment: true` would yield a URL the site never serves - none exist today.
+    rel = re.sub(r"(^|/)index\.(md|markdown|html|htm)$", r"\1", rel, flags=re.I)
+    if re.search(r"\.(md|markdown|html|htm|ipynb)$", rel, flags=re.I):
+        rel = re.sub(r"\.(md|markdown|html|htm|ipynb)$", ".html", rel, flags=re.I)
+    return canonicalize_content_url(rel)
 
 
 def read_creator_uids(fm: dict, path: Path | None = None):
