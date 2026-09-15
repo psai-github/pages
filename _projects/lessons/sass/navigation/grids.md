@@ -2,14 +2,16 @@
 layout: post
 title: SASS Grids Grammar
 description: Explore the Open Coding Society grid grammar through living examples.
-hide: true
-show_reading_time: false
+categories: [SASS, Grids]
+lesson_language: SASS
+lesson_topic: Grids
+lesson_part: interactive
+lesson_type: lesson
+microblog: true
 permalink: /navigation/sass/grids/
 ---
 
 <!-- markdownlint-disable MD033 MD046 -->
-
-{% include projects/sass/sass-nav.html %}
 
 Hi! My name is [Your Full Name]
 
