@@ -1334,11 +1334,21 @@ Check if this is a course lesson and determine which course context to use
         Submit Assignment
       </h3>
 
-      {% if submission_type == "link" %}
+      {% if submission_type == "link" or submission_type == "github_issue" %}
+      {% if submission_type == "github_issue" %}
+        {% assign link_label = "GitHub Issue or Gist Link" %}
+        {% assign link_placeholder = "https://github.com/owner/repo/issues/123" %}
+      {% else %}
+        {% assign link_label = "Submission Link" %}
+        {% assign link_placeholder = "https://..." %}
+      {% endif %}
       <form class="submission-form active" id="link-form-blog">
         <div class="form-group">
-          <label for="submission-link-blog">Submission Link</label>
-          <input type="url" id="submission-link-blog" placeholder="https://..." required>
+          <label for="submission-link-blog">{{ link_label }}</label>
+          <input type="url" id="submission-link-blog" placeholder="{{ link_placeholder }}" required>
+          {% if submission_type == "github_issue" %}
+          <p class="form-hint" style="font-size:0.85rem;color:#9ca3af;margin-top:6px;">Must be a public GitHub issue (github.com/owner/repo/issues/N) or gist link — it will be validated and reviewed automatically.</p>
+          {% endif %}
         </div>
         <div class="form-group">
           <label for="link-description-blog">Description</label>
