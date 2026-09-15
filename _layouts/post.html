@@ -135,6 +135,7 @@ Check if this is a course lesson and determine which course context to use
 
 <script type="module">
   import { pythonURI, fetchOptions, javaURI } from '{{ site.baseurl }}/assets/js/api/config.js';
+  import { exportToGist } from '{{ site.baseurl }}/assets/js/gist.js';
 
   /**
    * ============================================
@@ -145,6 +146,9 @@ Check if this is a course lesson and determine which course context to use
   const WEEK = '{{ current_week }}';
   const PAGE_TITLE = "{{ page.title }}";
   const CURRENT_LESSON_ID = '{{ page.url }}';
+  const SUBMISSION_TYPE = {{ page.assignment_submission_type | default: "file" | downcase | jsonify }};
+  const CODE_EXTENSIONS = { python: 'py', java: 'java', javascript: 'js', pseudocode: 'txt' };
+  const GITHUB_ISSUE_URL_PATTERN = /^https?:\/\/github\.com\/[^/]+\/[^/#?]+\/issues\/\d+\/?$/i;
   const STORAGE_KEY = `${COURSE}-lesson-completion`;
   const STATUS_AUTO_HIDE_MS = 5000;
   const FILE_SIZE_LIMIT_MB = 10;
@@ -530,7 +534,7 @@ Check if this is a course lesson and determine which course context to use
   async function submitLinkToBackend(link, description) {
     const assignmentId = await ensureAssignmentId();
     const { uid, personId } = await resolveCurrentUser();
-    const content = { type: 'link', url: link, notes: description };
+    const content = { type: SUBMISSION_TYPE === 'github_issue' ? 'github_issue' : 'link', url: link, notes: description };
     const res = await fetch(`${javaURI}/api/submissions/${assignmentId}`, {
       ...fetchOptions,
       method: 'POST',
@@ -554,6 +558,41 @@ Check if this is a course lesson and determine which course context to use
       method: 'POST',
       body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: content, submittedAt: new Date().toISOString() })
     }).catch(() => {}); // non-blocking — don't fail submission if grades write fails
+  }
+
+  async function submitCodeToBackend(code, language, description) {
+    const assignmentId = await ensureAssignmentId();
+    // Resolve the user first so we don't burn a Gist creation on a request that will fail anyway.
+    const { uid, personId } = await resolveCurrentUser();
+    const ext = CODE_EXTENSIONS[language] || 'txt';
+    const gistUrl = await exportToGist(
+      { [`submission.${ext}`]: { content: code } },
+      { type: 'submission', description: description || `Code submission (${language})` }
+    );
+    const content = { type: 'code', url: gistUrl, language, notes: description };
+    const res = await fetch(`${javaURI}/api/submissions/${assignmentId}`, {
+      ...fetchOptions,
+      method: 'POST',
+      body: JSON.stringify({
+        assignmentId: assignmentId,
+        submitterId: personId,
+        isGroupSubmission: false,
+        content,
+        comment: description,
+        isLate: false
+      })
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error(e.error || res.statusText);
+    }
+    const assignmentLabel = (typeof CURRENT_ASSIGNMENT_NAME === 'string' && CURRENT_ASSIGNMENT_NAME) ? CURRENT_ASSIGNMENT_NAME : String(assignmentId);
+    await fetch(`${javaURI}/api/grades`, {
+      ...fetchOptions,
+      method: 'POST',
+      body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: content, submittedAt: new Date().toISOString() })
+    }).catch(() => {}); // non-blocking
+    return gistUrl;
   }
 
   async function submitFilesToBackend(files, notes) {
@@ -722,6 +761,10 @@ Check if this is a course lesson and determine which course context to use
         const link = document.getElementById('submission-link').value.trim();
         const description = document.getElementById('link-description').value.trim();
         const submitBtn = linkForm.querySelector('button[type="submit"]');
+        if (SUBMISSION_TYPE === 'github_issue' && !GITHUB_ISSUE_URL_PATTERN.test(link)) {
+          showStatus('error', 'That is not a valid GitHub issue link (expected github.com/owner/repo/issues/N).');
+          return;
+        }
         submitBtn.disabled = true;
         showStatus('loading', 'Submitting...');
         try {
@@ -765,6 +808,41 @@ Check if this is a course lesson and determine which course context to use
         }
       });
     }
+
+    const codeForm = document.getElementById('code-form');
+    if (codeForm) {
+      codeForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const code = document.getElementById('code-input').value;
+        const language = document.getElementById('code-language').value;
+        const notes = document.getElementById('code-notes')?.value?.trim() || '';
+        const submitBtn = codeForm.querySelector('button[type="submit"]');
+        if (!code.trim()) {
+          showStatus('error', 'Please enter some code before submitting.');
+          return;
+        }
+        submitBtn.disabled = true;
+        showStatus('loading', 'Checking login...');
+        try {
+          await resolveCurrentUser();
+        } catch (err) {
+          showStatus('error', 'Please log in to submit code.');
+          submitBtn.disabled = false;
+          return;
+        }
+        showStatus('loading', 'Creating Gist and submitting...');
+        try {
+          await submitCodeToBackend(code, language, notes);
+          saveSubmissionLocally('code', { language, notes });
+          showStatus('success', 'Code submitted successfully!');
+          this.reset();
+        } catch (err) {
+          showStatus('error', err.message);
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+    }
   }
 
   /**
@@ -792,7 +870,8 @@ Check if this is a course lesson and determine which course context to use
           name: PAGE_TITLE || {{ page.title | jsonify }},
           contentUrl: CURRENT_LESSON_ID,
           description: {{ page.description | default: "" | jsonify }},
-          assignmentType: {{ page.assignment_submission_type | default: "File" | jsonify }}
+          assignmentType: {{ page.assignment_submission_type | default: "File" | jsonify }},
+          pageContent: {{ page.content | strip_html | normalize_whitespace | truncate: 8000 | jsonify }}
         })
       });
       
@@ -1418,6 +1497,9 @@ Check if this is a course lesson and determine which course context to use
     <script>
       const FRONTMATTER_ASSIGNMENT_ID_BLOG = {{ page.assignment_id | default: 'null' }};
       const FRONTMATTER_ASSIGNMENT_NAME_BLOG = {{ page.assignment_name | default: nil | jsonify }};
+      const SUBMISSION_TYPE_BLOG = {{ page.assignment_submission_type | default: "file" | downcase | jsonify }};
+      const CODE_EXTENSIONS_BLOG = { python: 'py', java: 'java', javascript: 'js', pseudocode: 'txt' };
+      const GITHUB_ISSUE_URL_PATTERN_BLOG = /^https?:\/\/github\.com\/[^/]+\/[^/#?]+\/issues\/\d+\/?$/i;
 
       async function ensureAssignmentIdBlog() {
         if (typeof ensureAssignmentId === 'function') {
@@ -1542,118 +1624,193 @@ Check if this is a course lesson and determine which course context to use
       }
 
       // Link submission — POST to Spring API
-      document.getElementById('link-form-blog').addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const link = document.getElementById('submission-link-blog').value.trim();
-        const description = document.getElementById('link-description-blog').value.trim();
-        const btn = this.querySelector('button[type="submit"]');
-        btn.disabled = true;
-        showStatusBlog('loading', 'Submitting...');
-        try {
-          const assignmentId = await ensureAssignmentIdBlog();
-          const { uid, personId } = await resolveCurrentUserBlog();
-          const content = { type: 'link', url: link, notes: description };
-          const res = await fetch(`${javaURI}/api/submissions/${assignmentId}`, {
-            ...fetchOptions,
-            method: 'POST',
-            body: JSON.stringify({
-              assignmentId: assignmentId,
-              submitterId: personId,
-              isGroupSubmission: false,
-              content,
-              comment: description,
-              isLate: false
-            })
-          });
-          if (!res.ok) {
-            const e = await res.json().catch(() => ({}));
-            throw new Error(e.error || res.statusText);
+      const linkFormBlog = document.getElementById('link-form-blog');
+      if (linkFormBlog) {
+        linkFormBlog.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const link = document.getElementById('submission-link-blog').value.trim();
+          const description = document.getElementById('link-description-blog').value.trim();
+          const btn = this.querySelector('button[type="submit"]');
+          if (SUBMISSION_TYPE_BLOG === 'github_issue' && !GITHUB_ISSUE_URL_PATTERN_BLOG.test(link)) {
+            showStatusBlog('error', 'That is not a valid GitHub issue link (expected github.com/owner/repo/issues/N).');
+            return;
           }
-          // Dual-write to EshikaP1's grades system
-          const assignmentName = currentAssignmentNameBlog();
-          const assignmentLabel = assignmentName ? assignmentName : String(assignmentId);
-          await fetch(`${javaURI}/api/grades`, {
-            ...fetchOptions,
-            method: 'POST',
-            body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: content, submittedAt: new Date().toISOString() })
-          }).catch(() => {});
-          showStatusBlog('success', 'Link submitted successfully!');
-          this.reset();
-        } catch (err) {
-          showStatusBlog('error', err.message);
-        } finally {
-          btn.disabled = false;
-        }
-      });
-
-      // File submission — POST to Spring file upload API
-      document.getElementById('file-form-blog').addEventListener('submit', async function (e) {
-        e.preventDefault();
-        if (selectedFilesBlog.length === 0) {
-          showStatusBlog('error', 'Please select at least one file.');
-          return;
-        }
-        const notes = document.getElementById('file-notes-blog').value.trim();
-        const btn = document.getElementById('file-submit-btn-blog');
-        btn.disabled = true;
-        showStatusBlog('loading', 'Uploading...');
-        try {
-          const assignmentId = await ensureAssignmentIdBlog();
-          const { uid, personId } = await resolveCurrentUserBlog();
-          // Resolve assignment name for the file upload endpoint
-          let assignmentName = null;
-          const preferredName = currentAssignmentNameBlog();
-          if (typeof preferredName === 'string') {
-            const normalized = preferredName.trim().toLowerCase();
-            if (normalized && normalized !== 'null' && normalized !== 'undefined') {
-              assignmentName = preferredName;
-            }
-          }
-          if (!assignmentName) {
-            const nameRes = await fetch(`${javaURI}/api/assignments/${assignmentId}`, { ...fetchOptions });
-            if (!nameRes.ok) throw new Error('Assignment not found on server.');
-            assignmentName = await nameRes.text();
-          }
-          for (const file of selectedFilesBlog) {
-            if (file.size > 10 * 1024 * 1024) throw new Error(`${file.name} exceeds 10MB limit.`);
-            const content = { type: 'file', filename: file.name, notes: notes || '' };
-            const fd = new FormData();
-            fd.append('assignmentName', assignmentName);
-            fd.append('assignmentId', String(assignmentId));
-            fd.append('userId', personId);
-            fd.append('username', uid);
-            fd.append('file', file);
-            if (notes) fd.append('notes', notes);
-            const r = await fetch(`${javaURI}/api/assignment-submissions/upload`, {
+          btn.disabled = true;
+          showStatusBlog('loading', 'Submitting...');
+          try {
+            const assignmentId = await ensureAssignmentIdBlog();
+            const { uid, personId } = await resolveCurrentUserBlog();
+            const content = { type: SUBMISSION_TYPE_BLOG === 'github_issue' ? 'github_issue' : 'link', url: link, notes: description };
+            const res = await fetch(`${javaURI}/api/submissions/${assignmentId}`, {
+              ...fetchOptions,
               method: 'POST',
-              mode: fetchOptions.mode,
-              credentials: fetchOptions.credentials,
-              headers: { 'X-Origin': 'client' },
-              body: fd
+              body: JSON.stringify({
+                assignmentId: assignmentId,
+                submitterId: personId,
+                isGroupSubmission: false,
+                content,
+                comment: description,
+                isLate: false
+              })
             });
-            if (!r.ok) {
-              const e = await r.json().catch(() => ({}));
-              throw new Error(`Upload failed for ${file.name}: ` + (e.error || r.statusText));
+            if (!res.ok) {
+              const e = await res.json().catch(() => ({}));
+              throw new Error(e.error || res.statusText);
             }
             // Dual-write to EshikaP1's grades system
-            const assignmentNameForGrades = currentAssignmentNameBlog();
-            const assignmentLabel = assignmentNameForGrades ? assignmentNameForGrades : String(assignmentId);
+            const assignmentName = currentAssignmentNameBlog();
+            const assignmentLabel = assignmentName ? assignmentName : String(assignmentId);
             await fetch(`${javaURI}/api/grades`, {
               ...fetchOptions,
               method: 'POST',
               body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: content, submittedAt: new Date().toISOString() })
             }).catch(() => {});
+            showStatusBlog('success', 'Link submitted successfully!');
+            this.reset();
+          } catch (err) {
+            showStatusBlog('error', err.message);
+          } finally {
+            btn.disabled = false;
           }
-          showStatusBlog('success', `${selectedFilesBlog.length} file(s) submitted successfully!`);
-          selectedFilesBlog = [];
-          updateFileListBlog();
-          this.reset();
-        } catch (err) {
-          showStatusBlog('error', err.message);
-        } finally {
-          btn.disabled = false;
-        }
-      });
+        });
+      }
+
+      // File submission — POST to Spring file upload API
+      const fileFormBlog = document.getElementById('file-form-blog');
+      if (fileFormBlog) {
+        fileFormBlog.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          if (selectedFilesBlog.length === 0) {
+            showStatusBlog('error', 'Please select at least one file.');
+            return;
+          }
+          const notes = document.getElementById('file-notes-blog').value.trim();
+          const btn = document.getElementById('file-submit-btn-blog');
+          btn.disabled = true;
+          showStatusBlog('loading', 'Uploading...');
+          try {
+            const assignmentId = await ensureAssignmentIdBlog();
+            const { uid, personId } = await resolveCurrentUserBlog();
+            // Resolve assignment name for the file upload endpoint
+            let assignmentName = null;
+            const preferredName = currentAssignmentNameBlog();
+            if (typeof preferredName === 'string') {
+              const normalized = preferredName.trim().toLowerCase();
+              if (normalized && normalized !== 'null' && normalized !== 'undefined') {
+                assignmentName = preferredName;
+              }
+            }
+            if (!assignmentName) {
+              const nameRes = await fetch(`${javaURI}/api/assignments/${assignmentId}`, { ...fetchOptions });
+              if (!nameRes.ok) throw new Error('Assignment not found on server.');
+              assignmentName = await nameRes.text();
+            }
+            for (const file of selectedFilesBlog) {
+              if (file.size > 10 * 1024 * 1024) throw new Error(`${file.name} exceeds 10MB limit.`);
+              const content = { type: 'file', filename: file.name, notes: notes || '' };
+              const fd = new FormData();
+              fd.append('assignmentName', assignmentName);
+              fd.append('assignmentId', String(assignmentId));
+              fd.append('userId', personId);
+              fd.append('username', uid);
+              fd.append('file', file);
+              if (notes) fd.append('notes', notes);
+              const r = await fetch(`${javaURI}/api/assignment-submissions/upload`, {
+                method: 'POST',
+                mode: fetchOptions.mode,
+                credentials: fetchOptions.credentials,
+                headers: { 'X-Origin': 'client' },
+                body: fd
+              });
+              if (!r.ok) {
+                const e = await r.json().catch(() => ({}));
+                throw new Error(`Upload failed for ${file.name}: ` + (e.error || r.statusText));
+              }
+              // Dual-write to EshikaP1's grades system
+              const assignmentNameForGrades = currentAssignmentNameBlog();
+              const assignmentLabel = assignmentNameForGrades ? assignmentNameForGrades : String(assignmentId);
+              await fetch(`${javaURI}/api/grades`, {
+                ...fetchOptions,
+                method: 'POST',
+                body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: content, submittedAt: new Date().toISOString() })
+              }).catch(() => {});
+            }
+            showStatusBlog('success', `${selectedFilesBlog.length} file(s) submitted successfully!`);
+            selectedFilesBlog = [];
+            updateFileListBlog();
+            this.reset();
+          } catch (err) {
+            showStatusBlog('error', err.message);
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      }
+
+      // Code submission — bundled into a Gist, then POST to Spring API
+      const codeFormBlog = document.getElementById('code-form-blog');
+      if (codeFormBlog) {
+        codeFormBlog.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const code = document.getElementById('code-input-blog').value;
+          const language = document.getElementById('code-language-blog').value;
+          const notes = document.getElementById('code-notes-blog')?.value?.trim() || '';
+          const btn = this.querySelector('button[type="submit"]');
+          if (!code.trim()) {
+            showStatusBlog('error', 'Please enter some code before submitting.');
+            return;
+          }
+          btn.disabled = true;
+          showStatusBlog('loading', 'Checking login...');
+          let uid, personId;
+          try {
+            ({ uid, personId } = await resolveCurrentUserBlog());
+          } catch (err) {
+            showStatusBlog('error', 'Please log in to submit code.');
+            btn.disabled = false;
+            return;
+          }
+          showStatusBlog('loading', 'Creating Gist and submitting...');
+          try {
+            const assignmentId = await ensureAssignmentIdBlog();
+            const ext = CODE_EXTENSIONS_BLOG[language] || 'txt';
+            const gistUrl = await window.exportToGist(
+              { [`submission.${ext}`]: { content: code } },
+              { type: 'submission', description: notes || `Code submission (${language})` }
+            );
+            const content = { type: 'code', url: gistUrl, language, notes };
+            const res = await fetch(`${javaURI}/api/submissions/${assignmentId}`, {
+              ...fetchOptions,
+              method: 'POST',
+              body: JSON.stringify({
+                assignmentId: assignmentId,
+                submitterId: personId,
+                isGroupSubmission: false,
+                content,
+                comment: notes,
+                isLate: false
+              })
+            });
+            if (!res.ok) {
+              const e = await res.json().catch(() => ({}));
+              throw new Error(e.error || res.statusText);
+            }
+            const assignmentName = currentAssignmentNameBlog();
+            const assignmentLabel = assignmentName ? assignmentName : String(assignmentId);
+            await fetch(`${javaURI}/api/grades`, {
+              ...fetchOptions,
+              method: 'POST',
+              body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: content, submittedAt: new Date().toISOString() })
+            }).catch(() => {});
+            showStatusBlog('success', 'Code submitted successfully!');
+            this.reset();
+          } catch (err) {
+            showStatusBlog('error', err.message);
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      }
 
       function showStatusBlog(type, message) {
         const status = document.getElementById('submission-status-blog');
@@ -1685,9 +1842,11 @@ Check if this is a course lesson and determine which course context to use
   <!-- Enhanced Analytics Tracking -->
   <script type="module">
     import { pythonURI, javaURI, fetchOptions } from '{{ site.baseurl }}/assets/js/api/config.js';
+    import { exportToGist } from '{{ site.baseurl }}/assets/js/gist.js';
     window.pythonURI = pythonURI;
     window.javaURI = javaURI;
     window.fetchOptions = fetchOptions;
+    window.exportToGist = exportToGist;
   </script>
   <script src="{{ site.baseurl }}/assets/js/ocs-analytics-enhanced.js"></script>
   <script src="{{ site.baseurl }}/assets/js/code-runner-analytics.js"></script>
