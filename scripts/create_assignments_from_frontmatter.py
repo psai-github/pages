@@ -204,9 +204,9 @@ def create_assignment(
     description: str = "auto-created on deploy",
     points=None,
     due_date=None,
-    creator_uids=None,
+    assignment_submission_type="file",
 ):
-    payload = {"name": name, "contentUrl": content_url, "description": description}
+    payload = {"name": name, "contentUrl": content_url, "description": description, "assignmentType": assignment_submission_type}
     if points is not None:
         payload["points"] = points
     if due_date:
@@ -220,7 +220,7 @@ def create_assignment(
     return resp
 
 
-def create_assignment_full(session: requests.Session, base_url: str, name: str, atype: str, description: str, points: float, dueDate: str):
+def create_assignment_full(session: requests.Session, base_url: str, name: str, atype: str, description: str, points: float, dueDate: str, assignmentType: str):
     # This calls the admin/teacher create endpoint which requires role privileges
     payload = {
         "name": name,
@@ -228,6 +228,8 @@ def create_assignment_full(session: requests.Session, base_url: str, name: str, 
         "description": description,
         "points": str(points),
         "dueDate": dueDate,
+        "assignmentType": assignmentType,
+        
     }
     resp = session.post(f"{base_url}/api/assignments/create", data=payload, timeout=30)
     return resp
@@ -262,29 +264,27 @@ def main():
         if not fm:
             continue
         if fm.get("assignment") is True:
+
+            assignment_submission_type = "file"
+            if fm.get("assignment_submission_type"):
+                assignment_submission_type = fm.get("assignment_submission_type")
+
             content_url = determine_content_url(root, f, fm)
             name = fm.get("title") or fm.get("name") or f.stem
             description = fm.get("description") or "auto-created from frontmatter"
             points = fm.get("points")
             due_date = fm.get("dueDate") or fm.get("due_date") or fm.get("due")
-            try:
-                creator_uids = read_creator_uids(fm, f)
-            except AssignmentFrontmatterError as error:
-                print(f"Invalid assignment frontmatter: {error}", file=sys.stderr)
-                return 2
-            candidates.append((f, content_url, name, description, points, due_date, creator_uids))
+            candidates.append((f, content_url, name, description, points, due_date, assignment_submission_type))
+           
+    
 
     if not candidates:
         print("No pages with assignment: true found.")
         return 0
 
     print(f"Found {len(candidates)} pages with assignment: true")
-    for path, content_url, name, description, points, due_date, creator_uids in candidates:
-        creator_summary = ",".join(creator_uids) if creator_uids else "legacy/unassigned"
-        print(
-            f"-> {path} -> contentUrl={content_url} name={name} "
-            f"creatorUids={creator_summary}"
-        )
+    for path, content_url, name, description, points, due_date, assignment_submission_type in candidates:
+        print(f"-> {path} -> contentUrl={content_url} name={name}")
         if args.dry_run and not args.create:
             continue
 
@@ -295,7 +295,7 @@ def main():
             # name already present
             atype = None
             if fm is not None:
-                atype = fm.get("type") or fm.get("assignment_type")
+                atype = fm.get("type") or fm.get("assignment_submission_type")
             if not atype:
                 missing.append("type")
             points = None
@@ -317,7 +317,7 @@ def main():
                 continue
 
             try:
-                resp = create_assignment_full(session, args.base_url, name, atype, description, points, str(dueDate))
+                resp = create_assignment_full(session, args.base_url, name, atype, description, points, str(dueDate), assignment_submission_type)
                 print(f"  {resp.status_code} {resp.text[:200]}")
             except Exception as e:
                 print(f"  ERROR: {e}")
@@ -325,16 +325,7 @@ def main():
             if args.dry_run:
                 continue
             try:
-                resp = create_assignment(
-                    session,
-                    args.base_url,
-                    name,
-                    content_url,
-                    description,
-                    points,
-                    due_date,
-                    creator_uids,
-                )
+                resp = create_assignment(session, args.base_url, name, content_url, description, points, due_date,assignment_submission_type)
                 print(f"  {resp.status_code} {resp.text[:200]}")
             except Exception as e:
                 print(f"  ERROR: {e}")
