@@ -194,13 +194,12 @@ Test at least four cases, including one where the room is closed and one where t
 
 ---
 
-## 4. Grading Plan
+## 4. Grading Plan (1 Point Total)
 
-Point values can be decided separately. For now, the work to check is:
-- classwork predictions include an explanation,
-- the incorrect Boolean condition is fixed and tested,
-- the homework uses the required conditions,
-- the student can explain the final expression in normal English.
+- **0.2 points — Classwork 1:** Correctly predict each Boolean result and include a short explanation.
+- **0.2 points — Classwork 2:** Fix the Boolean logic and test at least three combinations.
+- **0.2 points — Classwork 3:** Correctly translate the Boolean expression into JavaScript and College Board pseudocode.
+- **0.4 points — Homework:** Build the study-room Boolean expression using all required conditions, test at least four cases, and explain the final expression in 2–3 sentences.
 
 ---
 

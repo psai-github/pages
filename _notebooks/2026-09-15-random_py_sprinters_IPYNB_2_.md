@@ -161,13 +161,12 @@ Your program must:
 
 ---
 
-## 4. Grading Plan
+## 4. Grading Plan (1 Point Total)
 
-Point values can be decided separately. For now, the work to check is:
-- classwork correctly identifies possible outputs,
-- the incorrect random range is fixed,
-- the homework uses randomness in a meaningful way,
-- the student can explain why repeats are valid.
+- **0.2 points — Classwork 1:** Correctly identify the smallest, largest, and all possible values in the random range.
+- **0.2 points — Classwork 2:** Use `random.choice()` correctly, modify the list, and explain why repeats are possible.
+- **0.2 points — Classwork 3:** Fix the six-sided die range and correctly write the equivalent JavaScript and College Board pseudocode.
+- **0.4 points — Homework:** Build a working random program with at least three possible outcomes, use the random result in a meaningful decision or action, handle repeats, and explain the possible outputs.
 
 ---
 
