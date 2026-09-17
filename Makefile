@@ -25,6 +25,7 @@ DEV_PROJECTS := $(shell grep -v '^\#' $(PROJECT_FILE) 2>/dev/null | grep -v '^$$
 # Known top-level targets (add to this if needed)
 KNOWN_TARGETS := \
 	default dev serve build clean stop reload refresh help \
+	serve-current build-current \
 	serve-minima serve-cayman serve-yat serve-so-simple serve-hydejack \
 	build-minima build-cayman build-yat build-so-simple \
 	convert convert-docx convert-docx-config convert-single convert-registered-notebooks \
@@ -274,11 +275,11 @@ build: build-current
 # Multi-course file splitting
 split-courses:
 	@echo " ------ Splitting multi-course files... -------"
-	@python3 scripts/split_multi_course_files.py
+	@$(PYTHON) scripts/split_multi_course_files.py
 
 clean-courses:
 	@echo "🧹Cleaning course-specific files..."
-	@python3 scripts/split_multi_course_files.py clean
+	@$(PYTHON) scripts/split_multi_course_files.py clean
 
 # Notebook and DOCX conversion
 convert: $(MARKDOWN_FILES) convert-docx
