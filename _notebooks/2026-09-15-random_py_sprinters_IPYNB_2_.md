@@ -16,73 +16,45 @@ authors: Ruhaan Bansal, Deyar Raissadat, Arya Taghavi Zargar
 ---
 
 <h1>3.15 Python Random Generator</h1>
-
-<p>Randomness makes programs less predictable and more interactive. It can power dice rolls, shuffled playlists, randomized quiz questions, and computer choices.</p>
-
-<blockquote><p><strong>Warm-up:</strong> Think of one app or game that would become boring if it always made the same choice.</p></blockquote>
-
-<p><strong>How to use this page:</strong> Read and trace the Python examples here. Run or edit them in the notebook or your Python editor. Expand the answers after making your prediction.</p>
+<p><strong>Warm-up:</strong> What would happen if a game’s computer opponent always made the same move?</p>
+<p><mark>Predict → run → change.</mark> Follow the examples here; run them in your notebook or Python editor.</p>
 
 <h2>1. LxD Cycle Process</h2>
-
+<details>
+<summary>Teaching plan</summary>
 <h3>Empathize</h3>
-
-<p>Students learn random numbers best when they can <strong>predict, run, and immediately see</strong> what each line of code changes. Long explanations are avoided in favor of small examples and visible results.</p>
-
+<p>Make randomness visible through short, familiar examples.</p>
 <h3>Define</h3>
-
-<p>Students need to understand three main ideas:</p>
-
-<ol>
-<li>Python must import the <code>random</code> module.</li>
-<li>Different functions create different types of random results.</li>
-<li>A random value can be stored in a variable and used in a decision.</li>
-</ol>
-
+<p>Choose a number, pick an item, and use the result in a decision.</p>
 <h3>Ideate</h3>
-
-<p>The lesson uses familiar examples: a dice roll, a random name picker, and a simple computer opponent. Each example adds only one new idea at a time.</p>
-
+<p>Use a die, a location picker, and a computer opponent.</p>
 <h3>Prototype &amp; Test</h3>
-
-<p>Students first run working examples, then change one part, predict the result, and test their prediction. The final mini-project combines the lesson concepts.</p>
+<p>Students predict an output, run the code, then change one part.</p>
+</details>
 
 <h2>2. Lesson Plan</h2>
-
 <h3>Learning Objective</h3>
-
-<p>Students will use Python's <code>random</code> module to generate random integers, select items from a list, and control decisions in a program.</p>
-
+<p>Use Python’s <code>random</code> module to make unpredictable choices.</p>
 <h3>Success Criteria</h3>
-
-<p>By the end of the lesson, I can:</p>
-
 <ul>
-<li>import and use the <code>random</code> module</li>
-<li>explain that both endpoints in <code>randint(a, b)</code> are included</li>
-<li>use <code>random.choice()</code> with a list</li>
-<li>store a random result in a variable</li>
-<li>use a random value inside an <code>if</code> statement</li>
+<li>Choose valid bounds for <code>randint()</code>.</li>
+<li>Select a list item with <code>choice()</code>.</li>
+<li>Store a result and use it in an <code>if</code> statement.</li>
 </ul>
 
 <h3>Part 1: Random Integers</h3>
-
-<p>Python keeps its random tools inside a built-in <strong>module</strong> named <code>random</code>. A module is like a toolbox: importing it gives our program access to extra tools.</p>
-
-<h4>Visual code trace</h4>
-
+<p><code>import random</code> gives Python access to its built-in random tools.</p>
 <table>
-<thead><tr><th scope="col">Code</th><th scope="col">What Python does</th></tr></thead>
+<caption>Read the code from top to bottom</caption>
+<thead><tr><th scope="col">Code</th><th scope="col">Job</th></tr></thead>
 <tbody>
-<tr><td><code>import random</code></td><td>Opens the random toolbox</td></tr>
-<tr><td><code>roll = random.randint(1, 6)</code></td><td>Chooses a whole number from 1 through 6</td></tr>
-<tr><td><code>print(roll)</code></td><td>Displays the chosen number</td></tr>
+<tr><td><code>import random</code></td><td>Load the tools</td></tr>
+<tr><td><code>roll = random.randint(1, 6)</code></td><td>Pick and store a whole number</td></tr>
+<tr><td><code>print(roll)</code></td><td>Display it</td></tr>
 </tbody>
 </table>
-
-<p>The word <strong>inclusive</strong> matters: <code>random.randint(1, 6)</code> can return <strong>1, 2, 3, 4, 5, or 6</strong>.</p>
-
-<p><strong>Predict before running:</strong> Could the result ever be 0? Could it ever be 6?</p>
+<p><mark>Both endpoints count.</mark> Possible results: 1, 2, 3, 4, 5, 6.</p>
+<p><strong>Predict:</strong> Can it return 0? What about 6?</p>
 
 <pre><code>import random
 
@@ -90,33 +62,14 @@ authors: Ruhaan Bansal, Deyar Raissadat, Arya Taghavi Zargar
 roll = random.randint(1, 6)
 print("You rolled:", roll)</code></pre>
 
-<h4>Change it and test it</h4>
-
-<p>Turn the six-sided die into a twenty-sided die by changing only the two arguments inside <code>randint()</code>.</p>
-
-<p><strong>Quick check:</strong> What values are possible from <code>random.randint(4, 8)</code>?</p>
-<details><summary>Reveal answer</summary><p>4, 5, 6, 7, and 8. Both endpoints are included.</p></details>
-
-<p>Each integer in the range has the same chance of being selected. Repeated calls can return the same result; a few runs do not have to contain every possible value.</p>
+<p><strong>Change it:</strong> Make this a twenty-sided die.</p>
+<p><strong>Quick check:</strong> List the possible results of <code>random.randint(4, 8)</code>.</p>
+<details><summary>Reveal answer</summary><p>4, 5, 6, 7, 8.</p></details>
+<p>Each number has an equal chance. <mark>Random results can repeat.</mark> Six rolls do not guarantee six different numbers.</p>
 
 <h3>Part 2: Random Choices</h3>
-
-<p><code>random.choice()</code> selects one item from a <strong>sequence</strong>, such as a list.</p>
-
-<h4>Follow the data</h4>
-
-<p><code>["forest", "desert", "ocean"]</code> → <code>random.choice(locations)</code> → one chosen item → <code>print()</code></p>
-
-<table>
-<thead><tr><th scope="col">Piece</th><th scope="col">Purpose</th></tr></thead>
-<tbody>
-<tr><td><code>locations = [...]</code></td><td>Stores all possible choices</td></tr>
-<tr><td><code>random.choice(locations)</code></td><td>Selects one list item</td></tr>
-<tr><td><code>selected</code></td><td>Remembers the selected item</td></tr>
-</tbody>
-</table>
-
-<p><strong>Predict before running:</strong> Is Python returning the item's position or the actual item?</p>
+<p><code>random.choice()</code> picks <mark>one item from a list</mark>.</p>
+<p><strong>Predict:</strong> Will this code print a location or its position in the list?</p>
 
 <pre><code>import random
 
@@ -125,36 +78,31 @@ selected = random.choice(locations)
 
 print("Your mission location is:", selected)</code></pre>
 
-<h4>Try this</h4>
-
-<p>Add two new locations to the list and run the code several times. Every output should be one of the items in your list.</p>
-
-<blockquote><p><code>randint()</code> chooses a whole <strong>number</strong> from a range.  <br>
-<code>choice()</code> chooses an <strong>item</strong> from a sequence.</p></blockquote>
+<details><summary>Reveal answer and trace</summary>
+<p>It prints the location itself. For example:</p>
+<table>
+<thead><tr><th scope="col">Step</th><th scope="col">Example value</th></tr></thead>
+<tbody>
+<tr><td>Available items</td><td><code>["forest", "desert", "ocean"]</code></td></tr>
+<tr><td>Item stored in <code>selected</code></td><td><code>"ocean"</code></td></tr>
+<tr><td>Printed message</td><td><samp>Your mission location is: ocean</samp></td></tr>
+</tbody>
+</table>
+<p>This is one possible run, not a fixed output.</p>
+</details>
+<p><strong>Change it:</strong> Add two locations. Run again.</p>
 
 <h3>Part 3: Random Values in Decisions</h3>
-
-<p>Randomness becomes more useful when a program reacts to the value it receives. We can combine a random number with an <code>if</code> statement.</p>
-
-<h4>Program flow</h4>
-
-<ol>
-<li>Generate a number.</li>
-<li>Save it in <code>computer_move</code>.</li>
-<li>Compare the number.</li>
-<li>Print the matching action.</li>
-</ol>
-
+<p>An <code>if</code> statement turns a random number into an action.</p>
 <table>
-<thead><tr><th scope="col">Random value</th><th scope="col">Program action</th></tr></thead>
+<thead><tr><th scope="col">Value</th><th scope="col">Action</th></tr></thead>
 <tbody>
 <tr><td>1</td><td>Move left</td></tr>
 <tr><td>2</td><td>Move right</td></tr>
 <tr><td>3</td><td>Stay still</td></tr>
 </tbody>
 </table>
-
-<p>Before running, trace the program as if <code>computer_move</code> were 2. Which message would print?</p>
+<p><strong>Trace it:</strong> If <code>computer_move</code> is 2, which branch runs?</p>
 
 <pre><code>import random
 
@@ -168,28 +116,13 @@ elif computer_move == 2:
 else:
     print("Computer stays still.")</code></pre>
 
-<h4>Common mistake</h4>
-
-<p>This line generates one random value:</p>
-
-<pre><code>move = random.randint(1, 3)</code></pre>
-
-<p>Reuse <code>move</code> in every comparison. Calling <code>randint()</code> again inside each condition creates new values, so the program may not behave as expected.</p>
+<details><summary>Reveal the branch</summary><p>The <code>elif</code> branch prints <samp>Computer moves right.</samp></p></details>
+<p><mark>Generate once, reuse the variable.</mark> Calling <code>randint()</code> again makes a new draw—it may not match the first one.</p>
 
 <h2>3. Classwork &amp; Practice Tasks</h2>
-
 <h3>Classwork 1</h3>
-
-<p><strong>Build a coin flip.</strong></p>
-
-<ol>
-<li>Generate either 1 or 2.</li>
-<li>Print <code>Heads</code> when the value is 1.</li>
-<li>Print <code>Tails</code> when the value is 2.</li>
-<li>Run the program at least three times.</li>
-</ol>
-
-<p><strong>Checkpoint:</strong> Show your code and explain why both outcomes are possible.</p>
+<p><strong>Coin flip:</strong> Fill the blanks so 1 prints <samp>Heads</samp> and 2 prints <samp>Tails</samp>. Then run it three times.</p>
+<p><strong>Explain:</strong> Why are both outcomes possible?</p>
 
 <pre><code>import random
 
@@ -202,16 +135,8 @@ else:
     print("Tails")</code></pre>
 
 <h3>Classwork 2</h3>
-
-<p><strong>Create a random student picker.</strong></p>
-
-<ul>
-<li>Make a list containing at least five names.</li>
-<li>Use <code>random.choice()</code> to select one name.</li>
-<li>Print a complete sentence containing the selected name.</li>
-</ul>
-
-<p><strong>Extension:</strong> Add a second list of questions and randomly select both a student and a question.</p>
+<p><strong>Student picker:</strong> Use <code>choice()</code> to pick from at least five names and print a sentence with the result.</p>
+<details><summary>Optional challenge</summary><p>Add a list of questions. Pick both a student and a question.</p></details>
 
 <pre><code>import random
 
@@ -223,21 +148,17 @@ students = ["Alex", "Sam", "Jordan", "Taylor", "Casey"]
 </code></pre>
 
 <h3>Classwork 3</h3>
-
-<p><strong>Create a weather simulator.</strong></p>
-
-<p>Generate a random number from 1 through 4 and use a decision to print:</p>
-
-<ul>
-<li>1: Sunny</li>
-<li>2: Cloudy</li>
-<li>3: Rainy</li>
-<li>4: Windy</li>
-</ul>
-
-<p>Then add one extra message for each result. For example, a sunny result could print <code>Remember sunglasses.</code></p>
-
-<p><strong>Requirement:</strong> Generate the random number once, store it, and reuse that variable in the conditions.</p>
+<p><strong>Weather simulator:</strong> Use one random draw and an <code>if / elif / else</code> decision.</p>
+<table>
+<thead><tr><th scope="col">Number</th><th scope="col">Weather</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Sunny</td></tr>
+<tr><td>2</td><td>Cloudy</td></tr>
+<tr><td>3</td><td>Rainy</td></tr>
+<tr><td>4</td><td>Windy</td></tr>
+</tbody>
+</table>
+<p>Print the weather and one matching suggestion, such as <samp>Bring an umbrella.</samp></p>
 
 <pre><code>import random
 
@@ -247,62 +168,47 @@ weather_number = random.randint(1, 4)
 </code></pre>
 
 <h3>Homework</h3>
-
 <h4>Mini-project: Random Adventure Generator</h4>
-
-<p>Create a short program that can produce different adventure setups when it runs. Random results can repeat.</p>
-
-<p>Your program must include:</p>
-
+<p>Choose your own theme. Your program must:</p>
 <ul>
-<li><code>import random</code></li>
-<li>one list of at least four locations</li>
-<li>one list of at least four items</li>
-<li><code>random.choice()</code> used on both lists</li>
-<li>one <code>random.randint()</code></li>
-<li>an <code>if</code> statement that reacts to the random integer</li>
-<li>a clear final output that combines the results</li>
+<li>Import <code>random</code>.</li>
+<li>Use <code>choice()</code> on two lists: at least four locations and four items.</li>
+<li>Use <code>randint()</code> for a challenge level from 1 to 5.</li>
+<li>Use an <code>if</code> statement to react to that level.</li>
+<li>Print the location, item, level, and reaction.</li>
 </ul>
-
-<p>Example format: <code>You travel to the forest with a map. Challenge level: 3.</code></p>
-
-<p>Do not copy the example exactly. Choose your own theme and outputs.</p>
+<p><strong>Possible output:</strong> <samp>You reach the ocean with a map. Level: 4. Find a guide!</samp></p>
+<p>Submit your code, three test outputs, and one sentence explaining what can change.</p>
 
 <h2>4. Grading Plan</h2>
-
 <table>
-<thead><tr><th scope="col">Category</th><th scope="col">Points</th><th scope="col">Full-credit requirement</th></tr></thead>
+<caption>Homework rubric — 10 points</caption>
+<thead><tr><th scope="col">Requirement</th><th scope="col">Points</th></tr></thead>
 <tbody>
-<tr><td>Random tools</td><td>3</td><td>Correctly imports <code>random</code> and uses both <code>randint()</code> and <code>choice()</code></td></tr>
-<tr><td>Program logic</td><td>3</td><td>Stores results in variables and uses a correct decision</td></tr>
-<tr><td>Required content</td><td>2</td><td>Includes the required lists, range, and output</td></tr>
-<tr><td>Testing and explanation</td><td>1</td><td>Runs multiple tests and briefly explains what changes</td></tr>
-<tr><td>Readability</td><td>1</td><td>Uses clear variable names, comments, and organized output</td></tr>
-<tr><td><strong>Total</strong></td><td><strong>10</strong></td><td></td></tr>
+<tr><td>Correct import, <code>randint()</code>, and <code>choice()</code></td><td>3</td></tr>
+<tr><td>Stored results and a working decision</td><td>3</td></tr>
+<tr><td>Required lists, range, and output</td><td>2</td></tr>
+<tr><td>Three test outputs and an explanation</td><td>1</td></tr>
+<tr><td>Clear names and readable code</td><td>1</td></tr>
 </tbody>
 </table>
 
 <h3>Exit Ticket</h3>
-
-<p>Answer in 1–2 sentences each:</p>
-
 <ol>
-<li>What is the difference between <code>random.randint()</code> and <code>random.choice()</code>?</li>
-<li>Why should a random result usually be stored in a variable?</li>
-<li>If <code>random.randint(2, 5)</code> is used, list every possible result.</li>
+<li><code>randint()</code> or <code>choice()</code>: which picks a name?</li>
+<li>Why store a random result before testing it?</li>
+<li>What can <code>random.randint(2, 5)</code> return?</li>
 </ol>
 
 <h2>5. Lesson Revisions &amp; Feedback Evidence</h2>
-
-<p>After teaching the lesson, record feedback here.</p>
-
+<details>
+<summary>Record feedback after teaching</summary>
 <table>
-<thead><tr><th scope="col">Feedback source</th><th scope="col">What was confusing or helpful?</th><th scope="col">Revision made</th></tr></thead>
+<thead><tr><th scope="col">Source</th><th scope="col">Feedback / evidence</th><th scope="col">Change made</th></tr></thead>
 <tbody>
-<tr><td>Student feedback</td><td></td><td></td></tr>
-<tr><td>Peer feedback</td><td></td><td></td></tr>
-<tr><td>Teacher observation</td><td></td><td></td></tr>
+<tr><td>Student</td><td></td><td></td></tr>
+<tr><td>Peer</td><td></td><td></td></tr>
+<tr><td>Teacher</td><td></td><td></td></tr>
 </tbody>
 </table>
-
-<p>Possible evidence includes completed quick checks, common coding errors, student explanations, and improvements between the first and final program.</p>
+</details>
