@@ -49,24 +49,7 @@ active_tab: submissions
                 <div id="my-submissions-container"></div>
             </div>
 
-            <!-- Assignment creator content (separate from the staff-wide view) -->
-            <div id="tab-content-created-assignments" class="tab-content hidden px-6 py-4 text-neutral-200">
-                <p class="text-neutral-400 mb-4">
-                    Assignments where your OCS UID is listed as a creator. Staff members see only their own created assignments here; the staff-wide list remains separate.
-                </p>
-                <div id="created-assignments-loading" class="flex items-center justify-center min-h-[240px]">
-                    <div class="text-center">
-                        <div class="inline-block">
-                            <svg class="h-8 w-8 animate-spin text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                        </div>
-                        <p class="text-neutral-400 mt-4">Loading created assignments...</p>
-                    </div>
-                </div>
-                <div id="created-assignments-container"></div>
-            </div>
+            {% include submissions/creator-dashboard.html %}
 
             <!-- All Submissions tab content (Admin only) -->
             <div id="tab-content-all-submissions" class="tab-content hidden px-6 py-4 text-neutral-200">
@@ -187,7 +170,6 @@ active_tab: submissions
 
 <style>
     #my-submissions-container,
-    #created-assignments-container,
     #all-submissions-container {
         width: 100%;
         overflow-x: auto;
@@ -534,6 +516,7 @@ active_tab: submissions
 
 <script type="module">
     import { javaURI, pythonURI, fetchOptions } from '{{ site.baseurl }}/assets/js/api/config.js';
+    import { createCreatorDashboard } from '{{ site.baseurl }}/assets/js/submissions/creator-dashboard.js';
 
     const apiUrl = `${javaURI}/api/assignment-submission-view/list`;
     const userInfoUrl = `${javaURI}/api/assignment-submission-view/user-info`;
@@ -543,17 +526,30 @@ active_tab: submissions
     const MAX_SUMMARY_BATCH_ITEMS = 10;
 
     let allSubmissions = [];
-    let createdAssignments = [];
-    let managedSubmissions = [];
     let isAdmin = false;
     let currentUserId = null;
     let currentUsername = '';
     let activeEditSubmissionId = null;
 
+    const creatorDashboard = createCreatorDashboard({
+        managedAssignmentsUrl,
+        managedSubmissionsUrl,
+        courseManifestUrl: '{{ site.baseurl }}/assets/data/assignment-course-manifest.json',
+        fetchOptions,
+        baseUrl: '{{ site.baseurl }}',
+        renderContent,
+        renderAiSummary,
+        renderQualityScore,
+        getStatusBadge,
+        getFilterStatus,
+        escapeHtml,
+        cellTitle
+    });
+
     async function init() {
         try {
             await checkAdminStatus();
-            await Promise.all([loadSubmissions(), loadCreatedAssignments()]);
+            await Promise.all([loadSubmissions(), creatorDashboard.load(currentUsername)]);
             setupTabSwitcher();
             setupFilters();
             setupEditModal();
@@ -656,100 +652,6 @@ active_tab: submissions
 
             showErrorMessage(`Error loading submissions: ${error.message}`);
         }
-    }
-
-    async function loadCreatedAssignments() {
-        const container = document.getElementById('created-assignments-container');
-        try {
-            const assignmentsResponse = await fetch(managedAssignmentsUrl, fetchOptions);
-            if (!assignmentsResponse.ok) {
-                throw new Error(`Failed to fetch created assignments: HTTP ${assignmentsResponse.status}`);
-            }
-
-            const assignmentData = await assignmentsResponse.json();
-            const managedAssignments = Array.isArray(assignmentData) ? assignmentData : [];
-
-            // Staff receive every manageable assignment from Spring. Filtering by creator
-            // UID keeps this tab personal while preserving the separate staff-wide tab.
-            createdAssignments = managedAssignments.filter(assignment =>
-                currentUsername
-                && Array.isArray(assignment.creatorUids)
-                && assignment.creatorUids.includes(currentUsername)
-            );
-
-            if (createdAssignments.length > 0) {
-                const submissionsResponse = await fetch(managedSubmissionsUrl, fetchOptions);
-                if (submissionsResponse.ok) {
-                    const submissionData = await submissionsResponse.json();
-                    managedSubmissions = Array.isArray(submissionData) ? submissionData : [];
-                } else {
-                    console.warn('Could not load managed submission counts:', submissionsResponse.status);
-                    managedSubmissions = [];
-                }
-            }
-
-            displayCreatedAssignments();
-        } catch (error) {
-            console.error('Error loading created assignments:', error);
-            if (container) {
-                container.innerHTML = `<div class="error-message">${escapeHtml(error.message)}</div>`;
-            }
-        }
-    }
-
-    function displayCreatedAssignments() {
-        const container = document.getElementById('created-assignments-container');
-        if (!container) return;
-
-        if (createdAssignments.length === 0) {
-            container.innerHTML = '<div class="no-submissions">You are not listed as the creator of any assignments yet.</div>';
-            return;
-        }
-
-        container.innerHTML = `
-            <table class="submissions-table">
-                <thead>
-                    <tr>
-                        <th>Assignment</th>
-                        <th>Due Date</th>
-                        <th>Points</th>
-                        <th>Submissions</th>
-                        <th>Creators</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${createdAssignments.map(assignment => {
-                        const submissionCount = managedSubmissions.filter(submission =>
-                            String(submission.assignmentId) === String(assignment.id)
-                        ).length;
-                        const assignmentUrl = getAssignmentPageUrl(assignment);
-                        const action = assignmentUrl
-                            ? `<a class="submission-action-btn" href="${escapeHtml(assignmentUrl)}">Open Assignment</a>`
-                            : '<span style="color:#6b7280">Page unavailable</span>';
-                        return `
-                            <tr>
-                                <td><strong>${escapeHtml(assignment.name || 'Untitled assignment')}</strong></td>
-                                <td>${escapeHtml(assignment.dueDate || 'Not set')}</td>
-                                <td>${escapeHtml(String(assignment.points ?? 'Not set'))}</td>
-                                <td>${submissionCount}</td>
-                                <td>${escapeHtml((assignment.creatorUids || []).join(', '))}</td>
-                                <td>${action}</td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-        `;
-    }
-
-    function getAssignmentPageUrl(assignment) {
-        const description = assignment && assignment.description ? String(assignment.description) : '';
-        const match = description.match(/^\[CONTENT_URL:\s*([^\]]+)\]/);
-        if (!match) return '';
-        const contentPath = match[1].replace(/^\/+|\/+$/g, '');
-        const baseUrl = '{{ site.baseurl }}'.replace(/\/$/, '');
-        return `${baseUrl}/${contentPath}/`;
     }
 
     function renderContent(content) {
@@ -1665,11 +1567,9 @@ active_tab: submissions
 
     function hideLoadingSpinners() {
         const myLoading = document.getElementById('my-submissions-loading');
-        const createdLoading = document.getElementById('created-assignments-loading');
         const allLoading = document.getElementById('all-submissions-loading');
 
         if (myLoading) myLoading.style.display = 'none';
-        if (createdLoading) createdLoading.style.display = 'none';
         if (allLoading) allLoading.style.display = 'none';
     }
 

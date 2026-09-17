@@ -16,6 +16,7 @@ import json
 import os
 import re
 import sys
+from collections import OrderedDict
 from pathlib import Path
 from urllib.parse import quote
 
@@ -185,6 +186,69 @@ def read_creator_uids(fm: dict, path: Path | None = None):
     return normalized
 
 
+def read_course_codes(fm: dict, path: Path | None = None):
+    """Read course names without changing the established nested course metadata.
+
+    Existing pages use ``courses`` as a mapping whose values contain routing data such
+    as ``week``. Assignment synchronization only needs the mapping keys, so this leaves
+    those values entirely under the existing course-build system's control.
+
+    ``None`` means the field was absent and Spring must preserve any stored courses.
+    """
+    if "courses" not in fm:
+        return None
+
+    courses = fm.get("courses")
+    location = f" in {path}" if path is not None else ""
+    if not isinstance(courses, dict) or not courses:
+        raise AssignmentFrontmatterError(
+            f"courses must be a non-empty YAML mapping{location}"
+        )
+
+    normalized = []
+    for course in courses:
+        if not isinstance(course, str) or not course.strip():
+            raise AssignmentFrontmatterError(
+                f"courses must contain only non-empty course names{location}"
+            )
+        course_code = course.strip().upper()
+        if course_code not in normalized:
+            normalized.append(course_code)
+    return normalized
+
+
+def deduplicate_candidates(candidates):
+    """Collapse source/generated copies that resolve to the same served assignment.
+
+    Notebook conversion keeps frontmatter in a generated post, so scanning the repository
+    can encounter the same assignment twice. Creator/course metadata must agree; generated
+    display text may differ from the source, which remains authoritative on first creation.
+    """
+    unique = OrderedDict()
+    for candidate in candidates:
+        path, content_url, *_ = candidate
+        if content_url not in unique:
+            unique[content_url] = candidate
+            continue
+
+        existing = unique[content_url]
+        # Generated posts can intentionally shorten display text from their source
+        # notebook. Only ownership and course metadata is resynchronized on existing
+        # assignments, so those are the fields where disagreement must stop the run.
+        if (existing[6], existing[7]) != (candidate[6], candidate[7]):
+            raise AssignmentFrontmatterError(
+                "Conflicting assignment metadata for contentUrl "
+                f"'{content_url}' in {existing[0]} and {path}"
+            )
+
+        # The notebook is the editable source; prefer it when its generated post is also
+        # checked in. Its display metadata is authoritative for first-time creation.
+        if path.suffix.lower() == ".ipynb":
+            unique[content_url] = candidate
+
+    return list(unique.values())
+
+
 def authenticate(session: requests.Session, base_url: str, uid: str, password: str):
     resp = session.post(f"{base_url}/authenticate", json={"uid": uid, "password": password}, timeout=20)
     if resp.status_code != 200:
@@ -205,6 +269,7 @@ def create_assignment(
     points=None,
     due_date=None,
     creator_uids=None,
+    course_codes=None,
 ):
     payload = {"name": name, "contentUrl": content_url, "description": description}
     if points is not None:
@@ -215,6 +280,9 @@ def create_assignment(
         # Requests encodes a list value as repeated creatorUids form fields,
         # which Spring can bind directly to List<String>.
         payload["creatorUids"] = creator_uids
+    if course_codes is not None:
+        # As with creatorUids, Requests emits one form field per list entry.
+        payload["courseCodes"] = course_codes
     # Use form-encoded to match frontend
     resp = session.post(f"{base_url}/api/assignments/auto-create", data=payload, timeout=30)
     return resp
@@ -269,21 +337,31 @@ def main():
             due_date = fm.get("dueDate") or fm.get("due_date") or fm.get("due")
             try:
                 creator_uids = read_creator_uids(fm, f)
+                course_codes = read_course_codes(fm, f)
             except AssignmentFrontmatterError as error:
                 print(f"Invalid assignment frontmatter: {error}", file=sys.stderr)
                 return 2
-            candidates.append((f, content_url, name, description, points, due_date, creator_uids))
+            candidates.append(
+                (f, content_url, name, description, points, due_date, creator_uids, course_codes)
+            )
+
+    try:
+        candidates = deduplicate_candidates(candidates)
+    except AssignmentFrontmatterError as error:
+        print(f"Invalid assignment frontmatter: {error}", file=sys.stderr)
+        return 2
 
     if not candidates:
         print("No pages with assignment: true found.")
         return 0
 
     print(f"Found {len(candidates)} pages with assignment: true")
-    for path, content_url, name, description, points, due_date, creator_uids in candidates:
+    for path, content_url, name, description, points, due_date, creator_uids, course_codes in candidates:
         creator_summary = ",".join(creator_uids) if creator_uids else "legacy/unassigned"
+        course_summary = ",".join(course_codes) if course_codes else "legacy/unassigned"
         print(
             f"-> {path} -> contentUrl={content_url} name={name} "
-            f"creatorUids={creator_summary}"
+            f"creatorUids={creator_summary} courseCodes={course_summary}"
         )
         if args.dry_run and not args.create:
             continue
@@ -334,6 +412,7 @@ def main():
                     points,
                     due_date,
                     creator_uids,
+                    course_codes,
                 )
                 print(f"  {resp.status_code} {resp.text[:200]}")
             except Exception as e:
