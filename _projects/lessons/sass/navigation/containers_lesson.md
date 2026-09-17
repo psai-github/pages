@@ -11,7 +11,7 @@ permalink: /navigation/sass/containers/lesson/
 author: githubID
 ---
 
-## The Core Idea
+## Main Idea
 
 Use HTML for grouping and OCS classes for reusable container roles. This example shows how OCS classes give plain wrappers a defined page structure.
 
@@ -24,20 +24,31 @@ Use HTML for grouping and OCS classes for reusable container roles. This example
 </div>
 ```
 
-### Semantic HTML
+### How it Fits
 
-Use meaningful HTML elements to group content clearly and accessibly.
+> How do containers fit into an OCS page?
 
-| Element | Meaning | OCS usage |
-| --- | --- | --- |
-| `<div>` | Generic grouping block | Use with `ocs__container`, `ocs__card`, or `ocs__grid-cell` for page structure |
-| `<section>` | Thematic group of content | Use for a major page block inside `ocs__container` |
-| `<header>` | Introductory or navigation block | Use for page or card headers above the body content |
-| `<main>` | Primary page content | Use once per page as the parent of the `ocs__container` composition |
-| `<footer>` | Closing or pager block | Use for `ocs__pager` or footer content at the end of a container |
-| `<h2>` | Major section heading | Use with `ocs__section-title` inside a container or card |
-| `<h3>` | Subsection heading | Use inside an `ocs__card` or grid cell |
-| `<p>` | Paragraph | Use for normal body text inside containers and cards |
+```mermaid
+flowchart TB
+    subgraph container["ocs__container — outer page boundary (one per page)"]
+        direction TB
+        nav["navigation / ocs__links"]
+        heading["ocs__section-title + ocs__description"]
+        subgraph card["ocs__card — framed group of related content"]
+            direction TB
+            subgraph grid["ocs__grid — repeated / comparative layout"]
+                direction LR
+                cell1["ocs__grid-cell<br/>text + ocs__btn"]
+                cell2["ocs__grid-cell<br/>text + status"]
+            end
+            tablewrap["ocs__table-wrap → ocs__table"]
+            callout["ocs__callout"]
+        end
+        actions["ocs__btn actions / ocs__pager"]
+    end
+```
+
+**Key Takeaway**: Containers encompass the entire page, and all other SASS elemenets are "contained" in them.
 
 ### OCS Containers Grammar
 
