@@ -20,17 +20,19 @@ A **nested conditional** is an `if` statement inside another `if`, `elif`, or `e
 
 ## 1. LxD Cycle Process
 
-**Empathize:** Nested conditionals can be confusing because indentation changes which decision owns an inner branch, and students may check a detail before confirming that the larger condition applies.
+1. **Empathize:** Nested conditionals can be confusing because indentation changes which decision owns an inner branch, and students may check a detail before confirming that the larger condition applies.
 
-**Define:**
+2. **Define:**
 - **POV:** CSP students need a clear way to trace decisions from the outside in so they can build programs with multiple levels of rules.
 - **Learning Goal:** Students will be able to trace, write, test, and explain nested conditionals in Python.
 
-**Ideate:**
+3. **Ideate:**
 - **HMW Question:** How might we make each path through a nested conditional visible before students write a larger program?
 - **Activity:** Trace an outer and inner decision, fix incorrect indentation, translate nested logic, and build a two-level decision checker.
 
-**Prototype & Test:** Use the Popcorn Hacks below to check whether students can identify the path a program follows, place an inner condition in the correct block, and test every meaningful outcome.
+4. **Prototype:** Build the Tech Talk examples, three Popcorn Hacks, and one Homework Hack. The examples move from tracing a single path to creating a complete two-level decision checker.
+
+5. **Test:** Teach the draft, check whether students can identify the path a program follows, and collect feedback. Revise any explanation or activity that causes confusion and record the change in Section 5.
 
 ---
 
@@ -159,7 +161,7 @@ else:
 
 Write the same structure in JavaScript and College Board pseudocode. Then explain which condition is checked first and when `meeting_today` is skipped.
 
-### Popcorn Hack 4: Two-Level Event Checker
+### Homework Hack: Two-Level Event Checker
 
 Build a Python program for a school event. First check whether registration is complete. Only registered students should then be checked for a digital or printed pass.
 
@@ -183,10 +185,10 @@ has_pass = False
 
 | Activity | Points | What earns the points |
 | --- | ---: | --- |
-| Popcorn Hack 1 | 0.2 | Correctly predict the path and change the values to reach all outcomes. |
-| Popcorn Hack 2 | 0.2 | Correctly nest the permission check, add the outer `else`, and test all outcomes. |
-| Popcorn Hack 3 | 0.2 | Correctly translate the structure into JavaScript and College Board pseudocode and explain the execution order. |
-| Popcorn Hack 4 | 0.4 | Build a working two-level event checker, test every outcome, and explain why the inner decision depends on the outer branch. |
+| Popcorn Hack 1 | 0.15 | Correctly predict the path and change the values to reach all outcomes. |
+| Popcorn Hack 2 | 0.15 | Correctly nest the permission check, add the outer `else`, and test all outcomes. |
+| Popcorn Hack 3 | 0.20 | Correctly translate the structure into JavaScript and College Board pseudocode and explain the execution order. |
+| Homework Hack | 0.50 | Build a working two-level event checker, test every outcome, and explain why the inner decision depends on the outer branch. |
 | **Total** | **1.0** | |
 
 ---
@@ -194,7 +196,7 @@ has_pass = False
 ## 5. Lesson Revisions & Feedback Evidence
 
 - The lesson is organized into the same numbered `1` through `5` structure used by the Boolean Expressions and Random Values lessons.
-- Activity names use **Tech Talk** for instruction and **Popcorn Hack** for practice tasks.
+- Activity names use **Tech Talk**, **Popcorn Hack**, and **Homework Hack** as required by the Sprint 2 teaching objectives.
 - Python stays the main coding language, while JavaScript and College Board pseudocode are short comparison aids.
 - The examples progress from tracing one path to building and testing a complete two-level decision.
-- Feedback from a practice run can be added here with the specific change that was made because of it.
+- **Feedback applied:** The LxD process was revised from a combined “Prototype & Test” entry into five explicit, numbered stages, and the final challenge was labeled as a Homework Hack to match the course requirements.
