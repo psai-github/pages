@@ -600,7 +600,7 @@ Check if this is a course lesson and determine which course context to use
     return gistUrl;
   }
 
-  async function submitFilesToBackend(files, notes) {
+  async function submitFilesToBackend(files, notes, selfAssessment) {
     const assignmentId = await ensureAssignmentId();
     const { uid, personId } = await resolveCurrentUser();
     const assignmentName = await resolveAssignmentName();
@@ -832,6 +832,12 @@ Check if this is a course lesson and determine which course context to use
           showStatus('error', 'That is not a valid GitHub issue link (expected github.com/owner/repo/issues/N).');
           return;
         }
+        const selfAssessment = getSelfAssessmentData();
+        const selfAssessmentError = validateSelfAssessment(selfAssessment);
+        if (selfAssessmentError) {
+          showStatus('error', selfAssessmentError);
+          return;
+        }
         submitBtn.disabled = true;
         showStatus('loading', 'Submitting...');
         try {
@@ -939,11 +945,12 @@ Check if this is a course lesson and determine which course context to use
         ...fetchOptions,
         method: 'POST',
         headers: {
+          ...fetchOptions.headers,
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: new URLSearchParams({
           name: PAGE_TITLE || {{ page.title | jsonify }},
-          contentUrl: CURRENT_LESSON_ID,
+          contentUrl: CURRENT_LESSON_ID.replace(/^\/+|\/+$/g, ''),
           description: {{ page.description | default: "" | jsonify }},
           assignmentType: {{ page.assignment_submission_type | default: "File" | jsonify }},
           pageContent: {{ page.content | strip_html | normalize_whitespace | truncate: 8000 | jsonify }}
@@ -966,8 +973,8 @@ Check if this is a course lesson and determine which course context to use
         } else {
           console.log('Assignment resolved with ID:', result.id);
         }
-      } else if (createRes.status === 403) {
-        console.warn('Not authenticated - assignment creation skipped. Please log in to enable assignments.');
+      } else if (createRes.status === 401 || createRes.status === 403) {
+        console.warn('Assignment creation requires an active Spring login session. Please log in and refresh the page.');
       } else if (createRes.status === 400) {
         const error = await createRes.json();
         console.error('Bad request for auto-create assignment:', error.error);

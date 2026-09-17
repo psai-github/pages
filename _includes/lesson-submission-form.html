@@ -19,7 +19,7 @@
     {% assign link_label = "Submission Link" %}
     {% assign link_placeholder = "https://..." %}
   {% endif %}
-  <form class="submission-form active" id="link-form">
+  <div>
   <div class="self-assessment" id="self-assessment">
     <h4 class="self-assessment-title">
       <i class="fas fa-clipboard-check"></i>
@@ -85,17 +85,8 @@
     </div>
   </div>
 
-  <div class="submission-options">
-    <button class="submission-tab" onclick="switchSubmissionType('link')" type="button">
-      <i class="fas fa-link"></i> Link Submission
-    </button>
-    <button class="submission-tab" onclick="switchSubmissionType('file')" type="button">
-      <i class="fas fa-file-upload"></i> File Upload
-    </button>
-  </div>
-
   <!-- Link Submission Form -->
-  <form class="submission-form" id="link-form">
+  <form class="submission-form active" id="link-form">
     <div class="form-group">
       <label for="submission-link">{{ link_label }}</label>
       <input type="url" id="submission-link" placeholder="{{ link_placeholder }}" required>
@@ -112,6 +103,7 @@
       Submit Link
     </button>
   </form>
+  </div>
   {% elsif submission_type == "code" %}
   <form class="submission-form active" id="code-form">
     <div class="form-group">
