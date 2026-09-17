@@ -12,7 +12,6 @@ comments: false
 title: 3.5 Boolean Expressions (PY)
 description: Learn Boolean expressions in Python using the five-part LxD lesson format.
 permalink: /python/boolean/py
-authors: Ruhaan Bansal, Deyar Raissadat, Arya Taghavi Zargar
 ---
 
 # 3.5 Boolean Expressions in Python
