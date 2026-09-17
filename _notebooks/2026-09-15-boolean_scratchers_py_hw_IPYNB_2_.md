@@ -30,7 +30,7 @@ A **Boolean expression** is a question that evaluates to only `True` or `False`.
 - **HMW Question:** How might we make Boolean logic easier to understand before students have to write a full program?
 - **Activity:** Predict Boolean results, fix an incorrect condition, and then build one complete decision checker.
 
-**Prototype & Test:** Use the classwork below to check whether students can predict results before running code, choose the correct Boolean operator, and explain why their expression matches the rule.
+**Prototype & Test:** Use the Popcorn Hacks below to check whether students can predict results before running code, choose the correct Boolean operator, and explain why their expression matches the rule.
 
 ---
 
@@ -40,7 +40,7 @@ A **Boolean expression** is a question that evaluates to only `True` or `False`.
 
 **Success Criteria:** You can predict whether an expression is `True` or `False`, write a condition from a rule in normal English, and test the condition with more than one set of values.
 
-### Part 1: Comparisons Create Booleans
+### Tech Talk 1: Comparisons Create Booleans
 
 Python comparison operators return `True` or `False`.
 
@@ -65,7 +65,7 @@ Remember:
 - `score = 90` assigns a value.
 - `score == 90` compares two values.
 
-### Part 2: `and`, `or`, and `not`
+### Tech Talk 2: `and`, `or`, and `not`
 
 Sometimes one comparison is not enough.
 
@@ -92,7 +92,7 @@ is_teenager = age >= 13 and age <= 19
 print(is_teenager)
 ```
 
-### Part 3: Booleans Control `if` Statements
+### Tech Talk 3: Booleans Control `if` Statements
 
 An `if` statement runs when its condition is true.
 
@@ -120,9 +120,9 @@ ELSE
 
 ---
 
-## 3. Classwork & Practice Tasks
+## 3. Popcorn Hacks & Practice Tasks
 
-### Classwork 1: Predict Before You Run
+### Popcorn Hack 1: Predict Before You Run
 
 Predict each result first. Then run the code and compare.
 
@@ -135,7 +135,7 @@ print(10 <= 10)
 
 For each line, write `True` or `False` and one short reason.
 
-### Classwork 2: Fix the Logic
+### Popcorn Hack 2: Fix the Logic
 
 A level should unlock only when the player has **at least 10 coins AND has found the key**.
 
@@ -158,7 +158,7 @@ Do these four things:
 3. Test at least three combinations of `coins` and `has_key`.
 4. Explain why the rule needs `and` or `or`.
 
-### Classwork 3: Translate the Logic
+### Popcorn Hack 3: Translate the Logic
 
 Start with this Python expression:
 
@@ -168,7 +168,7 @@ has_ticket or on_guest_list
 
 Write the same Boolean expression in JavaScript and College Board pseudocode. Then explain what word in **"ticket or guest list"** tells you which operator to use.
 
-### Homework: Boolean Decision Checker
+### Popcorn Hack 4: Boolean Decision Checker
 
 A student can use a study room when:
 - they are logged in,
@@ -196,16 +196,19 @@ Test at least four cases, including one where the room is closed and one where t
 
 ## 4. Grading Plan (1 Point Total)
 
-- **0.2 points — Classwork 1:** Correctly predict each Boolean result and include a short explanation.
-- **0.2 points — Classwork 2:** Fix the Boolean logic and test at least three combinations.
-- **0.2 points — Classwork 3:** Correctly translate the Boolean expression into JavaScript and College Board pseudocode.
-- **0.4 points — Homework:** Build the study-room Boolean expression using all required conditions, test at least four cases, and explain the final expression in 2–3 sentences.
+| Activity | Points | What earns the points |
+| --- | ---: | --- |
+| Popcorn Hack 1 | 0.2 | Correctly predict each Boolean result and include a short explanation. |
+| Popcorn Hack 2 | 0.2 | Fix the Boolean logic and test at least three combinations. |
+| Popcorn Hack 3 | 0.2 | Correctly translate the Boolean expression into JavaScript and College Board pseudocode. |
+| Popcorn Hack 4 | 0.4 | Build the study-room Boolean expression using all required conditions, test at least four cases, and explain the final expression in 2–3 sentences. |
+| **Total** | **1.0** | |
 
 ---
 
 ## 5. Lesson Revisions & Feedback Evidence
 
 - The lesson is organized into the same numbered `1` through `5` structure used by the reference lesson.
-- Activity names use **Part**, **Classwork**, and **Homework** instead of labels such as Tech Talk or Popcorn Hack.
+- Activity names use **Tech Talk** for instruction and **Popcorn Hack** for practice tasks.
 - Python stays the main coding language, while JavaScript and College Board pseudocode are short comparison aids.
 - Feedback from a practice run can be added here with the specific change that was made because of it.

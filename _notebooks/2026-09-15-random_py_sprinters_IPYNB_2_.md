@@ -31,7 +31,7 @@ A **random value** is selected from a set or range of possible values. Python is
 - **HMW Question:** How might we show randomness in a way that students can predict the possible outputs even though they cannot predict the exact next result?
 - **Activity:** Predict ranges, use `random.choice`, fix a wrong range, and build a small dice game.
 
-**Prototype & Test:** Use the classwork below to check whether students can list possible outputs, recognize valid ranges, and use a random result inside a decision.
+**Prototype & Test:** Use the Popcorn Hacks below to check whether students can list possible outputs, recognize valid ranges, and use a random result inside a decision.
 
 ---
 
@@ -41,7 +41,7 @@ A **random value** is selected from a set or range of possible values. Python is
 
 **Success Criteria:** You can identify every possible output of a random expression, choose the correct range, and explain why repeated results are allowed.
 
-### Part 1: Random Integers
+### Tech Talk 1: Random Integers
 
 Python's built-in `random` module gives us tools for random values.
 
@@ -56,7 +56,7 @@ print("Die roll:", die_roll)
 
 For a normal die, the possible results are `1`, `2`, `3`, `4`, `5`, and `6`.
 
-### Part 2: Random Choices
+### Tech Talk 2: Random Choices
 
 Python can choose directly from a list.
 
@@ -79,7 +79,7 @@ The same random-integer idea looks like this in the three forms:
 | JavaScript | `Math.floor(Math.random() * 6) + 1` |
 | College Board pseudocode | `RANDOM(1, 6)` |
 
-### Part 3: Use Random Values in Decisions
+### Tech Talk 3: Use Random Values in Decisions
 
 A program can generate a random value and then use that result in an `if` statement.
 
@@ -98,9 +98,9 @@ Random does **not** mean every possible result appears once before a repeat. Rep
 
 ---
 
-## 3. Classwork & Practice Tasks
+## 3. Popcorn Hacks & Practice Tasks
 
-### Classwork 1: Predict the Range
+### Popcorn Hack 1: Predict the Range
 
 Before running this expression:
 
@@ -117,7 +117,7 @@ answer:
 
 Then test it several times.
 
-### Classwork 2: Random Choice
+### Popcorn Hack 2: Random Choice
 
 ```python
 import random
@@ -135,7 +135,7 @@ Do these five things:
 4. Explain why the same snack can appear more than once.
 5. Replace the list with your own category.
 
-### Classwork 3: Fix the Range
+### Popcorn Hack 3: Fix the Range
 
 This is supposed to simulate a six-sided die, but the range is wrong.
 
@@ -148,7 +148,7 @@ print(die)
 
 List the current possible results, fix the range so it returns `1` through `6`, and write the corrected random expression in JavaScript and College Board pseudocode.
 
-### Homework: Random Game Challenge
+### Popcorn Hack 4: Random Game Challenge
 
 Build a small Python program using randomness. You can make a dice game, random prize, activity picker, opponent move, or another simple idea.
 
@@ -163,16 +163,19 @@ Your program must:
 
 ## 4. Grading Plan (1 Point Total)
 
-- **0.2 points — Classwork 1:** Correctly identify the smallest, largest, and all possible values in the random range.
-- **0.2 points — Classwork 2:** Use `random.choice()` correctly, modify the list, and explain why repeats are possible.
-- **0.2 points — Classwork 3:** Fix the six-sided die range and correctly write the equivalent JavaScript and College Board pseudocode.
-- **0.4 points — Homework:** Build a working random program with at least three possible outcomes, use the random result in a meaningful decision or action, handle repeats, and explain the possible outputs.
+| Activity | Points | What earns the points |
+| --- | ---: | --- |
+| Popcorn Hack 1 | 0.2 | Correctly identify the smallest, largest, and all possible values in the random range. |
+| Popcorn Hack 2 | 0.2 | Use `random.choice()` correctly, modify the list, and explain why repeats are possible. |
+| Popcorn Hack 3 | 0.2 | Fix the six-sided die range and correctly write the equivalent JavaScript and College Board pseudocode. |
+| Popcorn Hack 4 | 0.4 | Build a working random program with at least three possible outcomes, use the random result in a meaningful decision or action, handle repeats, and explain the possible outputs. |
+| **Total** | **1.0** | |
 
 ---
 
 ## 5. Lesson Revisions & Feedback Evidence
 
 - The lesson is organized into the same numbered `1` through `5` structure used by the reference lesson.
-- Activity names use **Part**, **Classwork**, and **Homework** instead of labels such as Tech Talk or Popcorn Hack.
+- Activity names use **Tech Talk** for instruction and **Popcorn Hack** for practice tasks.
 - Python stays the main coding language, while JavaScript and College Board pseudocode are short comparison aids.
 - Feedback from a practice run can be added here with the specific change that was made because of it.
