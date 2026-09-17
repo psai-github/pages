@@ -1,15 +1,25 @@
 <!-- ASSIGNMENT SUBMISSION FORM -->
 {% comment %}
   Displays when page.assignment is true
-  Includes both link and file submission options
+  Includes link, github_issue, code, and file submission options
 {% endcomment %}
 
+{% assign submission_type = page.assignment_submission_type | default: "file" | downcase %}
 <div class="assignment-submission">
   <h3>
     <i class="fas fa-upload assignment-submission-icon"></i>
     Submit Assignment
   </h3>
 
+  {% if submission_type == "link" or submission_type == "github_issue" %}
+  {% if submission_type == "github_issue" %}
+    {% assign link_label = "GitHub Issue Link" %}
+    {% assign link_placeholder = "https://github.com/owner/repo/issues/123" %}
+  {% else %}
+    {% assign link_label = "Submission Link" %}
+    {% assign link_placeholder = "https://..." %}
+  {% endif %}
+  <form class="submission-form active" id="link-form">
   <div class="self-assessment" id="self-assessment">
     <h4 class="self-assessment-title">
       <i class="fas fa-clipboard-check"></i>
@@ -87,8 +97,11 @@
   <!-- Link Submission Form -->
   <form class="submission-form" id="link-form">
     <div class="form-group">
-      <label for="submission-link">Submission Link</label>
-      <input type="url" id="submission-link" placeholder="https://..." required>
+      <label for="submission-link">{{ link_label }}</label>
+      <input type="url" id="submission-link" placeholder="{{ link_placeholder }}" required>
+      {% if submission_type == "github_issue" %}
+      <p class="form-hint" style="font-size:0.85rem;color:#9ca3af;margin-top:6px;">Must be a public GitHub issue (github.com/owner/repo/issues/N) — it will be validated and reviewed automatically.</p>
+      {% endif %}
     </div>
     <div class="form-group">
       <label for="link-description">Description</label>
@@ -99,18 +112,42 @@
       Submit Link
     </button>
   </form>
-
-  <!-- File Upload Form -->
-  <form class="submission-form hidden" id="file-form">
+  {% elsif submission_type == "code" %}
+  <form class="submission-form active" id="code-form">
+    <div class="form-group">
+      <label for="code-language">Language</label>
+      <select id="code-language">
+        <option value="python">Python</option>
+        <option value="java">Java</option>
+        <option value="javascript">JavaScript</option>
+        <option value="pseudocode">Text / Pseudocode</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="code-input">Code</label>
+      <textarea id="code-input" class="code-input" placeholder="Paste or type your code here..." rows="12" required></textarea>
+      <p class="form-hint" style="font-size:0.85rem;color:#9ca3af;margin-top:6px;">Your code will be saved as a Gist and reviewed automatically. You must be logged in to submit.</p>
+    </div>
+    <div class="form-group">
+      <label for="code-notes">Notes (Optional)</label>
+      <textarea id="code-notes" placeholder="Add any additional comments..."></textarea>
+    </div>
+    <button type="submit" class="submit-btn" id="code-submit-btn">
+      <i class="fas fa-check"></i>
+      Submit Code
+    </button>
+  </form>
+  {% else %}
+  <form class="submission-form active" id="file-form">
     <div class="form-group">
       <label>Upload Files</label>
       <div class="file-upload-area" id="file-upload-area">
-        <input type="file" id="file-input" multiple style="display: none;">
+        <input type="file" id="file-input" multiple accept=".pdf,.zip,.png,.jpg,.jpeg,.gif,.doc,.docx,.txt,.ipynb" style="display: none;">
         <div class="file-upload-icon">
           <i class="fas fa-cloud-upload-alt"></i>
         </div>
         <div class="file-upload-text">Click to upload or drag and drop</div>
-        <div class="file-upload-hint">PDF, ZIP, images, or documents (Max 10MB per file)</div>
+        <div class="file-upload-hint">PDF, ZIP, images, documents, or Jupyter notebooks (.ipynb) (Max 10MB per file)</div>
       </div>
       <div class="file-list" id="file-list"></div>
     </div>
@@ -123,6 +160,7 @@
       Submit Files
     </button>
   </form>
+  {% endif %}
 
   <div class="submission-status" id="submission-status"></div>
 </div>

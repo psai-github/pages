@@ -139,11 +139,29 @@ class AssignmentCreatorFrontmatterTests(unittest.TestCase):
             session.request["data"]["courseCodes"],
         )
 
+    def test_omitted_submission_type_is_not_sent_to_existing_assignments(self):
+        session = RecordingSession()
+
+        create_assignment(session, "https://spring.example.test", "Existing", "csa/existing")
+
+        self.assertNotIn("assignmentType", session.request["data"])
+
+    def test_explicit_submission_type_is_sent(self):
+        session = RecordingSession()
+
+        create_assignment(
+            session, "https://spring.example.test", "Issue", "csa/issue",
+            assignment_submission_type="github_issue",
+        )
+
+        self.assertEqual("github_issue", session.request["data"]["assignmentType"])
+
     def test_identical_source_and_generated_assignments_are_deduplicated(self):
         metadata = (
             "sprint1/challenge",
             "Ground 0",
             "Onboarding",
+            None,
             None,
             None,
             [],
@@ -161,8 +179,8 @@ class AssignmentCreatorFrontmatterTests(unittest.TestCase):
 
     def test_conflicting_duplicate_assignment_metadata_is_rejected(self):
         candidates = [
-            (Path("_posts/ground-0.md"), "sprint1/challenge", "Ground 0", "A", None, None, [], ["CSA"]),
-            (Path("_notebooks/ground-0.ipynb"), "sprint1/challenge", "Ground 0", "A", None, None, [], ["CSP"]),
+            (Path("_posts/ground-0.md"), "sprint1/challenge", "Ground 0", "A", None, None, None, [], ["CSA"]),
+            (Path("_notebooks/ground-0.ipynb"), "sprint1/challenge", "Ground 0", "A", None, None, None, [], ["CSP"]),
         ]
 
         with self.assertRaisesRegex(AssignmentFrontmatterError, "Conflicting assignment metadata"):

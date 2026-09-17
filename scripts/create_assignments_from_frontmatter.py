@@ -221,7 +221,7 @@ def deduplicate_candidates(candidates):
     """Collapse source/generated copies that resolve to the same served assignment.
 
     Notebook conversion keeps frontmatter in a generated post, so scanning the repository
-    can encounter the same assignment twice. Creator/course metadata must agree; generated
+    can encounter the same assignment twice. Submission type, creator, and course metadata must agree; generated
     display text may differ from the source, which remains authoritative on first creation.
     """
     unique = OrderedDict()
@@ -235,7 +235,7 @@ def deduplicate_candidates(candidates):
         # Generated posts can intentionally shorten display text from their source
         # notebook. Only ownership and course metadata is resynchronized on existing
         # assignments, so those are the fields where disagreement must stop the run.
-        if (existing[6], existing[7]) != (candidate[6], candidate[7]):
+        if existing[6:9] != candidate[6:9]:
             raise AssignmentFrontmatterError(
                 "Conflicting assignment metadata for contentUrl "
                 f"'{content_url}' in {existing[0]} and {path}"
@@ -268,10 +268,13 @@ def create_assignment(
     description: str = "auto-created on deploy",
     points=None,
     due_date=None,
+    assignment_submission_type=None,
     creator_uids=None,
     course_codes=None,
 ):
     payload = {"name": name, "contentUrl": content_url, "description": description}
+    if assignment_submission_type:
+        payload["assignmentType"] = assignment_submission_type
     if points is not None:
         payload["points"] = points
     if due_date:
@@ -288,7 +291,7 @@ def create_assignment(
     return resp
 
 
-def create_assignment_full(session: requests.Session, base_url: str, name: str, atype: str, description: str, points: float, dueDate: str):
+def create_assignment_full(session: requests.Session, base_url: str, name: str, atype: str, description: str, points: float, dueDate: str, assignmentType: str):
     # This calls the admin/teacher create endpoint which requires role privileges
     payload = {
         "name": name,
@@ -296,6 +299,7 @@ def create_assignment_full(session: requests.Session, base_url: str, name: str, 
         "description": description,
         "points": str(points),
         "dueDate": dueDate,
+        "assignmentType": assignmentType,
     }
     resp = session.post(f"{base_url}/api/assignments/create", data=payload, timeout=30)
     return resp
@@ -330,6 +334,11 @@ def main():
         if not fm:
             continue
         if fm.get("assignment") is True:
+
+            # Spring defaults new assignments to file; omitting this field must not
+            # overwrite an existing assignment's selected submission type.
+            assignment_submission_type = fm.get("assignment_submission_type") or None
+
             content_url = determine_content_url(root, f, fm)
             name = fm.get("title") or fm.get("name") or f.stem
             description = fm.get("description") or "auto-created from frontmatter"
@@ -342,7 +351,8 @@ def main():
                 print(f"Invalid assignment frontmatter: {error}", file=sys.stderr)
                 return 2
             candidates.append(
-                (f, content_url, name, description, points, due_date, creator_uids, course_codes)
+                (f, content_url, name, description, points, due_date,
+                 assignment_submission_type, creator_uids, course_codes)
             )
 
     try:
@@ -356,11 +366,12 @@ def main():
         return 0
 
     print(f"Found {len(candidates)} pages with assignment: true")
-    for path, content_url, name, description, points, due_date, creator_uids, course_codes in candidates:
+    for path, content_url, name, description, points, due_date, assignment_submission_type, creator_uids, course_codes in candidates:
         creator_summary = ",".join(creator_uids) if creator_uids else "legacy/unassigned"
         course_summary = ",".join(course_codes) if course_codes else "legacy/unassigned"
         print(
             f"-> {path} -> contentUrl={content_url} name={name} "
+            f"assignmentType={assignment_submission_type or 'unchanged/default file'} "
             f"creatorUids={creator_summary} courseCodes={course_summary}"
         )
         if args.dry_run and not args.create:
@@ -373,7 +384,7 @@ def main():
             # name already present
             atype = None
             if fm is not None:
-                atype = fm.get("type") or fm.get("assignment_type")
+                atype = fm.get("type") or fm.get("assignment_submission_type")
             if not atype:
                 missing.append("type")
             points = None
@@ -395,7 +406,7 @@ def main():
                 continue
 
             try:
-                resp = create_assignment_full(session, args.base_url, name, atype, description, points, str(dueDate))
+                resp = create_assignment_full(session, args.base_url, name, atype, description, points, str(dueDate), assignment_submission_type or "file")
                 print(f"  {resp.status_code} {resp.text[:200]}")
             except Exception as e:
                 print(f"  ERROR: {e}")
@@ -411,6 +422,7 @@ def main():
                     description,
                     points,
                     due_date,
+                    assignment_submission_type,
                     creator_uids,
                     course_codes,
                 )
