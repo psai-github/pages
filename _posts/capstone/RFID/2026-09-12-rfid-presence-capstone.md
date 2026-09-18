@@ -14,7 +14,38 @@ rp_active: hub
 <div class="rfid-presence-infograph">
 	<div class="rfid-presence-header"><div class="ocs__badge">Design-Based Research Capstone</div><h1 class="rfid-presence-title">{{ data.Title }}</h1><p class="ocs__description">{{ data.Description }}</p></div>
 	{% include rfid-presence-nav.html %}
-	<div class="ocs__card"><h3 class="ocs__section-title">Overview</h3><div class="rfid-presence-table-wrap"><table class="ocs__table rfid-presence-table"><tbody><tr><td>The Problem</td><td>Attendance rarely reflects sustained presence. Tardiness, restroom breaks, counseling visits, and early departures all get flattened into a single present/absent mark, hiding how much instructional time a student actually gets.</td></tr><tr><td>Our Approach</td><td>Correlate multiple independent presence signals, device via RFID and person via camera, against the bell schedule and per-period enrollment to build a continuous presence model, not just a single daily checkmark.</td></tr><tr><td>Research Question</td><td>Can a low-cost Raspberry Pi&ndash;based UHF RFID system, using tamper-evident computer-mounted tags and doorway detection, reliably establish classroom device presence and contribute to student presence determination when correlated with an existing camera-spatial technology and class registration/bell-schedule data?</td></tr><tr><td>Current Phase</td><td>Phase&nbsp;1, the contact-tap prototype, is working end to end. See <a href="/capstone/rfid-presence/phases/">Phases</a> for the full roadmap.</td></tr><tr><td>Signals Correlated</td><td>RFID (device presence) + Camera (person identity), reconciled against Bell Schedule (attendance window) and Registration (per-period roster).</td></tr></tbody></table></div></div>
+	<div class="ocs__card"><h3 class="ocs__section-title">Overview</h3><div class="rfid-presence-table-wrap"><table class="ocs__table rfid-presence-table"><tbody><tr><td>The Problem</td><td>Roll call is a snapshot. It misses lost minutes, tardiness, restroom breaks, counseling visits, and early departures all flatten into one present/absent mark, and it costs teacher time every period.</td></tr><tr><td>Background</td><td>Time leaks in minutes, not just in whether a student showed up at all. Prior classroom-attendance studies (see <a href="/capstone/rfid-presence/summary/">Project Summary</a>) mostly check recognition at the door; few measure minutes-in-room against a real ground truth.</td></tr><tr><td>Research Question</td><td><strong>Can classroom presence be measured with zero teacher effort?</strong> Design-based research, pragmatic mixed methods. The technology, RFID tap, QR, or face, is a variable under test, not the product.</td></tr><tr><td>Current Phase</td><td>Cycle&nbsp;0 of the research design below is done: an RFID tap reliably reaches OCS. See <a href="/capstone/rfid-presence/phases/">Phases</a> for the build roadmap and <a href="https://github.com/vibha1019/crowpi-attendance/issues/3" target="_blank" rel="noopener">Issue&nbsp;#3</a> for the working evidence.</td></tr></tbody></table></div></div>
+	<div class="ocs__card"><h3 class="ocs__section-title">Research Question &amp; Hypotheses</h3><div class="rfid-presence-table-wrap"><table class="ocs__table rfid-presence-table"><thead><tr><th>Hypothesis</th><th>Claim</th><th>Sanity check</th></tr></thead><tbody><tr><td>H1</td><td>Presence accuracy at least as good as roll call</td><td>Low-risk claim, roll call's own bar is low.</td></tr><tr><td>H2</td><td>Minutes within 2 min of ground truth per period</td><td>Genuinely tight for a tap mechanism: accuracy depends on when a student remembers to tap, not continuous sensing. This may get rejected for contact-tap specifically, which would still be a real, useful finding.</td></tr><tr><td>H3</td><td>Zero teacher attendance actions</td><td>Needs a precise operational definition, does one-time tag registration count, or only ongoing per-period actions? As built today, periods are still admin-managed, so this would fail under a strict reading.</td></tr><tr><td>H4</td><td>A combination of inputs beats any single input</td><td>Supported by the sensor-fusion literature already cited, but a poorly correlated combination can introduce more failure points than either signal alone. Testing this, not assuming it.</td></tr></tbody></table></div></div>
+	<div class="ocs__card"><h3 class="ocs__section-title">Design-Based Research Cycles</h3><p class="rfid-presence-about">Each cycle: question, build, test, analyze, reflect, repeat if it fails.</p><div class="ocs__diagram"><pre class="mermaid">flowchart LR
+		C0["Cycle 0, done
+RFID reader to OCS
+Tested: can a tap reach OCS?
+Issue #3"] --> C1["Cycle 1, tests H2
+Input-agnostic API, roster, minutes
+Measure roll call baseline
+minutes correct?"]
+		C1 --> C2["Cycle 2, tests H3
+Who's missing view and report
+Short class trial, RFID only
+teacher does nothing?"]
+		C2 --> C3["Cycle 3, tests H4
+Add QR or face to same API
+Side by side with RFID
+which input wins?"]
+		C3 --> C4["Cycle 4, tests H1 + main
+Classroom pilot
+2 to 4 weeks, one class
+H1 to H4 decided"]</pre></div><div class="ocs__callout">Cycle 1 requires an input-agnostic API. What's built today (<a href="/capstone/rfid-presence/technical/">Technical Detail</a>) is explicitly RFID-shaped, an <code>/api/rfid/scan</code> endpoint and an <code>RfidTag</code> model in OCS. That needs generalizing to a generic presence-event API before QR or face can plug into the same pipeline in Cycle 3. Flagged now so it's planned rather than discovered mid-cycle.</div></div>
+	<div class="ocs__card"><h3 class="ocs__section-title">The Intervention Being Tested</h3><div class="ocs__diagram"><pre class="mermaid">flowchart LR
+		RFID["RFID tap"] --> API[One Event API
+student, room, time, direction]
+		QR["QR scan"] --> API
+		FACE["Face scan"] --> API
+		API --> ENGINE[Presence Engine
++ bell schedule + roster]
+		ENGINE --> MISSING["Who's missing now"]
+		ENGINE --> MINUTES["Minutes report"]</pre></div><p class="rfid-presence-about">RFID tap, QR scan, and face scan are the independent variable. Who's missing now and the minutes report are the dependent variables, measured against ground truth below.</p></div>
+	<div class="ocs__card"><h3 class="ocs__section-title">Evaluating Against Ground Truth</h3><div class="rfid-presence-table-wrap"><table class="ocs__table rfid-presence-table"><tbody><tr><td>Ground Truth</td><td>A student observer hand-logs every entry and exit; a second observer checks them, a standard dual-rater design.</td></tr><tr><td>Measures</td><td>Agreement rate, minutes error, teacher actions per period, missed and false events per input, teacher and student survey.</td></tr><tr><td>Findings</td><td>Each hypothesis is accepted or rejected, with limitations and design lessons carried back into OCS, not just a pass/fail on RFID.</td></tr></tbody></table></div><div class="ocs__callout">The hand-logging ground truth is new data collection beyond what the existing privacy and governance decisions (<a href="/capstone/rfid-presence/summary/">Project Summary</a>) currently cover, opt-in face scanning and team's-own-data-only testing. It needs its own consent treatment before the Cycle&nbsp;4 classroom pilot runs, not an assumption that it's already covered.</div></div>
 	<div class="ocs__card"><h3 class="ocs__section-title">System Architecture</h3><p class="rfid-presence-about">Two independent event sources, RFID and camera, feed a correlation engine that is also aware of the bell schedule and per-period enrollment.</p><div class="ocs__diagram"><pre class="mermaid">flowchart TD
 		BS[Bell Schedule] --> CP[Class / Period]
 		CP --> REG["Registration:
