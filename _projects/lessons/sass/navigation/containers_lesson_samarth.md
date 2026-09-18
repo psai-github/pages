@@ -102,7 +102,7 @@ Use OCS classes to express container roles without hardcoded layout styling.
 We are using a shared OCS container grammar. This means **you don't need to write CSS for your page layout**. Instead of inventing wrapper styles, you just need to tell the browser *what role* each block plays. There's already a global system to take care of the styling.
 
 * **The Rule:** Use one `ocs__container` per page, with `ocs__card` and `ocs__grid` children. Let the system handle the look.
-* ✅ **Do this:** `<div class="ocs__container">` with `<div class="ocs__card">` inside it
+* ✅ **Do this:** `<div class="ocs__container">` with `<div class="ocs__card">` inside it. Key term: **ocs_container**
 * ❌ **Don't do this:** `<div class="page-wrap" style="max-width: 900px; margin: auto;">` or `<div class="pretty-box">`
 
 Why do we do this? It ensures our whole project looks consistent, makes our code reusable, and keeps every page responsive without extra work.
@@ -157,6 +157,37 @@ Why do we do this? It ensures our whole project looks consistent, makes our code
   </div>
 </div>
 ```
+
+#### D. Advanced: Layout That Responds to Container Size
+
+Media queries change layout based on the viewport width. Container queries change layout based on a parent container's width, so the same `ocs__card` can lay out differently in a narrow sidebar vs. a wide page without custom page CSS.
+
+Two steps: 1) mark a wrapper as the query container with `container-type: inline-size`, 2) write `@container` rules for its children.
+
+```html
+<style>
+  /* Why: this makes the card the measuring box, not the viewport. */
+  .cq-demo { container-type: inline-size; }
+  .cq-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  /* Why: when the card itself is wide, show 2 columns; narrow stays stacked. */
+  @container (min-width: 500px) {
+    .cq-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+
+<div class="ocs__container">
+  <div class="ocs__card cq-demo">
+    <h3 class="ocs__section-title">Team Roles</h3>
+    <div class="cq-grid">
+      <div class="ocs__grid-cell">Frontend: builds the pages.</div>
+      <div class="ocs__grid-cell">Backend: builds the API.</div>
+    </div>
+    <div class="ocs__callout">Resize the card (not the window): narrow = 1 column, wide = 2 columns.</div>
+  </div>
+</div>
+```
+
+**Key Takeaway:** Use viewport media queries for page-level changes; use container queries when a reusable block should adapt to wherever you place it.
 
 ---
 
