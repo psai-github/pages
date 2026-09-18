@@ -1,130 +1,197 @@
 ---
 layout: post
-title: SASS Inputs Aesthetihawk
+assignment: true
+title: SASS Inputs — PAW Patrol
+description: Learn the OCS SASS input grammar and refactor hardcoded input styles into reusable classes.
 categories: [SASS, Inputs]
 lesson_language: SASS
 lesson_topic: Inputs
 lesson_part: interactive
 lesson_type: lesson
-microblog: true 
+microblog: true
 permalink: /sass/inputs/
-author: Aashray Reddy
+author: PAW Patrol
 ---
 
-## Inputs
+# OCS SASS Inputs
 
-### How to Use
+## 1. LxD Cycle Process
 
-To use an input field, start with the `<input>` element and apply classes to control **size** and **style**.
+### Empathize
 
-**Basic structure:**
+Students often style inputs by hand with inline CSS such as `style="width: 400px; border: 3px dashed purple;"` or invent one-off classes for each field. That may work for one page, but it makes forms inconsistent and harder to maintain when the site theme changes.
+
+### Define
+
+**POV:** CSP students need a shared, class-based input system so forms stay consistent without repeating custom CSS.
+
+**Learning Goal:** Students will use the OCS input grammar—`ocs__input` plus reusable size and style modifiers—instead of inline styles or made-up classes.
+
+### Ideate
+
+**HMW Question:** How might we teach students to choose an existing input role and modifier before writing custom CSS?
+
+**Activity:** Refactor hardcoded inputs into clean OCS input markup.
+
+### Prototype & Test
+
+Our first practice version asked students to build a full form from scratch. That took too long, so the practice was reduced to a quick refactor task followed by one focused homework exercise.
+
+---
+
+## 2. Lesson Plan
+
+**Learning Objective:** By the end of this lesson, you will be able to size and style `<input>` elements using the OCS SASS input grammar.
+
+**Success Criteria:** You can remove inline input styling and replace it with `ocs__input` plus the correct size and style modifiers.
+
+### OCS Input Grammar
+
+| Class / Modifier | Purpose | Example |
+| --- | --- | --- |
+| `ocs__input` | Base input role | `<input class="ocs__input">` |
+| `small` | Compact input | `<input class="ocs__input small">` |
+| `medium` | Standard input size | `<input class="ocs__input medium">` |
+| `large` | Large input | `<input class="ocs__input large">` |
+| `gradient` | Gradient style | `<input class="ocs__input gradient">` |
+
+Modifiers can be combined:
 
 ```html
-<input type="text" class="[sizeClass] [styleClass]" placeholder="Placeholder text">
+<input
+  type="text"
+  class="ocs__input large gradient"
+  placeholder="Username"
+>
 ```
 
-### Size Classes
+> **Backward compatibility:** Existing pages that use `smallInput`, `mediumInput`, `largeInput`, or `gradientInput` will continue to work. New code should use the OCS grammar shown above.
 
-- `smallInput` – Compact field for dense UI
-- `mediumInput` – Default size (most common)
-- `largeInput` – Spacious, useful on mobile or minimalistic layouts
+### Tech Talk
 
-### Style Classes
+The global SASS system already provides the shared input appearance. Your HTML should describe the component role and modifiers rather than duplicate styling.
 
-- `gradientInput` – Adds a colorful or decorative border/background
+**The Rule:** Use `ocs__input` and its modifiers. Let the global SASS system handle the visual design.
 
-> You can mix size and style classes as needed (e.g., `class="smallInput gradientInput"`).
+- ✅ Do this: `<input type="email" class="ocs__input medium" placeholder="Email">`
+- ❌ Don't do this: `<input type="email" style="width: 300px; padding: 8px;" placeholder="Email">`
 
----
+### Code Examples
 
-### Input Variants and When to Use Them
-
-#### ✅ Default Input
-
-- **Example**: `<input type="text" placeholder="default input">`
-- **Purpose**: Used when no special styling is needed. Clean, minimal.
-- **Use When**: You just need a plain, standard input for quick forms or internal tools.
-
----
-
-#### ✅ `gradientInput`
-
-- **Example**: `<input type="text" class="gradientInput" placeholder="Enter name">`
-- **Purpose**: Adds visual flair or thematic styling (e.g., brand gradients or subtle attention).
-- **Use When**: The form is part of a marketing page or when you want to elevate the UI.
-
----
-
-#### ✅ Size Variants
-
-- **`smallInput`**  
-  - **Example**: `<input type="text" class="smallInput" placeholder="First Name">`  
-  - **Use When**: Space is tight or the input is part of a compact component (e.g., in a card or modal)
-
-- **`mediumInput`**  
-  - **Example**: `<input type="text" class="mediumInput" placeholder="Email address">`  
-  - **Use When**: General use. Best default for most forms.
-
-- **`largeInput`**  
-  - **Example**: `<input type="text" class="largeInput" placeholder="Search...">`  
-  - **Use When**: You want a bold, easy-to-read input—like a search bar or prominent signup form.
-
----
-
-### Combo: Gradient + Size
-
-You can combine style and size:
+#### A. Simple: Base Input
 
 ```html
-<input type="text" class="largeInput gradientInput" placeholder="Username">
+<input type="text" class="ocs__input" placeholder="Default input">
 ```
 
-Use combos for stylized forms that require both visual polish and size control.
+#### B. Intermediate: Size Modifiers
 
----
+```html
+<input type="text" class="ocs__input small" placeholder="First Name">
+<input type="text" class="ocs__input large" placeholder="Search...">
+```
+
+#### C. Complex: Combined Modifiers
+
+```html
+<input type="text" class="ocs__input large gradient" placeholder="Username">
+```
 
 ### Accessibility Tips
 
-- Always include a `placeholder` or `<label>` to explain what the input is for.
-- Consider `aria-label` for screen readers if the label is not visible.
-- Ensure gradient inputs still have strong contrast and focus outlines for keyboard navigation.
+- Prefer a visible `<label>` for form fields.
+- If a visible label is not available, provide an appropriate accessible name such as `aria-label`.
+- Keep keyboard focus visible.
+- Use the correct input `type` such as `email`, `number`, or `password` when appropriate.
 
-## Examples
+---
 
-**The placeholders in the inputs are their class names.**
+## 3. Hacks & Practice Tasks
 
-<!-- inputs -->
-<input type="text" placeholder="default (no class needed)"><br><br>
-<input type="text" class="gradientInput" placeholder="gradientInput"><br><br>
-<input type="text" class="smallInput" placeholder="smallInput"><br><br>
-<input type="text" class="mediumInput" placeholder="mediumInput"><br><br>
-<input type="text" class="largeInput" placeholder="largeInput"><br><br>
+### Prepare Your Submission (IPYNB)
 
-<br>
-<br>
-<br>
+1. Create a notebook in your portfolio homework area: `_notebooks/homework`.
+2. Add a markdown cell with the frontmatter below.
+3. Add code cells for the Popcorn Hack and Homework Hack.
+4. Keep `%%html` and the `UI_RUNNER` comment in each code cell.
+5. Run each cell and verify the rendered result before submitting.
 
-<input type="text" class="smallInput gradientInput" placeholder="smallInput gradientInput"><br><br>
-<input type="text" class="mediumInput gradientInput" placeholder="mediumInput gradientInput"><br><br>
-<input type="text" class="largeInput gradientInput" placeholder="largeInput gradientInput"><br><br>
+```raw
+---
+layout: post
+title: SASS Inputs PAW Patrol HW
+categories: [SASS]
+lesson_language: SASS
+lesson_topic: Inputs HW
+lesson_part: interactive
+lesson_type: lesson
+permalink: /sass/inputs-hw/
+author: githubID
+---
+```
 
-<br>
-<br>
-<br>
+### Submission Safety Rules
 
-<!-- DO NOT USE THE ONES BELOW. THE DO NOT WORK YET. -->
+> [!IMPORTANT]
+> - Submit only your final class-based input markup for each hack.
+> - Do not add custom CSS, inline styles, or made-up classes.
+> - Keep `%%html` and the `UI_RUNNER` comment line in each notebook submission cell.
+> - For new code, use `ocs__input` with the allowed modifiers: `small`, `medium`, `large`, and `gradient`.
 
-<!-- <div class="inputIconGroup">
-    <input type="text" class="smallInput" placeholder="small with icon">
-    <ion-icon name="id-card-outline"></ion-icon>
-</div><br>
+### Popcorn Hack (In-Class)
 
-<div class="inputIconGroup">
-    <input type="text" class="mediumInput" placeholder="medium input with icon">
-    <ion-icon name="id-card-outline"></ion-icon>
-</div><br>
+> [!TIP]
+> **2-minute challenge:** refactor the code, run it, and submit only the corrected markup.
 
-<div class="inputIconGroup">
-    <input type="text" class="largeInput" placeholder="large input with icon">
-    <ion-icon name="id-card-outline"></ion-icon>
-</div><br> -->
+**Task:** Replace the inline styling and made-up class below with the OCS input grammar.
+
+```html
+%%html
+<!-- UI_RUNNER: Inputs Popcorn Base -->
+
+<input type="text" style="width: 400px; border: 3px dashed purple;" placeholder="Search...">
+<input type="text" class="box" placeholder="First Name">
+```
+
+**Expected direction:** one large, gradient-styled input and one compact plain input, both using `ocs__input`.
+
+### Homework Hack
+
+**Task:** Refactor this signup form. Remove all inline styles and made-up classes. Use `ocs__input` with the appropriate size and style modifiers, then run it with `UI_RUNNER`.
+
+```html
+%%html
+<!-- UI_RUNNER: Inputs Homework Base -->
+
+<input type="text" style="width: 500px; background: linear-gradient(to right, pink, purple);" placeholder="Username">
+<input type="text" class="tinybox" placeholder="First Name">
+<input type="email" style="padding: 6px;" placeholder="Email address">
+```
+
+---
+
+## 4. Grading Plan (1 Point Total)
+
+### Classroom Rubric
+
+- **0.2 points — Popcorn completion:** Student submitted a class-based refactor attempt and kept the code runnable with `%%html`.
+- **0.8 points — Homework completion:**
+  - **0.4 — input grammar:** Every input uses `ocs__input` with an appropriate size modifier.
+  - **0.3 — style modifier:** The gradient field uses `gradient` instead of inline background or border styling.
+  - **0.1 — accessibility:** Every input has a clear purpose through a label, placeholder, or accessible name.
+
+### Quick Validation Checklist
+
+- Present: `%%html` and the `UI_RUNNER` comment line in homework notebook cells.
+- Absent: inline `style` attributes and made-up classes.
+- Present: `ocs__input` on each submitted input.
+- Present: appropriate `small`, `medium`, or `large` modifiers.
+- Present: `gradient` where decorative gradient styling is required.
+
+---
+
+## 5. Lesson Revisions & Feedback Evidence
+
+**Feedback Received:** The lesson was originally placed in the Python notebook directory even though it teaches SASS. The reviewer also noted that the lesson should follow the Markdown-based SASS lesson structure and integrate with the site's normal submission and microblog behavior.
+
+**Revision Made:** The lesson now lives in the SASS navigation lesson directory as Markdown, uses `assignment: true` for the standard submission UI, keeps the canonical trailing-slash permalink used by the microblog topic path, and teaches the OCS `ocs__input` grammar while retaining the older input classes for backward compatibility.
