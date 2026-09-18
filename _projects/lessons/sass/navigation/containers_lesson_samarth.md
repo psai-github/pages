@@ -8,7 +8,7 @@ lesson_topic: Containers
 lesson_part: interactive
 lesson_type: lesson
 permalink: /navigation/sass/containers/lesson/
-author: githubID
+author: Samarth H, Rigved G, Rohan R
 ---
 
 ## Main Idea
@@ -84,7 +84,7 @@ Use OCS classes to express container roles without hardcoded layout styling.
 
 **Ideate:**
 
-* **HMW Question:** How might we teach students to trust the shared container grammar and stop hardcoding page layout?
+* **How might we** teach students to trust the shared container grammar and stop hardcoding page layout?
 * **Activity:** Refactoring a poorly written block of custom wrapper divs into a clean `ocs__container` > `ocs__card` > `ocs__grid` composition that automatically inherits our SASS theme.
 
 **Prototype & Test:** I taught a trial run to my project team. They felt the original homework was too long, so I revised it to be a single, focused refactoring task (documented below).
@@ -191,7 +191,7 @@ author: githubID
 > To avoid grading errors, follow these rules exactly:
 >
 > * Submit only your final container HTML for each hack.
-> * Do not add custom CSS, inline styles, or non-OCS layout classes.
+> * **DO NOT** add custom CSS, inline styles, or non-OCS layout classes.
 > * Keep `%%html` and the `UI_RUNNER` comment line in each submission cell.
 > * Use only allowed OCS container classes for this lesson: `ocs__container`, `ocs__card`, `ocs__grid`, `ocs__grid-cell`, `ocs__section-title`, `ocs__description`, `ocs__callout`, `ocs__table-wrap`, `ocs__table`.
 > * Use exactly one `ocs__container` as the outer wrapper in each hack.
