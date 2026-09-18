@@ -1,190 +1,104 @@
 ---
 layout: post
-title: SASS Containers Grammar
-description: Explore the Open Coding Society container grammar through living examples.
+assignment: true
+title: OCS SASS Containers Grammar
 categories: [SASS, Containers]
 lesson_language: SASS
 lesson_topic: Containers
 lesson_part: interactive
 lesson_type: lesson
-microblog: true
-permalink: /sass/containers/
+permalink: /navigation/sass/containers/lesson/
+author: Rigved, Samarth, Rohan
 ---
 
-<!-- markdownlint-disable MD033 MD046 -->
+## OCS Container and HTML Semantics
 
-> Build a complete page with OCS grammar before writing custom CSS. Containers establish the page boundary; cards, grids, tables, images, and buttons organize the content inside it.
+The OCS Container is a structural wrapper that establishes the page boundary and provides structure for the content in our page.  
 
-<div class="ocs__links ocs__links--wide">
-    <a class="ocs__btn" href="{{ '/navigation/sass/buttons/' | relative_url }}">Button Grammar</a>
-    <a class="ocs__btn" href="{{ '/navigation/sass/grids/' | relative_url }}">Grid Grammar</a>
-    <a class="ocs__btn accent fill" href="{{ '/navigation/sass/containers/' | relative_url }}">Container Grammar</a>
-</div>
 
-## The Container Relationship
 
-> Use one `ocs__container` for the page. Add navigation, section titles, cards, grids, tables, and actions as children. The composition provides structure without page-specific CSS.
+### How it Fits
 
-```text
-ocs__container
-|- navigation or ocs__links
-|- ocs__section-title
-|- ocs__card
-|  |- ocs__grid
-|  |  `- ocs__grid-cell
-|  |     |- image content
-|  |     |- text and status
-|  |     `- ocs__btn action
-|  `- ocs__table-wrap
-|     `- ocs__table
-`- ocs__pager or footer
+```mermaid
+flowchart TB
+    subgraph container["ocs__container — outer page boundary (one per page)"]
+        direction TB
+        nav["navigation / ocs__links"]
+        heading["ocs__section-title + ocs__description"]
+        subgraph card["ocs__card — framed group of related content"]
+            direction TB
+            subgraph grid["ocs__grid — repeated / comparative layout"]
+                direction LR
+                cell1["ocs__grid-cell<br/>text + ocs__btn"]
+                cell2["ocs__grid-cell<br/>text + status"]
+            end
+            tablewrap["ocs__table-wrap → ocs__table"]
+            callout["ocs__callout"]
+        end
+        actions["ocs__btn actions / ocs__pager"]
+    end
 ```
 
-## Example 1: Project Landing
+**Key Takeaway**: Containers encompass the entire page, and all other SASS elemenets are "contained" in them.
 
-<div class="ocs__container" style="margin-bottom: 1.5rem;">
-    <div class="ocs__capstone-nav">
-        <div class="ocs__links ocs__links--wide">
-            <a class="ocs__btn pill accent fill" href="#overview">Overview</a>
-            <a class="ocs__btn pill" href="#work">Work</a>
-            <a class="ocs__btn pill" href="#team">Team</a>
-        </div>
-    </div>
+### Tech Talk
 
-    <div class="ocs__badge">Design-Based Research Hub</div>
-    <h1 id="overview">Classroom Presence</h1>
-    <p class="ocs__description">A preference-aware project page assembled from shared OCS elements.</p>
+We are using a shared OCS container grammar. This means **you don't need to write CSS for your page layout**. Instead of writing wrapper styles, you just need to put your code within a `ocs_container` block. The global system to take care of the styling.
 
-    <div class="ocs__card" id="work">
-        <h3 class="ocs__section-title">What the project does</h3>
-        <div class="ocs__grid ocs__grid--card">
-            <div class="ocs__grid-cell">
-                <img class="ocs__image-frame" src="{{ '/images/capstone/powaynec-logo-white.png' | relative_url }}" alt="Project placeholder logo">
-                <h4>Detect</h4>
-                <p>Collect useful signals from the environment.</p>
-                <a class="ocs__btn accent fill" href="#details">Project details</a>
-            </div>
-            <div class="ocs__grid-cell">
-                <h4>Correlate</h4>
-                <p>Combine evidence into a clear, testable state.</p>
-                <span class="ocs__status-pill ocs__status-pill--good">In progress</span>
-            </div>
-            <div class="ocs__grid-cell">
-                <h4>Explain</h4>
-                <p>Make the result understandable to the person using it.</p>
-                <span class="ocs__status-pill ocs__status-pill--neutral">Planned</span>
-            </div>
-        </div>
-    </div>
+* **The Rule:** Use one `ocs__container` `<div>` block per page, with children like `ocs__card` and `ocs__grid`. Let the system handle the look.
+* ✅ **Do this:** `<div class="ocs__container">` with `<div class="ocs__card">` inside it
+* ❌ **Don't do this:** `<div class="page-wrap" style="max-width: 900px; margin: auto;">` or `<div class="pretty-box">`
+
+Why do we do this? It ensures our whole project looks consistent, makes our code reusable, and keeps every page responsive without extra work.
+
+### Code Examples
+
+#### A. Simple: Container and Card
+
+```html
+<!-- One container per page. Cards group related content inside it. -->
+<div class="ocs__container">
+  <h2 class="ocs__section-title">About Our Project</h2>
+  <div class="ocs__card">
+    <p class="ocs__description">We are a group of CSP students building a cool web app.</p>
+  </div>
 </div>
+```
 
-## Example 2: Card, Grid, and Table
+#### B. Adding a Grid
 
-<div class="ocs__container" style="margin-bottom: 1.5rem;">
-    <h2 class="ocs__section-title">Hardware Plan</h2>
-    <div class="ocs__card">
-        <div class="ocs__grid ocs__grid--standard cols-2">
-            <div class="ocs__grid-cell ocs__grid-cell--accent">
-                <strong>Current hardware</strong><br>
-                Already available for the first prototype.
-            </div>
-            <div class="ocs__grid-cell">
-                <strong>Next hardware</strong><br>
-                Purchased only after the first test proves the need.
-            </div>
-        </div>
-
-        <div class="ocs__table-wrap" style="margin-top: 1.25rem;">
-            <table class="ocs__table">
-                <thead>
-                    <tr><th>Item</th><th>Status</th><th>Purpose</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>Camera</td><td><span class="ocs__status-pill ocs__status-pill--good">Current</span></td><td>Capture the room.</td></tr>
-                    <tr><td>Reader</td><td><span class="ocs__status-pill ocs__status-pill--warn">Planned</span></td><td>Collect a second signal.</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="ocs__callout">
-            The same structure adapts to the active user preference theme. No page-specific color CSS is needed.
-        </div>
+```html
+<!-- Don't invent column classes. Use ocs__grid with ocs__grid-cell children. -->
+<div class="ocs__container">
+  <div class="ocs__card">
+    <h3 class="ocs__section-title">Team Roles</h3>
+    <div class="ocs__grid ocs__grid--standard cols-2">
+      <div class="ocs__grid-cell">Frontend: builds the pages.</div>
+      <div class="ocs__grid-cell">Backend: builds the API.</div>
     </div>
+  </div>
 </div>
+```
 
-## Example 3: Nonprofit Capstone Hub
+#### C. Complex: Full Container Composition
 
-> A useful hub gives people context before navigation: a few meaningful signals, clear filters, and cards that explain the next step.
-
-<div class="ocs__container" style="margin-bottom: 1.5rem;">
-    <div class="ocs__capstone-nav">
-        <div class="ocs__links ocs__links--wide">
-            <a class="ocs__btn pill accent fill" href="#hub-overview">Hub</a>
-            <a class="ocs__btn pill" href="#programs">Programs</a>
-            <a class="ocs__btn pill" href="#get-involved">Get Involved</a>
-            <a class="ocs__btn pill" href="#impact">Impact</a>
-        </div>
+```html
+<!-- Compose container > card > grid + table, mirroring the Containers Grammar page -->
+<div class="ocs__container">
+  <h2 class="ocs__section-title">Hardware Plan</h2>
+  <div class="ocs__card">
+    <div class="ocs__grid ocs__grid--standard cols-2">
+      <div class="ocs__grid-cell ocs__grid-cell--accent">Current hardware</div>
+      <div class="ocs__grid-cell">Next hardware</div>
     </div>
-
-    <div class="ocs__badge">Community Organization</div>
-    <h1 id="hub-overview">Scripps Ranch Fire Safe Council</h1>
-    <p class="ocs__description">A nonprofit hub that helps neighbors understand local wildfire risk, find programs, and choose a practical way to help.</p>
-
-    <div class="ocs__grid ocs__grid--standard cols-3" style="margin-bottom: 1.5rem;">
-        <div class="ocs__grid-cell ocs__grid-cell--accent"><strong>12</strong><br>Active programs</div>
-        <div class="ocs__grid-cell"><strong>4</strong><br>Upcoming events</div>
-        <div class="ocs__grid-cell"><strong>3</strong><br>Ways to volunteer</div>
+    <div class="ocs__table-wrap">
+      <table class="ocs__table">
+        <tr><th>Item</th><th>Status</th></tr>
+        <tr><td>Camera</td><td>Current</td></tr>
+      </table>
     </div>
-
-    <div class="ocs__card" id="programs">
-        <h2 class="ocs__section-title">Find a starting point</h2>
-        <div class="ocs__links" style="margin-bottom: 1rem;">
-            <a class="ocs__btn pill accent fill" href="#programs">All</a>
-            <a class="ocs__btn pill" href="#programs">Prepare</a>
-            <a class="ocs__btn pill" href="#programs">Volunteer</a>
-            <a class="ocs__btn pill" href="#programs">Learn</a>
-        </div>
-        <div class="ocs__grid ocs__grid--card">
-            <div class="ocs__grid-cell">
-                <h3>Prepare Your Home</h3>
-                <p>Practical home-hardening steps, local guidance, and a clear first action.</p>
-                <span class="ocs__status-pill ocs__status-pill--good">Start here</span>
-            </div>
-            <div class="ocs__grid-cell">
-                <h3>Join a Workday</h3>
-                <p>See upcoming neighborhood fuel-reduction events and sign up for a role.</p>
-                <a class="ocs__btn accent fill" href="#get-involved">See events</a>
-            </div>
-            <div class="ocs__grid-cell">
-                <h3>Learn the Risk</h3>
-                <p>Understand local wildfire conditions through short explainers and updates.</p>
-                <span class="ocs__status-pill ocs__status-pill--neutral">Explore</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="ocs__card" id="get-involved">
-        <h2 class="ocs__section-title">Make the next action obvious</h2>
-        <div class="ocs__callout">
-            Visitors should not have to guess whether to donate, volunteer, attend an event, or prepare their home. Give each path a short explanation and one clear action.
-        </div>
-        <div class="ocs__links" style="margin-top: 1rem;">
-            <a class="ocs__btn accent fill" href="#impact">Donate</a>
-            <a class="ocs__btn" href="#programs">Volunteer</a>
-            <a class="ocs__btn" href="#programs">View events</a>
-        </div>
-    </div>
+    <div class="ocs__callout">The same structure adapts to the active theme. No page-specific CSS is needed.</div>
+  </div>
 </div>
+```
 
-## Rules of Thumb
-
-- Start with `ocs__container` for page width and typography.
-- Use `ocs__card` for a framed section of related content.
-- Use `ocs__grid` when content needs comparison or repeated layout.
-- Put images in the card or grid cell that explains them.
-- Use `ocs__table` for structured comparison data.
-- Use `ocs__btn`, `ocs__status-pill`, and `ocs__callout` for actions and state.
-- Use preference tokens through the shared grammar instead of choosing fixed colors.
-- Add custom CSS only when the shared grammar cannot express the required behavior.
-
-<!-- markdownlint-enable MD033 MD046 -->
