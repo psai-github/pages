@@ -9,6 +9,7 @@ lesson_part: interactive
 lesson_type: lesson
 permalink: /navigation/sass/containers/lesson/
 author: Rigved, Samarth, Rohan
+microblog: true
 ---
 
 ## OCS Container and HTML Semantics
