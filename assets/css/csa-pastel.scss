@@ -1,0 +1,174 @@
+---
+---
+// Only lessons using the csa-pastel layout opt into this palette.
+// Explicit colors override the site's dark theme, including its syntax styles.
+body:has(.csa-pastel-lesson) {
+  color-scheme: light;
+  background: #faf7f2 !important;
+  color: #293247 !important;
+}
+body:has(.csa-pastel-lesson) .page-content,
+body:has(.csa-pastel-lesson) .wrapper,
+body:has(.csa-pastel-lesson) .opencs_root,
+body:has(.csa-pastel-lesson) .post-content {
+  background: transparent !important;
+  color: #293247 !important;
+}
+body:has(.csa-pastel-lesson) .site-header,
+body:has(.csa-pastel-lesson) .site-footer {
+  background: #eee8f7 !important;
+  color: #293247 !important;
+  border-color: #aaa0bc !important;
+}
+body:has(.csa-pastel-lesson) .site-header a,
+body:has(.csa-pastel-lesson) .site-footer a {
+  color: #504073 !important;
+}
+body:has(.csa-pastel-lesson) .site-nav .trigger {
+  background: #eee8f7 !important;
+}
+body:has(.csa-pastel-lesson) .menu-icon > svg {
+  fill: #504073 !important;
+}
+body:has(.csa-pastel-lesson) .post {
+  background: #fffefa !important;
+  color: #293247 !important;
+  border: 1px solid #c8c0d3;
+  border-radius: 20px;
+  padding: clamp(16px, 4vw, 36px);
+  box-shadow: 0 8px 28px rgba(55, 42, 76, 0.06);
+}
+body:has(.csa-pastel-lesson) .post-header {
+  background: #eee8f7 !important;
+  color: #293247 !important;
+  border: 1px solid #c8bdd9;
+  border-radius: 14px;
+  padding: 24px 20px;
+}
+body:has(.csa-pastel-lesson) .post :is(p, li, td, strong, em, label) {
+  color: #293247;
+}
+body:has(.csa-pastel-lesson) .post :is(h1, h2, h3, h4, h5, h6) {
+  color: #504073 !important;
+  border-color: #c8bdd9 !important;
+}
+body:has(.csa-pastel-lesson) .post :is(.post-meta, .post-meta *, .page-description) {
+  color: #545a6b !important;
+}
+body:has(.csa-pastel-lesson) .post a {
+  color: #504073 !important;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+body:has(.csa-pastel-lesson) .post a:hover {
+  color: #34234f !important;
+}
+body:has(.csa-pastel-lesson) .post-header a.category-tags-link {
+  background: #dceee5 !important;
+  color: #285547 !important;
+  border: 1px solid #8fae9e;
+}
+body:has(.csa-pastel-lesson) .post-content > ul:first-child {
+  background: #f3effa;
+  border: 1px solid #c8bdd9;
+  border-radius: 12px;
+  padding: 18px 18px 18px 36px;
+  margin: 24px 0;
+}
+body:has(.csa-pastel-lesson) .post :is(pre, div.highlight, figure.highlight) {
+  background: #edf3fa !important;
+  color: #293247 !important;
+  border-radius: 10px;
+}
+body:has(.csa-pastel-lesson) .post pre {
+  border: 1px solid #9baec7 !important;
+  padding: 16px;
+  overflow-x: auto;
+  white-space: pre;
+}
+body:has(.csa-pastel-lesson) .post code {
+  background: #eee8f7 !important;
+  color: #493666 !important;
+  border-color: #c8bdd9 !important;
+}
+body:has(.csa-pastel-lesson) .post pre code,
+body:has(.csa-pastel-lesson) .post .highlight span {
+  background: transparent !important;
+  color: #293247 !important;
+}
+body:has(.csa-pastel-lesson) .post .highlight :is(.k, .kd, .kn, .kp, .kr, .kt, .ow) {
+  color: #654084 !important;
+}
+body:has(.csa-pastel-lesson) .post .highlight :is(.s, .s1, .s2, .sc, .se) {
+  color: #24624f !important;
+}
+body:has(.csa-pastel-lesson) .post .highlight :is(.m, .mi, .mf, .mh, .il) {
+  color: #8a414b !important;
+}
+body:has(.csa-pastel-lesson) .post .highlight :is(.c, .c1, .cm, .cp, .cs) {
+  color: #526176 !important;
+}
+body:has(.csa-pastel-lesson) .post table {
+  display: block;
+  max-width: 100%;
+  width: max-content;
+  overflow-x: auto;
+  border-collapse: collapse;
+  background: #fffefa !important;
+  color: #293247 !important;
+}
+body:has(.csa-pastel-lesson) .post :is(th, td) {
+  border: 1px solid #9baec7 !important;
+  padding: 10px 12px;
+  color: #293247 !important;
+}
+body:has(.csa-pastel-lesson) .post th {
+  background: #e3eaf7 !important;
+}
+body:has(.csa-pastel-lesson) .post td {
+  background: #fffefa !important;
+}
+body:has(.csa-pastel-lesson) .post tr:nth-child(even) td {
+  background: #f1f5fb !important;
+}
+body:has(.csa-pastel-lesson) .post details {
+  background: #eef7f2 !important;
+  color: #293247 !important;
+  border: 1px solid #8fae9e;
+  border-radius: 12px;
+  padding: 0 16px;
+  margin: 20px 0;
+}
+body:has(.csa-pastel-lesson) .post summary {
+  display: list-item;
+  cursor: pointer;
+  padding: 14px 0;
+  color: #285547 !important;
+  font-weight: 700;
+}
+body:has(.csa-pastel-lesson) .post details[open] {
+  padding-bottom: 14px;
+}
+body:has(.csa-pastel-lesson) .post blockquote {
+  background: #f9e9df !important;
+  color: #293247 !important;
+  border-left: 4px solid #b98165;
+  padding: 14px 18px;
+}
+body:has(.csa-pastel-lesson) :focus-visible {
+  outline: 3px solid #654084 !important;
+  outline-offset: 4px;
+}
+body:has(.csa-pastel-lesson) ::selection {
+  background: #d9c9ef;
+  color: #293247;
+}
+@media (max-width: 600px) {
+  body:has(.csa-pastel-lesson) .page-content > .wrapper {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+  body:has(.csa-pastel-lesson) .post-header {
+    padding: 18px 12px;
+  }
+}
