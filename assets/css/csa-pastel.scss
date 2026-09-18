@@ -1,112 +1,103 @@
 ---
 ---
-// Only lessons using the csa-pastel layout opt into this palette.
-// Explicit colors override the site's dark theme, including its syntax styles.
+// These three lessons keep the site's original background and layout.
+// Pastels are reserved for readable text, syntax, and subtle borders.
 body:has(.csa-pastel-lesson) {
-  color-scheme: light;
-  background: #faf7f2 !important;
-  color: #293247 !important;
+  color-scheme: dark;
+  color: #d8d7df !important;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
 }
-body:has(.csa-pastel-lesson) .page-content,
-body:has(.csa-pastel-lesson) .wrapper,
-body:has(.csa-pastel-lesson) .opencs_root,
+body:has(.csa-pastel-lesson) :is(.post, .post-content, .post-header) {
+  color: #d8d7df !important;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
 body:has(.csa-pastel-lesson) .post-content {
-  background: transparent !important;
-  color: #293247 !important;
+  font-size: 1rem;
+  line-height: 1.8;
 }
-body:has(.csa-pastel-lesson) .site-header,
-body:has(.csa-pastel-lesson) .site-footer {
-  background: #eee8f7 !important;
-  color: #293247 !important;
-  border-color: #aaa0bc !important;
-}
-body:has(.csa-pastel-lesson) .site-header a,
-body:has(.csa-pastel-lesson) .site-footer a {
-  color: #504073 !important;
-}
-body:has(.csa-pastel-lesson) .site-nav .trigger {
-  background: #eee8f7 !important;
-}
-body:has(.csa-pastel-lesson) .menu-icon > svg {
-  fill: #504073 !important;
-}
-body:has(.csa-pastel-lesson) .post {
-  background: #fffefa !important;
-  color: #293247 !important;
-  border: 1px solid #c8c0d3;
-  border-radius: 20px;
-  padding: clamp(16px, 4vw, 36px);
-  box-shadow: 0 8px 28px rgba(55, 42, 76, 0.06);
-}
-body:has(.csa-pastel-lesson) .post-header {
-  background: #eee8f7 !important;
-  color: #293247 !important;
-  border: 1px solid #c8bdd9;
-  border-radius: 14px;
-  padding: 24px 20px;
-}
-body:has(.csa-pastel-lesson) .post :is(p, li, td, strong, em, label) {
-  color: #293247;
+body:has(.csa-pastel-lesson) .post :is(p, li, th, td, summary, label) {
+  color: #d8d7df;
+  font-family: inherit;
 }
 body:has(.csa-pastel-lesson) .post :is(h1, h2, h3, h4, h5, h6) {
-  color: #504073 !important;
-  border-color: #c8bdd9 !important;
+  color: #cfbff3 !important;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.025em;
+  border-color: #3b3548 !important;
+}
+body:has(.csa-pastel-lesson) .post-header h3 {
+  font-size: clamp(1.65rem, 3vw, 2rem);
+}
+body:has(.csa-pastel-lesson) .post-content h2 {
+  font-size: 1.5rem;
+  margin-top: 2rem;
+}
+body:has(.csa-pastel-lesson) .post-content h3 {
+  font-size: 1.15rem;
+}
+body:has(.csa-pastel-lesson) .post strong {
+  color: #e3d6bd;
+  font-weight: 600;
 }
 body:has(.csa-pastel-lesson) .post :is(.post-meta, .post-meta *, .page-description) {
-  color: #545a6b !important;
+  color: #aaa8b6 !important;
+}
+body:has(.csa-pastel-lesson) .post a,
+body:has(.csa-pastel-lesson) .site-header a {
+  color: #aabfeb !important;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
 }
 body:has(.csa-pastel-lesson) .post a {
-  color: #504073 !important;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 body:has(.csa-pastel-lesson) .post a:hover {
-  color: #34234f !important;
+  color: #d3c2f5 !important;
 }
 body:has(.csa-pastel-lesson) .post-header a.category-tags-link {
-  background: #dceee5 !important;
-  color: #285547 !important;
-  border: 1px solid #8fae9e;
-}
-body:has(.csa-pastel-lesson) .post-content > ul:first-child {
-  background: #f3effa;
-  border: 1px solid #c8bdd9;
-  border-radius: 12px;
-  padding: 18px 18px 18px 36px;
-  margin: 24px 0;
+  background: #1d2925 !important;
+  color: #9bceb9 !important;
+  border: 1px solid #455c52;
 }
 body:has(.csa-pastel-lesson) .post :is(pre, div.highlight, figure.highlight) {
-  background: #edf3fa !important;
-  color: #293247 !important;
-  border-radius: 10px;
+  background: #1b1b22 !important;
+  color: #d8d7df !important;
+  border-radius: 8px;
 }
 body:has(.csa-pastel-lesson) .post pre {
-  border: 1px solid #9baec7 !important;
+  border: 1px solid #41414c !important;
   padding: 16px;
   overflow-x: auto;
   white-space: pre;
 }
+body:has(.csa-pastel-lesson) .post :is(pre, code, code span) {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace !important;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
 body:has(.csa-pastel-lesson) .post code {
-  background: #eee8f7 !important;
-  color: #493666 !important;
-  border-color: #c8bdd9 !important;
+  background: #24202c !important;
+  color: #cfbff3 !important;
+  border-color: #41414c !important;
 }
 body:has(.csa-pastel-lesson) .post pre code,
 body:has(.csa-pastel-lesson) .post .highlight span {
   background: transparent !important;
-  color: #293247 !important;
+  color: #d8d7df !important;
 }
 body:has(.csa-pastel-lesson) .post .highlight :is(.k, .kd, .kn, .kp, .kr, .kt, .ow) {
-  color: #654084 !important;
+  color: #cfbff3 !important;
 }
 body:has(.csa-pastel-lesson) .post .highlight :is(.s, .s1, .s2, .sc, .se) {
-  color: #24624f !important;
+  color: #9bceb9 !important;
 }
 body:has(.csa-pastel-lesson) .post .highlight :is(.m, .mi, .mf, .mh, .il) {
-  color: #8a414b !important;
+  color: #e1b3aa !important;
 }
 body:has(.csa-pastel-lesson) .post .highlight :is(.c, .c1, .cm, .cp, .cs) {
-  color: #526176 !important;
+  color: #aaa8b6 !important;
 }
 body:has(.csa-pastel-lesson) .post table {
   display: block;
@@ -114,28 +105,29 @@ body:has(.csa-pastel-lesson) .post table {
   width: max-content;
   overflow-x: auto;
   border-collapse: collapse;
-  background: #fffefa !important;
-  color: #293247 !important;
+  background: transparent !important;
+  color: #d8d7df !important;
 }
 body:has(.csa-pastel-lesson) .post :is(th, td) {
-  border: 1px solid #9baec7 !important;
+  border: 1px solid #41414c !important;
   padding: 10px 12px;
-  color: #293247 !important;
+  color: #d8d7df !important;
 }
 body:has(.csa-pastel-lesson) .post th {
-  background: #e3eaf7 !important;
+  background: #25212e !important;
+  color: #cfbff3 !important;
 }
 body:has(.csa-pastel-lesson) .post td {
-  background: #fffefa !important;
+  background: #19191d !important;
 }
 body:has(.csa-pastel-lesson) .post tr:nth-child(even) td {
-  background: #f1f5fb !important;
+  background: #202025 !important;
 }
 body:has(.csa-pastel-lesson) .post details {
-  background: #eef7f2 !important;
-  color: #293247 !important;
-  border: 1px solid #8fae9e;
-  border-radius: 12px;
+  background: transparent !important;
+  color: #d8d7df !important;
+  border: 1px solid #455c52;
+  border-radius: 8px;
   padding: 0 16px;
   margin: 20px 0;
 }
@@ -143,32 +135,23 @@ body:has(.csa-pastel-lesson) .post summary {
   display: list-item;
   cursor: pointer;
   padding: 14px 0;
-  color: #285547 !important;
-  font-weight: 700;
+  color: #9bceb9 !important;
+  font-weight: 600;
 }
 body:has(.csa-pastel-lesson) .post details[open] {
   padding-bottom: 14px;
 }
 body:has(.csa-pastel-lesson) .post blockquote {
-  background: #f9e9df !important;
-  color: #293247 !important;
-  border-left: 4px solid #b98165;
-  padding: 14px 18px;
+  background: transparent !important;
+  color: #d8d7df !important;
+  border-left: 3px solid #e1b3aa;
+  padding: 8px 18px;
 }
 body:has(.csa-pastel-lesson) :focus-visible {
-  outline: 3px solid #654084 !important;
+  outline: 2px solid #cfbff3 !important;
   outline-offset: 4px;
 }
 body:has(.csa-pastel-lesson) ::selection {
-  background: #d9c9ef;
-  color: #293247;
-}
-@media (max-width: 600px) {
-  body:has(.csa-pastel-lesson) .page-content > .wrapper {
-    padding-right: 12px;
-    padding-left: 12px;
-  }
-  body:has(.csa-pastel-lesson) .post-header {
-    padding: 18px 12px;
-  }
+  background: #50415e;
+  color: #f0e9fa;
 }
