@@ -4,7 +4,7 @@ Founded and maintained by John Mortensen.
 
 Open Coding Society `Pages` is a project designed to support students in their Computer Science education. It offers a wide range of resources including tech talks, code examples, and educational blogs.
 
-This GitHub Pages repository can be customized by the blogger to support computer science learning as the student works through the pathways of using Javascript, Python/Flask, Java/Spring. It is intended to support course work for Computer Science and Software Engineering (CSSE), AP Computer Science Principles (APCSP or CSP), and AP Computer Science 'A' (APCSA, or CSA).
+This GitHub Pages repository can be customized by the blogger to support computer science learning as the student works through the pathways of using Javascript, Python/Flask, Java/Spring. It is intended to support course work for Computer Science and Software Engineering (CSSE), AP Computer Science Principles (APCSP or CSP), AP Computer Science 'A' (APCSA or CSA), and Computer Science Honors (CSH).
 
 "Open Coding Society's instructional model is grounded in **Connectivism**, recognizing that learning happens through diverse networks of people, platforms, and AI. OCS is refining `pages` using **Merrill's structure**, deepening learning through **Fink**, ensuring access via **UDL**, and supporting our classroom through **Agile and Design Thinking ceremonies**, with a touch of **Gagné** to focus each classroom day. OCS wants to create projects that support learning for today's digital, open, and connected world."
 
@@ -85,38 +85,55 @@ Comprehensive start. A topic-by-topic guide to getting this project running is p
 
 Quick start.  A quick start below is a reminder, but is dependent on your knowledge.  Only follow this instruction if you need a refresher.  Always default to the comprehensive start if any problem occurs.
 
-#### Clone Repo
+#### Create From Template, Then Clone
 
-Run these commands to obtain the project, then locate into the project directory with the terminal, install an extensive set of tools, and make.
+Use **GitHub "Use this template"** on this repository and create your own repository named `pages`.
+Keeping the repository name as `pages` avoids `site.baseurl` mismatch problems.
+
+Then clone your own repository and enter the project root (not the scripts folder):
 
 ```bash
-git clone <this-repo> # git clone https://github.com/open-coding-society/pages.git 
-cd <repo-dir>/scripts # cd pages 
+git clone https://github.com/<your-username>/pages.git
+cd pages
+```
+
+Add Open Coding Society as an `upstream` remote once, then periodically merge updates. This help you keep up with dynamic character of a portfolio project.
+
+```bash
+#  In your repository, do this once
+git remote add upstream https://github.com/open-coding-society/pages.git
+git remote -v # verify sucess
+
+# first sync for template-created repos (run once if you see unrelated histories)
+git fetch upstream
+# if fetch fails, remove and try again with correct location: get remote remove upstream
+
+# this part is the downstream update, work through best option
+git merge upstream/main
+git merge upstream/main --allow-unrelated-histories
+git merge upstream/main --allow-unrelated-histories -X theirs # destructive resolve
+
+# resolve conflicts, for instance VSCode will have them in Version Control secton with Continue button 
 ```
 
 #### Windows WSL and/or Ubuntu or Kali Users
 
-- Execute the script: `./activate_ubuntu.sh` or `./activate_kali.sh`
+- Execute the script: `./scripts/activate_ubuntu.sh` or `./scripts/activate_kali.sh`
 
 #### macOS Users
 
-- Execute the script: `./activate_macos.sh`
+- Execute the script: `./scripts/activate_macos.sh`
 
-#### Kasm Cloud Desktop Users
+#### Setup connection to GitHub
 
-- Execute the script: `./activate_github.sh`
+- Execute the script: `./scripts/activate.sh`
 
-## Run Server on localhost
+#### Prep project to serve on localhost
 
-To preview the project you will need to "make" the project.
-
-### Bundle install
-
-The very first time you clone run project you will need to run this Ruby command as the final part of your setup.
-
-```bash
-bundle install
-```
+- Execute the script: `./scripts/venv.sh`
+- Source the virtual environment: `source venv/bin/activate`
+- Build localhost server:  `make`
+- Look for and click on server line output, perhaps `Server address: http://localhost:4500/portfolio/`.  The Port and baseurl may change.```
 
 ### Jupyter Kernels
 

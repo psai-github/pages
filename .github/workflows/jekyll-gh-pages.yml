@@ -6,14 +6,16 @@ on:
   push:
     branches: ["main"]
 
+  # Runs the build (not deploy) on pull requests targeting the default branch
+  pull_request:
+    branches: ["main"]
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# Keep the default token read-only; deployment permissions are scoped to the deploy job.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
@@ -21,13 +23,16 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   # Build job
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -98,17 +103,28 @@ jobs:
 
           echo "baseurl: \"$BASEURL\"" > _config.override.yml
 
+      - name: Generate dynamic SASS imports
+        run: |
+          source venv/bin/activate
+          python scripts/generate_sass_imports.py
+
       - name: Build with Jekyll
         run: |
           bundle exec jekyll build --config _config.yml,_config.override.yml
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
-  # Deployment job
+  # Deployment job (skipped on pull requests; deploys on pushes to main or manual runs)
   deploy:
+    if: >
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'workflow_dispatch'
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages-deployment
       url: ${{ steps.deployment.outputs.page_url }}
@@ -117,4 +133,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

@@ -2,10 +2,10 @@ export class GameExecutor {
   constructor({
     getCode,
     updateStatus,
-    runBtn,
-    pauseBtn,
-    stopBtn,
-    fullscreenBtn,
+    runButton,
+    pauseButton,
+    stopButton,
+    fullscreenButton,
     levelSelect,
     engineVersionSelect,
     getGameContainer,
@@ -16,10 +16,10 @@ export class GameExecutor {
   } = {}) {
     this.getCode = getCode || (() => '');
     this.updateStatus = updateStatus || (() => {});
-    this.runBtn = runBtn;
-    this.pauseBtn = pauseBtn;
-    this.stopBtn = stopBtn;
-    this.fullscreenBtn = fullscreenBtn;
+    this.runButton = runButton;
+    this.pauseButton = pauseButton;
+    this.stopButton = stopButton;
+    this.fullscreenButton = fullscreenButton;
     this.levelSelect = levelSelect;
     this.engineVersionSelect = engineVersionSelect;
     this.getGameContainer = getGameContainer;
@@ -66,10 +66,10 @@ export class GameExecutor {
     }
 
     this.updateStatus('Stopped');
-    if (this.runBtn) this.runBtn.disabled = false;
-    if (this.pauseBtn) this.pauseBtn.disabled = true;
-    if (this.stopBtn) this.stopBtn.disabled = true;
-    if (this.fullscreenBtn) this.fullscreenBtn.disabled = true;
+    if (this.runButton) this.runButton.disabled = false;
+    if (this.pauseButton) this.pauseButton.disabled = true;
+    if (this.stopButton) this.stopButton.disabled = true;
+    if (this.fullscreenButton) this.fullscreenButton.disabled = true;
     if (this.levelSelect) this.levelSelect.disabled = false;
   }
 
@@ -221,14 +221,14 @@ export class GameExecutor {
       }
 
       this.updateStatus('Loading...');
-      if (this.runBtn) this.runBtn.disabled = true;
-      if (this.pauseBtn) {
-        this.pauseBtn.disabled = false;
-        this.pauseBtn.textContent = '⏸ Pause';
-        this.pauseBtn.title = 'Pause Game';
+      if (this.runButton) this.runButton.disabled = true;
+      if (this.pauseButton) {
+        this.pauseButton.disabled = false;
+        this.pauseButton.textContent = '⏸';
+        this.pauseButton.title = 'Pause Game';
       }
-      if (this.stopBtn) this.stopBtn.disabled = false;
-      if (this.fullscreenBtn) this.fullscreenBtn.disabled = false;
+      if (this.stopButton) this.stopButton.disabled = false;
+      if (this.fullscreenButton) this.fullscreenButton.disabled = false;
       if (this.levelSelect) this.levelSelect.disabled = true;
 
       const gameContainer = this.getGameContainer?.();
@@ -237,24 +237,38 @@ export class GameExecutor {
       const selectedVersion = this.engineVersionSelect ? this.engineVersionSelect.value : 'GameEnginev1';
 
       code = code.replace(/GameEnginev1(?:\.1)?/g, selectedVersion);
-      code = code.replace(/from\s+['"]([^'"]+)['"]/g, (match, importPath) => {
-        // Keep import-map aliases, relative paths, and explicit schemes untouched.
-        if (
-          importPath.startsWith('@') ||
-          importPath.startsWith('./') ||
-          importPath.startsWith('../') ||
-          /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(importPath)
-        ) {
-          return match;
+
+      // Blob modules cannot resolve relative specifiers (./, ../) correctly,
+      // so normalize all import specifiers to absolute URLs before execution.
+      const moduleBase = `${baseUrl}/assets/js/${selectedVersion}/`;
+      const normalizeImportPath = (importPath) => {
+        if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(importPath)) {
+          return importPath;
+        }
+
+        if (importPath.startsWith('@')) {
+          return importPath;
         }
 
         if (importPath.startsWith('/')) {
-          return `from '${baseUrl}${importPath}'`;
-        } else if (!importPath.startsWith('http://') && !importPath.startsWith('https://')) {
-          return `from '${baseUrl}/${importPath}'`;
+          return `${baseUrl}${importPath}`;
         }
 
-        return `from '${baseUrl}/${importPath}'`;
+        if (importPath.startsWith('./') || importPath.startsWith('../')) {
+          return new URL(importPath, moduleBase).href;
+        }
+
+        return `${baseUrl}/${importPath}`;
+      };
+
+      code = code.replace(/from\s+(['"])([^'"]+)\1/g, (match, quote, importPath) => {
+        const normalizedPath = normalizeImportPath(importPath);
+        return `from ${quote}${normalizedPath}${quote}`;
+      });
+
+      code = code.replace(/import\s*\(\s*(['"])([^'"]+)\1\s*\)/g, (match, quote, importPath) => {
+        const normalizedPath = normalizeImportPath(importPath);
+        return `import(${quote}${normalizedPath}${quote})`;
       });
 
       const GameModule = await import(baseUrl + '/assets/js/' + selectedVersion + '/essentials/Game.js');
@@ -291,33 +305,33 @@ export class GameExecutor {
         this.gameControl = this.gameCore?.gameControl || null;
 
         // Resolve the best level to restore to:
-        // 1. If the preserved class exists in the new level array, use its index there.
-        // 2. Otherwise (it was a dynamically-spliced level like Code Hub) fall back
-        //    to the last level in the permanent array that comes before it, so the
-        //    player lands at Wayfinding World / the hub rather than an unrelated level.
+        // 1. If the preserved class exists in the permanent array, use its index there.
+        // 2. If it was a dynamically-spliced level (e.g. Code Hub inserted by Wayfinding
+        //    World at runtime), re-splice it back into levelClasses at its original
+        //    position so the player returns exactly to that level after fullscreen toggle.
         let resolvedLevelIndex = preservedLevelIndex;
         if (preservedLevelClass && Array.isArray(gameLevelClasses)) {
           const classIndex = gameLevelClasses.indexOf(preservedLevelClass);
           if (classIndex >= 0) {
             // Class found in the permanent array — restore directly.
             resolvedLevelIndex = classIndex;
-          } else if (Number.isInteger(preservedLevelIndex)) {
-            // Dynamic level: clamp to the last valid index so we don't overshoot
-            // into an unrelated level (e.g. Mission Tools instead of Code Hub).
-            resolvedLevelIndex = Math.min(preservedLevelIndex, gameLevelClasses.length - 1);
+          } else if (Number.isInteger(preservedLevelIndex) && this.gameControl?.levelClasses) {
+            // Dynamic level: re-splice the class back at its original position.
+            // preservedLevelIndex is the index it held inside the runtime levelClasses
+            // array (e.g. 2 for Code Hub after Wayfinding World spliced it in).
+            const insertAt = Math.min(preservedLevelIndex, this.gameControl.levelClasses.length);
+            this.gameControl.levelClasses.splice(insertAt, 0, preservedLevelClass);
+            resolvedLevelIndex = insertAt;
           }
         }
 
         if (
           Number.isInteger(resolvedLevelIndex) &&
           this.gameControl &&
-          Array.isArray(gameLevelClasses) &&
-          preservedLevelIndex >= 0 &&
-          preservedLevelIndex < gameLevelClasses.length &&
-          preservedLevelIndex !== this.gameControl.currentLevelIndex &&
+          resolvedLevelIndex !== this.gameControl.currentLevelIndex &&
           typeof this.gameControl.transitionToLevel === 'function'
         ) {
-          this.gameControl.currentLevelIndex = preservedLevelIndex;
+          this.gameControl.currentLevelIndex = resolvedLevelIndex;
           this.gameControl.transitionToLevel();
         }
 
@@ -336,15 +350,48 @@ export class GameExecutor {
     } catch (error) {
       this.updateStatus('Error: ' + error.message);
       console.error('Game error:', error);
-      if (this.runBtn) this.runBtn.disabled = false;
-      if (this.pauseBtn) this.pauseBtn.disabled = true;
-      if (this.stopBtn) this.stopBtn.disabled = true;
-      if (this.fullscreenBtn) this.fullscreenBtn.disabled = true;
+      if (this.runButton) this.runButton.disabled = false;
+      if (this.pauseButton) this.pauseButton.disabled = true;
+      if (this.stopButton) this.stopButton.disabled = true;
+      if (this.fullscreenButton) this.fullscreenButton.disabled = true;
       if (this.levelSelect) this.levelSelect.disabled = false;
 
       if (this.gameStateMonitor) {
         clearInterval(this.gameStateMonitor);
         this.gameStateMonitor = null;
+      }
+    }
+  }
+
+  _resizeGameForViewport(gameOutput, viewportHeight) {
+    const currentLevel = this.gameControl?.currentLevel;
+    const gameEnv = currentLevel?.gameEnv || this.gameControl?.gameEnv;
+    const canvas = gameEnv?.canvas;
+
+    if (!gameEnv || !canvas) {
+      return;
+    }
+
+    const resolvedWidth = gameOutput?.parentElement?.clientWidth || gameOutput?.clientWidth || window.innerWidth;
+    const resolvedHeight = Math.max(1, viewportHeight);
+
+    if (this.gameCore?.environment) {
+      this.gameCore.environment.innerWidth = resolvedWidth;
+      this.gameCore.environment.innerHeight = resolvedHeight;
+    }
+
+    gameEnv.innerWidth = resolvedWidth;
+    gameEnv.innerHeight = resolvedHeight;
+    gameEnv.size();
+
+    const gameObjects = Array.isArray(gameEnv.gameObjects) ? gameEnv.gameObjects : [];
+    for (const gameObject of gameObjects) {
+      if (gameObject && typeof gameObject.resize === 'function') {
+        try {
+          gameObject.resize();
+        } catch (error) {
+          console.warn('Failed to resize game object for fullscreen:', error);
+        }
       }
     }
   }
@@ -365,10 +412,14 @@ export class GameExecutor {
       // Create fullscreen overlay
       this.fullscreenOverlay = document.createElement('div');
       this.fullscreenOverlay.className = 'game-fullscreen-overlay';
+      this.fullscreenOverlay.style.zIndex = '9999';
 
       // Create collapsible control panel header
       const controlHeader = document.createElement('div');
       controlHeader.className = 'fullscreen-control-header';
+      controlHeader.style.position = 'relative';
+      controlHeader.style.zIndex = '2';
+      controlHeader.style.flexShrink = '0';
 
       // Add collapse toggle button
       const collapseBtn = document.createElement('button');
@@ -378,31 +429,32 @@ export class GameExecutor {
 
       const controlsContainer = document.createElement('div');
       controlsContainer.className = 'fullscreen-controls-container';
+      controlsContainer.style.flexWrap = 'wrap';
 
       // Clone control buttons
-      const clonedRunBtn = this.runBtn ? this.runBtn.cloneNode(true) : null;
-      const clonedPauseBtn = this.pauseBtn ? this.pauseBtn.cloneNode(true) : null;
-      const clonedStopBtn = this.stopBtn ? this.stopBtn.cloneNode(true) : null;
-      const clonedFullscreenBtn = this.fullscreenBtn ? this.fullscreenBtn.cloneNode(true) : null;
+      const clonedRunButton = this.runButton ? this.runButton.cloneNode(true) : null;
+      const clonedPauseButton = this.pauseButton ? this.pauseButton.cloneNode(true) : null;
+      const clonedStopButton = this.stopButton ? this.stopButton.cloneNode(true) : null;
+      const clonedFullscreenButton = this.fullscreenButton ? this.fullscreenButton.cloneNode(true) : null;
       const clonedEngineSelect = this.engineVersionSelect ? this.engineVersionSelect.cloneNode(true) : null;
       const clonedLevelSelect = this.levelSelect ? this.levelSelect.cloneNode(true) : null;
 
       // Add event listeners to cloned buttons to trigger original buttons
-      if (clonedRunBtn) {
-        clonedRunBtn.addEventListener('click', () => this.runBtn?.click());
-        controlsContainer.appendChild(clonedRunBtn);
+      if (clonedRunButton) {
+        clonedRunButton.addEventListener('click', () => this.runButton?.click());
+        controlsContainer.appendChild(clonedRunButton);
       }
-      if (clonedPauseBtn) {
-        clonedPauseBtn.addEventListener('click', () => this.pauseBtn?.click());
-        controlsContainer.appendChild(clonedPauseBtn);
+      if (clonedPauseButton) {
+        clonedPauseButton.addEventListener('click', () => this.pauseButton?.click());
+        controlsContainer.appendChild(clonedPauseButton);
       }
-      if (clonedStopBtn) {
-        clonedStopBtn.addEventListener('click', () => this.stopBtn?.click());
-        controlsContainer.appendChild(clonedStopBtn);
+      if (clonedStopButton) {
+        clonedStopButton.addEventListener('click', () => this.stopButton?.click());
+        controlsContainer.appendChild(clonedStopButton);
       }
-      if (clonedFullscreenBtn) {
-        clonedFullscreenBtn.addEventListener('click', () => this.fullscreenBtn?.click());
-        controlsContainer.appendChild(clonedFullscreenBtn);
+      if (clonedFullscreenButton) {
+        clonedFullscreenButton.addEventListener('click', () => this.fullscreenButton?.click());
+        controlsContainer.appendChild(clonedFullscreenButton);
       }
 
       // Add event listeners to cloned selects to sync with originals
@@ -452,6 +504,11 @@ export class GameExecutor {
       // Assemble fullscreen overlay
       this.fullscreenOverlay.appendChild(controlHeader);
       this.fullscreenOverlay.appendChild(gameOutput);
+      gameOutput.style.position = 'relative';
+      gameOutput.style.flex = '1 1 auto';
+      gameOutput.style.minHeight = '0';
+      gameOutput.style.width = '100%';
+      gameOutput.style.zIndex = '1';
       document.body.appendChild(this.fullscreenOverlay);
 
       // Update canvas height to account for control header
@@ -460,15 +517,15 @@ export class GameExecutor {
       this.configuredCanvasHeight = viewportHeight;
 
       // Update button text
-      if (this.fullscreenBtn) {
-        this.fullscreenBtn.textContent = '⛶ Minimize';
-        this.fullscreenBtn.title = 'Exit Fullscreen';
+      if (this.fullscreenButton) {
+        this.fullscreenButton.textContent = '⛶';
+        this.fullscreenButton.title = 'Exit Fullscreen';
       }
 
       this.isFullscreen = true;
 
-      // Restart game with new dimensions
-      this.run();
+      // Resize the active level in place so fullscreen does not replay startup dialogue.
+      this._resizeGameForViewport(gameOutput, viewportHeight);
 
       // Handle ESC key to exit fullscreen
       this.escapeHandler = (e) => {
@@ -498,9 +555,9 @@ export class GameExecutor {
       }
 
       // Update button text
-      if (this.fullscreenBtn) {
-        this.fullscreenBtn.textContent = '⛶ Fullscreen';
-        this.fullscreenBtn.title = 'Enter Fullscreen';
+      if (this.fullscreenButton) {
+        this.fullscreenButton.textContent = '⛶';
+        this.fullscreenButton.title = 'Enter Fullscreen';
       }
 
       this.isFullscreen = false;
@@ -511,8 +568,8 @@ export class GameExecutor {
         this.escapeHandler = null;
       }
 
-      // Restart game with original dimensions
-      this.run();
+      // Restore the active level size without reinitializing the level.
+      this._resizeGameForViewport(gameOutput, this.originalGameOutput?.height || this.configuredCanvasHeight);
     }
   }
 }
