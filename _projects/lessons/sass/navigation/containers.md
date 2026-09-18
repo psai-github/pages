@@ -22,21 +22,24 @@ The OCS Container is a structural wrapper that establishes the page boundary and
 
 ```mermaid
 flowchart TB
-    subgraph container["ocs__container — outer page boundary (one per page)"]
+    subgraph container["ocs__container<br/>outer page boundary"]
         direction TB
         nav["navigation / ocs__links"]
-        heading["ocs__section-title + ocs__description"]
-        subgraph card["ocs__card — framed group of related content"]
+        heading["ocs__section-title<br/>+ ocs__description"]
+        subgraph card["ocs__card<br/>framed group"]
             direction TB
-            subgraph grid["ocs__grid — repeated / comparative layout"]
-                direction LR
+            subgraph grid["ocs__grid<br/>repeated layout"]
+                direction TB
                 cell1["ocs__grid-cell<br/>text + ocs__btn"]
                 cell2["ocs__grid-cell<br/>text + status"]
             end
-            tablewrap["ocs__table-wrap → ocs__table"]
+            tablewrap["ocs__table-wrap<br/>ocs__table"]
             callout["ocs__callout"]
         end
-        actions["ocs__btn actions / ocs__pager"]
+        actions["ocs__btn actions<br/>ocs__pager"]
+        nav --> heading --> card --> actions
+        grid --> tablewrap --> callout
+        cell1 --> cell2
     end
 ```
 
