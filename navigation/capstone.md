@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function(){
       frontendUrl: "http://sfifoundation.opencodingsociety.com",
       backendUrl: "https://greppers-be.opencodingsociety.com/"
     },
-    "Communication System": {
+    "OCS Communication Systems": {
       pageUrl: "https://pages.opencodingsociety.com/capstone/communication-system/",
       frontendUrl: "https://github.com/UGRC-CSA/Pages",
       backendUrl: "https://github.com/Open-Coding-Society/spring"
@@ -912,14 +912,14 @@ document.addEventListener('DOMContentLoaded', function(){
        </div>
    </div>
 
-   <!-- Communication System (CSA) -->
+   <!-- OCS Communication Systems (CSA) -->
   <div class="ocs__grid-cell CSA" data-year="2026-2027">
        <a href="{% post_url capstone/2026-08-27-communication-system-capstone %}">
-           <img src="/images/csa-chat/announcement-chat.png" alt="Communication System - class announcement chat on the CSA course page" class="ocs__image-frame ocs__image-frame--thumbnail" />
+           <img src="/images/csa-chat/announcement-chat.png" alt="OCS Communication System - class announcement chat on the CSA course page" class="ocs__image-frame ocs__image-frame--thumbnail" />
        </a>
        <div>
-           <h3><a href="{% post_url capstone/2026-08-27-communication-system-capstone %}">Communication System</a></h3>
-           <p>Moving class discussion out of Slack and onto the course site — class-wide announcements, per-week chat, and a rich-text composer with emoji already ship, with per-assignment threads, 1:1 direct messages, GIFs, Slack-style emoji reactions, and teacher moderation still to build.</p>
+           <h3><a href="{% post_url capstone/2026-08-27-communication-system-capstone %}">OCS Communication Systems</a></h3>
+           <p>Students are extending the OCS communication system with chat, announcements, assignment discussions, direct messaging, calendar integration, and reusable presentation components. The work includes maintaining the real-time WebSocket service and connecting these features to the existing course site, backend APIs, security, and data model. Students will also develop the OCS SASS grammar—a small, purpose-built styling system for consistent, responsive, reusable components across the OCS GitHub Pages ecosystem.</p>
            <p>Team: Akhil, Syown, Leon, Perry, Skandan, Sathwik, Akshajh, Tarun, Samarth</p>
        </div>
    </div>
