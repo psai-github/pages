@@ -12,7 +12,7 @@ author: Rigved, Samarth, Rohan
 microblog: true
 ---
 
-## OCS Container and HTML Semantics
+## OCS Container
 
 The OCS Container is a structural wrapper that establishes the page boundary and provides structure for the content in our page.  
 
@@ -55,7 +55,36 @@ We are using a shared OCS container grammar. This means **you don't need to writ
 
 Why do we do this? It ensures our whole project looks consistent, makes our code reusable, and keeps every page responsive without extra work.
 
+### SASS Code
+
+You can find the OCS SASS Container code in `_sass/open-coding/elements/containers/common.scss` (loaded through `_main.scss` in the same folder):
+
+```scss
+// Shared page container for document-style elements.
+.ocs__container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  font-family: var(--pref-font-family);
+  color: var(--pref-text-color);
+}
+
+.ocs__container,
+.ocs__container * {
+  box-sizing: border-box;
+}
+```
+
+What this code does:
+
+* `max-width: 900px; margin: 0 auto;` — constrains the page to a readable width and centers it, establishing the outer page boundary.
+* `padding: 2rem 1.5rem;` — adds breathing room so content never touches the viewport edge.
+* `font-family` / `color` — inherit the active user-preference theme tokens, so the container adapts to light/dark/accent choices with no page-specific CSS.
+* `box-sizing: border-box;` — applied to the container and all children so padding and borders stay inside the 900px boundary.
+
 ### Code Examples
+
+> How you can use OCS containers in your blogs, projects, and hacks.
 
 #### A. Simple: Container and Card
 
