@@ -153,7 +153,6 @@ Resize the window to see it work. The three cells share the container width and 
 
 ### Hack: Invite Rescue (~10 minutes)
 
-> [!TIP]
 > A 10-minute challenge for someone new to SASS: rescue a broken invite page using only the OCS container grammar. No custom CSS.
 
 **Story:** Rohan's invite sprawls edge-to-edge, uses a purple inline title, and lays out the schedule with a hand-made flex row that breaks on phones. Rebuild it inside one `ocs__container` so it looks consistent and responsive.
