@@ -138,12 +138,15 @@ Resize the window to see it work. The three cells share the container width and 
 <div class="ocs__container">
   <div class="ocs__card">
     <h3 class="ocs__section-title">Containers Resize With You</h3>
-    <p class="ocs__description">One container sets the boundary. The standard grid splits it into columns that stretch and wrap.</p>
+    <p class="ocs__description">A container sets the boundary. The standard grid splits it into columns that stretch and wrap.</p>
     <div class="ocs__grid ocs__grid--standard cols-3">
-      <div class="ocs__grid-cell">One container per page sets the boundary.</div>
+      <div class="ocs__grid-cell">A  container sets the boundary.</div>
       <div class="ocs__grid-cell">Grids split the container into columns.</div>
       <div class="ocs__grid-cell">Cells stretch and wrap with the container.</div>
     </div>
   </div>
 </div>
 
+### What benifit did containers give us?
+
+**Styling all content in a specific section**: OCS containers allow us to style all other OCS SASS elements, such as grids, cards, and grid cells, in one centralized place. 
