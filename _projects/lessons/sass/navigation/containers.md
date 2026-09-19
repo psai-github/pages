@@ -167,3 +167,19 @@ What this code does:
 </div>
 </div>
 
+### Live Example: Container with Standard Grid
+
+Resize the window to see it work. The three cells share the container width and collapse from 3 columns to 2 on mobile. This applies to every container using the same grammar, existing or new, with no custom CSS.
+
+<div class="ocs__container">
+  <div class="ocs__card">
+    <h3 class="ocs__section-title">Containers Resize With You</h3>
+    <p class="ocs__description">One container sets the boundary. The standard grid splits it into columns that stretch and wrap.</p>
+    <div class="ocs__grid ocs__grid--standard cols-3">
+      <div class="ocs__grid-cell">One container per page sets the boundary.</div>
+      <div class="ocs__grid-cell">Grids split the container into columns.</div>
+      <div class="ocs__grid-cell">Cells stretch and wrap with the container.</div>
+    </div>
+  </div>
+</div>
+
