@@ -59,6 +59,10 @@ Why do we do this? It ensures our whole project looks consistent, makes our code
 
 You can find the OCS SASS Container code in `_sass/open-coding/elements/containers/common.scss` (loaded through `_main.scss` in the same folder):
 
+<div class="ocs__grid ocs__grid--holographic" markdown="1">
+<div class="ocs__grid-cell" markdown="1">
+<div class="ocs__card" markdown="1">
+
 ```scss
 // Shared page container for document-style elements.
 .ocs__container {
@@ -75,6 +79,10 @@ You can find the OCS SASS Container code in `_sass/open-coding/elements/containe
 }
 ```
 
+</div>
+</div>
+</div>
+
 What this code does:
 
 * `max-width: 900px; margin: 0 auto;` — constrains the page to a readable width and centers it, establishing the outer page boundary.
@@ -88,6 +96,10 @@ What this code does:
 
 #### A. Simple: Container and Card
 
+<div class="ocs__grid ocs__grid--holographic" markdown="1">
+<div class="ocs__grid-cell" markdown="1">
+<div class="ocs__card" markdown="1">
+
 ```html
 <!-- One container per page. Cards group related content inside it. -->
 <div class="ocs__container">
@@ -98,7 +110,15 @@ What this code does:
 </div>
 ```
 
+</div>
+</div>
+</div>
+
 #### B. Adding a Grid
+
+<div class="ocs__grid ocs__grid--holographic" markdown="1">
+<div class="ocs__grid-cell" markdown="1">
+<div class="ocs__card" markdown="1">
 
 ```html
 <!-- Don't invent column classes. Use ocs__grid with ocs__grid-cell children. -->
@@ -113,7 +133,15 @@ What this code does:
 </div>
 ```
 
+</div>
+</div>
+</div>
+
 #### C. Complex: Full Container Composition
+
+<div class="ocs__grid ocs__grid--holographic" markdown="1">
+<div class="ocs__grid-cell" markdown="1">
+<div class="ocs__card" markdown="1">
 
 ```html
 <!-- Compose container > card > grid + table, mirroring the Containers Grammar page -->
@@ -134,4 +162,8 @@ What this code does:
   </div>
 </div>
 ```
+
+</div>
+</div>
+</div>
 
