@@ -165,15 +165,16 @@ Rescue Rohan's invite: rebuild the broken HTML inside one ocs__container using o
 {% endcapture %}
 
 {% capture containers_hack_code %}
-outputElement.innerHTML = '';
+// Do not edit this line. Edit only the HTML inside the quotes below.
+outputElement.innerHTML = "";
 outputElement.innerHTML =
-  '<div class="page-wrap" style="max-width: 1100px; margin: auto;">' +
-  '<h1 style="color: purple;">Rohan's Random Invite</h1>' +
-  '<div style="display: flex;">' +
-  '<div class="box">Pizza at 6pm</div>' +
-  '<div class="box">Demos at 7pm</div>' +
-  '<div class="box">Prizes at 8pm</div>' +
-  '</div></div>';
+  "<div class='page-wrap' style='max-width: 1100px; margin: auto;'>" +
+  "<h1 style='color: purple;'>Rohan Invite</h1>" +
+  "<div style='display: flex;'>" +
+  "<div class='box'>Pizza at 6pm</div>" +
+  "<div class='box'>Demos at 7pm</div>" +
+  "<div class='box'>Prizes at 8pm</div>" +
+  "</div></div>";
 {% endcapture %}
 
 {% include runners/ui.html
@@ -189,6 +190,7 @@ outputElement.innerHTML =
 * Wrap the content in an `ocs__card`, with the title as an `ocs__section-title` and a one-line `ocs__description` of your own.
 * Replace the inline flex row and `box` divs with an `ocs__grid ocs__grid--standard cols-3` holding three `ocs__grid-cell` divs (one per schedule item, one with `--accent`).
 * Remove every inline `style` and made-up class. Press **Run** and resize to check it collapses cleanly on mobile.
+* Keep the double quotes around each line so apostrophes in your text (like Rohan's) don't break the run — and never use backticks here.
 
 **Done when:**
 
