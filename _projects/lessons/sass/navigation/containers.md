@@ -149,4 +149,42 @@ Resize the window to see it work. The three cells share the container width and 
 
 ### What benifit did containers give us?
 
-**Styling all content in a specific section**: OCS containers allow us to style all other OCS SASS elements, such as grids, cards, and grid cells, in one centralized place. 
+**Styling all content in a specific section**: OCS containers allow us to style all other OCS SASS elements, such as grids, cards, and grid cells, in one centralized place.
+
+### Hack: Invite Rescue (~10 minutes)
+
+> [!TIP]
+> A 10-minute challenge for someone new to SASS: rescue a broken invite page using only the OCS container grammar. No custom CSS.
+
+**Story:** Rohan's invite sprawls edge-to-edge, uses a purple inline title, and lays out the schedule with a hand-made flex row that breaks on phones. Rebuild it inside one `ocs__container` so it looks consistent and responsive.
+
+**Starter code** — paste into a notebook code cell and run it with `UI_RUNNER`:
+
+```html
+%%html
+
+<!-- UI_RUNNER: Containers Hack Base -->
+
+<div class="page-wrap" style="max-width: 1100px; margin: auto;">
+  <h1 style="color: purple;">Rohan's Goofing Off Invite</h1>
+  <div style="display: flex;">
+    <div class="box">Pizza at 6pm</div>
+    <div class="box">Demos at 7pm</div>
+    <div class="box">Prizes at 8pm</div>
+  </div>
+</div>
+```
+
+**Your tasks:**
+
+* Replace the `page-wrap` div with one `ocs__container` div.
+* Wrap the content in an `ocs__card`, with the title as an `ocs__section-title` and a one-line `ocs__description` of your own.
+* Replace the inline flex row and `box` divs with an `ocs__grid ocs__grid--standard cols-3` holding three `ocs__grid-cell` divs (one per schedule item, one with `--accent`).
+* Remove every inline `style` and made-up class. Run the cell and resize to check it collapses cleanly on mobile.
+
+**Done when:**
+
+* Present: `%%html` and the `UI_RUNNER` comment line.
+* Present: one `ocs__container`, one `ocs__card`, one `ocs__grid--standard` with three `ocs__grid-cell` children.
+* Absent: inline styles and made-up classes like `page-wrap` or `box`. 
+* Test: Demostrate system awareness & Ensure you have tested that the finished product works on phones as well as computers
