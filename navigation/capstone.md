@@ -326,8 +326,8 @@ document.addEventListener('DOMContentLoaded', function(){
            <div class="ocs__image-frame ocs__image-frame--thumbnail capstone-card-placeholder" style="background: linear-gradient(135deg, #06b6d4, #0f172a);">SUB</div>
        </a>
        <div>
-           <h3><a href="{% post_url capstone/2026-08-31-submissions-capstone %}">OCS Submissions</a></h3>
-           <p>Umbrella capstone covering three groups' work on the assignment/submission system: assignment creator permissions, submission analytics, and AI grading.</p>
+           <h3><a href="{% post_url capstone/2026-08-31-submissions-capstone %}">OCS Assignments System</a></h3>
+           <p>Students are extending the OCS assignment lifecycle from creation through submission, analytics, and grading. The system supports inserting rubrics directly into assignments, providing immediate AI evaluation, and assigning student-generated lessons for peer review and grading. After initial automated evaluation, live review sessions follow, allowing students and graders to discuss challenges, successes, and the work. A grader assignment view supports this process by giving graders a place to review submissions, record observations, and provide an overall assessment. The work integrates OCS interfaces with the Java/Spring backend, AWS S3, and AWS RDS/SQL, moving assignment data, student activity, scores, and feedback into a shared system rather than separate tools and spreadsheets.</p>
            <p>Groups: Assignment Creator Permissions, Submission Analytics, AI Grading</p>
        </div>
    </div>
