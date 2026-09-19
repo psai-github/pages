@@ -24,8 +24,6 @@ The OCS Container is a structural wrapper that establishes the page boundary and
 flowchart TB
     subgraph container["ocs__container<br/>outer page boundary"]
         direction TB
-        nav["navigation / ocs__links"]
-        heading["ocs__section-title<br/>+ ocs__description"]
         subgraph card["ocs__card<br/>framed group"]
             direction TB
             subgraph grid["ocs__grid<br/>repeated layout"]
@@ -36,8 +34,6 @@ flowchart TB
             tablewrap["ocs__table-wrap<br/>ocs__table"]
             callout["ocs__callout"]
         end
-        actions["ocs__btn actions<br/>ocs__pager"]
-        nav --> heading --> card --> actions
         grid --> tablewrap --> callout
         cell1 --> cell2
     end
