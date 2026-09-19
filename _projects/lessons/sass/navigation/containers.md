@@ -171,9 +171,9 @@ outputElement.innerHTML =
   "<div class='page-wrap' style='max-width: 1100px; margin: auto;'>" +
   "<h1 style='color: purple;'>Rohan Invite</h1>" +
   "<div style='display: flex;'>" +
-  "<div class='box'>Pizza at 6pm</div>" +
-  "<div class='box'>Demos at 7pm</div>" +
-  "<div class='box'>Prizes at 8pm</div>" +
+  "<div class='box'>Pizza at 6pm<br></div>" +
+  "<div class='box'>Demos at 7pm<br></div>" +
+  "<div class='box'>Prizes at 8pm<br></div>" +
   "</div></div>";
 {% endcapture %}
 
@@ -197,3 +197,59 @@ outputElement.innerHTML =
 * Present: one `ocs__container`, one `ocs__card`, one `ocs__grid--standard` with three `ocs__grid-cell` children in the runner output.
 * Absent: inline styles and made-up classes like `page-wrap` or `box`. 
 * Test: Demostrate system awareness & Ensure you have tested that the finished product works on phones as well as computers
+
+### Homework: Group Hub Page (~30 minutes)
+
+Build a full container page for your group. Do the required part (~20 min) in a notebook cell; the SASS extra is optional (~10 min).
+
+**Starter code** — paste into a notebook code cell and run it with `UI_RUNNER`:
+
+```html
+%%html
+
+<!-- UI_RUNNER: Containers Homework Base -->
+
+<div class="wrap" style="max-width: 1100px; margin: auto;">
+  <h1 style="color: teal;">Robotics Club</h1>
+  <div style="display: flex;">
+    <div class="tile">Build nights</div>
+    <div class="tile">Comp team</div>
+    <div class="tile">Outreach</div>
+  </div>
+  <table border="1">
+    <tr><td>dues</td><td>paid</td></tr>
+  </table>
+</div>
+```
+
+**Required tasks:**
+
+* Use exactly one `ocs__container` holding one `ocs__card`.
+* Title as `ocs__section-title` plus a one-line `ocs__description`.
+* A `cols-3` standard grid with a `--header` cell, one `--accent` cell, and one `--muted` cell.
+* The table rebuilt with `ocs__table-wrap` + `ocs__table` (header row + two body rows).
+* One `ocs__callout` line at the end.
+
+**Do:**
+
+* Do use only OCS container grammar classes.
+* Do keep `%%html` and the `UI_RUNNER` comment line.
+* Do test narrow and wide widths before submitting.
+
+**Don't:**
+
+* Don't use inline `style` attributes.
+* Don't invent classes like `wrap` or `tile`.
+* Don't use more than one `ocs__container`.
+
+**Grading (1 point total, required part):**
+
+* 0.4 structure: one container, one card, title, description, callout all present.
+* 0.4 grammar: standard grid with header, accent, and muted cells; table uses wrap + table classes with header and two body rows.
+* 0.2 cleanliness: no inline styles or made-up classes.
+
+**Optional SASS extra (+0.2):**
+
+* Write your own SCSS container variant (for example, a wider `.my-container` or a tinted variant), show the SCSS in a fenced block, and use the new class on your page.
+
+**Extra condition:** extra credit counts only if the required part scores full marks with zero custom CSS outside the optional SCSS block.
