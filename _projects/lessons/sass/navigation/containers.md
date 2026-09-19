@@ -158,33 +158,40 @@ Resize the window to see it work. The three cells share the container width and 
 
 **Story:** Rohan's invite sprawls edge-to-edge, uses a purple inline title, and lays out the schedule with a hand-made flex row that breaks on phones. Rebuild it inside one `ocs__container` so it looks consistent and responsive.
 
-**Starter code** — paste into a notebook code cell and run it with `UI_RUNNER`:
+**Starter runner** — edit the HTML strings below, then press **Run**:
 
-```html
-%%html
+{% capture containers_hack_challenge %}
+Rescue Rohan's invite: rebuild the broken HTML inside one ocs__container using only OCS container grammar.
+{% endcapture %}
 
-<!-- UI_RUNNER: Containers Hack Base -->
+{% capture containers_hack_code %}
+outputElement.innerHTML = '';
+outputElement.innerHTML =
+  '<div class="page-wrap" style="max-width: 1100px; margin: auto;">' +
+  '<h1 style="color: purple;">Rohan's Random Invite</h1>' +
+  '<div style="display: flex;">' +
+  '<div class="box">Pizza at 6pm</div>' +
+  '<div class="box">Demos at 7pm</div>' +
+  '<div class="box">Prizes at 8pm</div>' +
+  '</div></div>';
+{% endcapture %}
 
-<div class="page-wrap" style="max-width: 1100px; margin: auto;">
-  <h1 style="color: purple;">Rohan's Goofing Off Invite</h1>
-  <div style="display: flex;">
-    <div class="box">Pizza at 6pm</div>
-    <div class="box">Demos at 7pm</div>
-    <div class="box">Prizes at 8pm</div>
-  </div>
-</div>
-```
+{% include runners/ui.html
+   runner_id="containers-hack"
+   challenge=containers_hack_challenge
+   code=containers_hack_code
+   height="250px"
+%}
 
 **Your tasks:**
 
 * Replace the `page-wrap` div with one `ocs__container` div.
 * Wrap the content in an `ocs__card`, with the title as an `ocs__section-title` and a one-line `ocs__description` of your own.
 * Replace the inline flex row and `box` divs with an `ocs__grid ocs__grid--standard cols-3` holding three `ocs__grid-cell` divs (one per schedule item, one with `--accent`).
-* Remove every inline `style` and made-up class. Run the cell and resize to check it collapses cleanly on mobile.
+* Remove every inline `style` and made-up class. Press **Run** and resize to check it collapses cleanly on mobile.
 
 **Done when:**
 
-* Present: `%%html` and the `UI_RUNNER` comment line.
-* Present: one `ocs__container`, one `ocs__card`, one `ocs__grid--standard` with three `ocs__grid-cell` children.
+* Present: one `ocs__container`, one `ocs__card`, one `ocs__grid--standard` with three `ocs__grid-cell` children in the runner output.
 * Absent: inline styles and made-up classes like `page-wrap` or `box`. 
 * Test: Demostrate system awareness & Ensure you have tested that the finished product works on phones as well as computers
