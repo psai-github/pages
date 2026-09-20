@@ -812,7 +812,7 @@ document.addEventListener('DOMContentLoaded', function(){
    <!-- FOPS (2026-2027) -->
  <div class="ocs__grid-cell CSP" data-year="2026-2027">
         <a href="{% post_url 2026-09-09-fops-2026-2027-capstone %}">
-            <img src="/images/capstone/fops.png" alt="Friends of Poway Seniors" class="ocs__image-frame ocs__image-frame--thumbnail" />
+            <img src="/images/capstone/fops.pngx" alt="Friends of Poway Seniors" class="ocs__image-frame ocs__image-frame--thumbnail" />
         </a>
         <div>
             <h3><a href="{% post_url 2026-09-09-fops-2026-2027-capstone %}">Friends of Poway Seniors</a></h3>
