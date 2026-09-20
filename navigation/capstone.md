@@ -779,11 +779,40 @@ document.addEventListener('DOMContentLoaded', function(){
             <p>Team: Nitya, Vivian, Virginia</p>
         </div>
     </div>
+    
+    <!-- Doing Exceptional Deeds Website Redesign (CSP, 2026/2027) -->
+  <div class="ocsgrid-cell CSP"
+      data-year="2026-2027"
+      data-page-url="{{ '/capstone/doingexceptionaldeeds/' | relative_url }}">
+
+      <a href="{{ '/capstone/doingexceptionaldeeds/' | relative_url }}">
+          <div class="ocsimage-frame ocs__image-frame--thumbnail capstone-card-placeholder">
+              D.A.D.
+          </div>
+      </a>
+
+      <div>
+          <h3>
+              <a href="{{ '/capstone/doingexceptionaldeeds/' | relative_url }}">
+                  Doing Exceptional Deeds
+              </a>
+          </h3>
+
+          <p>
+              A website redesign focused on simpler navigation, shorter content,
+              student and teacher accounts, teacher profiles, and an easier
+              events and calendar experience.
+          </p>
+
+          <p>Team: Jake, Noah, Ishaan</p>
+      </div>
+    </div>
+
 
    <!-- FOPS (2026-2027) -->
  <div class="ocs__grid-cell CSP" data-year="2026-2027">
         <a href="{% post_url 2026-09-09-fops-2026-2027-capstone %}">
-            <img src="/images/capstone/fops.png" alt="Friends of Poway Seniors" class="ocs__image-frame ocs__image-frame--thumbnail" />
+            <img src="/images/capstone/fops.pngx" alt="Friends of Poway Seniors" class="ocs__image-frame ocs__image-frame--thumbnail" />
         </a>
         <div>
             <h3><a href="{% post_url 2026-09-09-fops-2026-2027-capstone %}">Friends of Poway Seniors</a></h3>
