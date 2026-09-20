@@ -779,18 +779,7 @@ document.addEventListener('DOMContentLoaded', function(){
             <p>Team: Nitya, Vivian, Virginia</p>
         </div>
     </div>
-     <!-- Friends of the Poway Library  (CSP) -->
-   <div class="ocs__grid-cell CSP">
-       <a href="{% post_url 2026-03-09-poway-library %}">
-           <img src="/images/capstone/poway_library.png" alt="Friends of the Poway Library" class="ocs__image-frame ocs__image-frame--thumbnail" />
-       </a>
-       <div>
-           <h3><a href="{% post_url 2026-03-09-poway-library %}">Friends of the Poway Library</a></h3>
-           <p>Rebuilding the Friends of the Poway Library website with a live events calendar, volunteer portal, and donation flow.</p>
-           <p>Team: Shayan Bhatti, Arnav Pallapotu, Tanay Paranjpe</p>
-       </div>
-   </div>
-
+    
     <!-- Doing Exceptional Deeds Website Redesign (CSP, 2026/2027) -->
   <div class="ocsgrid-cell CSP"
       data-year="2026-2027"
