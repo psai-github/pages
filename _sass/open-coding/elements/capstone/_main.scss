@@ -302,12 +302,16 @@
 }
 
 .ocs__nav-card-kicker {
-  color: var(--text-muted) !important;
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+
+html.user-theme-active .ocs__nav-card-kicker {
+   color: var(--text-muted) !important;
+}
+
 
 .ocs__nav-card-title {
   flex: 1 1 auto;
