@@ -1,7 +1,7 @@
 ---
 layout: post
 assignment: true
-title: SASS Inputs — PAW Patrol
+title: SASS Inputs
 description: Learn the OCS SASS input grammar and refactor hardcoded input styles into reusable classes.
 categories: [SASS, Inputs]
 lesson_language: SASS
@@ -11,36 +11,12 @@ lesson_type: lesson
 codemirror: true
 microblog: true
 permalink: /sass/inputs/
-author: PAW Patrol
+author: Open Coding Society
 ---
 
 # OCS SASS Inputs
 
-## 1. LxD Cycle Process
-
-### Empathize
-
-Students often style inputs by hand with inline CSS such as `style="width: 400px; border: 3px dashed purple;"` or invent one-off classes for each field. That may work for one page, but it makes forms inconsistent and harder to maintain when the site theme changes.
-
-### Define
-
-**POV:** CSP students need a shared, class-based input system so forms stay consistent without repeating custom CSS.
-
-**Learning Goal:** Students will use the OCS input grammar—`ocs__input` plus reusable size and style modifiers—instead of inline styles or made-up classes.
-
-### Ideate
-
-**HMW Question:** How might we teach students to choose an existing input role and modifier before writing custom CSS?
-
-**Activity:** Refactor hardcoded inputs into clean OCS input markup.
-
-### Prototype & Test
-
-Our first practice version asked students to build a full form from scratch. That took too long, so the practice was reduced to a quick refactor task followed by one focused homework exercise.
-
----
-
-## 2. Lesson Plan
+## Lesson
 
 **Learning Objective:** By the end of this lesson, you will be able to size and style `<input>` elements using the OCS SASS input grammar.
 
@@ -48,7 +24,7 @@ Our first practice version asked students to build a full form from scratch. Tha
 
 ### What Is an Input?
 
-An HTML `<input>` is a **form control that lets a user give data to a web page**. The browser renders the control, the user changes its value, and JavaScript or a form submission can read that value.
+An HTML `<input>` is a form control that lets a user give data to a web page.
 
 The most important pieces are:
 
@@ -73,7 +49,7 @@ A simple input looks like this:
 >
 ```
 
-The important distinction is: **HTML defines the input, SASS styles it, and JavaScript can read or react to its value.**
+**HTML defines the input, SASS styles it, and JavaScript reads its value.**
 
 ### OCS Input Grammar
 
@@ -95,7 +71,6 @@ Modifiers can be combined:
 >
 ```
 
-> **Backward compatibility:** Existing pages that use `smallInput`, `mediumInput`, `largeInput`, or `gradientInput` will continue to work. New code should use the OCS grammar shown above.
 
 ### Tech Talk
 
@@ -290,6 +265,24 @@ if (emailValue.trim() === "") {
    code=input_validation_code
 %}
 
+### College Board Pseudocode Example
+
+In AP CSP pseudocode, `INPUT()` gets data from the user and `DISPLAY()` shows output.
+
+{% capture input_pseudocode_example %}
+name ← INPUT("Enter your name:")
+age ← INPUT("Enter your age:")
+
+DISPLAY("Hello " + name)
+DISPLAY("Next year you will be " + (age + 1))
+{% endcapture %}
+
+{% include runners/code.html
+   runner_id="sass-input-pseudocode-demo"
+   language="pseudocode"
+   code=input_pseudocode_example
+%}
+
 ### Accessibility Tips
 
 - Prefer a visible `<label>` for form fields.
@@ -299,7 +292,7 @@ if (emailValue.trim() === "") {
 
 ---
 
-## 3. Hacks & Practice Tasks
+## Practice
 
 ### Prepare Your Submission (IPYNB)
 
@@ -312,7 +305,7 @@ if (emailValue.trim() === "") {
 ```raw
 ---
 layout: post
-title: SASS Inputs PAW Patrol HW
+title: SASS Inputs HW
 categories: [SASS]
 lesson_language: SASS
 lesson_topic: Inputs HW
@@ -363,7 +356,7 @@ author: githubID
 
 ---
 
-## 4. Grading Plan (1 Point Total)
+## Grading (1 Point Total)
 
 ### Classroom Rubric
 
@@ -382,58 +375,3 @@ author: githubID
 - Present: `gradient` where decorative gradient styling is required.
 
 ---
-
-## Local Testing
-
-Use the repo's normal local development workflow so the SASS, Liquid includes, UI Runner, Code Runner, assignment UI, and microblog assets are built the same way they are for Pages.
-
-From the repository root:
-
-```bash
-git pull
-make stop
-make clean
-make
-```
-
-The default port is `4500`. In this fork, `baseurl` is empty, so open:
-
-```text
-http://localhost:4500/sass/inputs/
-```
-
-### Local Test Checklist
-
-1. Confirm there is only one Inputs lesson at `/sass/inputs/`.
-2. Confirm the page shows the standard **Submit Assignment** section near the bottom.
-3. Confirm the Microblog controls render at the top of the page. Creating posts requires the configured OCS backend/login.
-4. In **Read an Input Value**, type text and confirm the displayed value updates on every keystroke.
-5. In **Test OCS Input Classes**, change `large` to `small` or `medium`, toggle `useGradient`, and click **Run**.
-6. In **Input + Button**, type a message and verify the rendered button reads and displays the value.
-7. Run both JavaScript Code Runners. On localhost, the runner has a browser fallback if the JavaScript backend is unavailable.
-8. Resize the browser and confirm the inputs remain usable.
-9. Check the terminal for Jekyll or SASS errors.
-
-For a build-only check without keeping the preview server running:
-
-```bash
-make build
-```
-
-This project-aware build regenerates registered project assets, navigation includes, converted notebooks, and documentation before Jekyll runs.
-
-If a renamed or deleted lesson still appears locally, clear generated output and rebuild:
-
-```bash
-make stop
-make clean
-make
-```
-
----
-
-## 5. Lesson Revisions & Feedback Evidence
-
-**Feedback Received:** The lesson was originally placed in the Python notebook directory even though it teaches SASS. The reviewer also noted that the lesson should follow the Markdown-based SASS lesson structure and integrate with the site's normal submission and microblog behavior.
-
-**Revision Made:** The lesson now lives in the SASS navigation lesson directory as Markdown, uses `assignment: true` for the standard submission UI, keeps the canonical trailing-slash permalink used by the microblog topic path, and teaches the OCS `ocs__input` grammar while retaining the older input classes for backward compatibility.
