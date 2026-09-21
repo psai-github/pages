@@ -39,9 +39,9 @@ permalink: /navigation/py-reference/
     <div class="ocs__grid ocs__grid--card cols-3 language-reference__cards">
         {% for lesson in lessons %}
         <article class="ocs__grid-cell">            
-            <a class="ocs__card accent" href="{{ lesson.url | relative_url }}">
+            <a class="ocs__card" href="{{ lesson.url | relative_url }}">
                 <span class="ocs__status-pill ocs__status-pill--neutral">{{ lesson.lesson_part | default: "reference" }}</span>
-                <h3>{{ lesson.title }}</h3>
+                <h2>{{ lesson.title }}</h2>
                 {% if lesson.description %}<p>{{ lesson.description }}</p>{% endif %}
             </a>
         </article>
