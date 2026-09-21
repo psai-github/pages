@@ -67,23 +67,23 @@ ACTIVE_DEV_PROJECTS = $(sort $(DEV_PROJECTS) $(VALID_EXTRA_PROJECTS))
 
 define run_projects
 	@for proj in $(1); do \
-		if [ -d "_projects/$proj" ]; then \
-			case "$proj" in \
+		if [ -d "_projects/$$proj" ]; then \
+			case "$$proj" in \
 				lessons/python|lessons/javascript|lessons/java) \
 					: ;; \
 				*) \
-					echo "📋 Syncing Makefile for $proj (from template)"; \
-					cp "_projects/_template/Makefile" "_projects/$proj/Makefile"; \
+					echo "📋 Syncing Makefile for $$proj (from template)"; \
+					cp "_projects/_template/Makefile" "_projects/$$proj/Makefile"; \
 					;; \
 			esac; \
-			if [ ! -f "_projects/$proj/Makefile" ]; then \
-				echo "⚠️  Missing Makefile for $proj"; \
+			if [ ! -f "_projects/$$proj/Makefile" ]; then \
+				echo "⚠️  Missing Makefile for $$proj"; \
 				continue; \
 			fi; \
-			echo "$(2): $proj"; \
-			$(MAKE) -C "_projects/$proj" $(3) 2>/dev/null || echo "  ⚠️  Failed: $proj"; \
+			echo "$(2): $$proj"; \
+			$(MAKE) -C "_projects/$$proj" $(3) 2>/dev/null || echo "  ⚠️  Failed: $$proj"; \
 		else \
-			echo "⚠️  Project directory not found: $proj"; \
+			echo "⚠️  Project directory not found: $$proj"; \
 		fi; \
 	done
 endef
