@@ -30,12 +30,18 @@ author: Indira Viswesh and Angel Bulatao
 
 **Conditionals**
 
-Conditionals allow dynamic responses to different blocks of code depending on wheater it is true or false.
+Conditionals allow dynamic responses to different blocks of code depending on wheater it is true or false. This allows user interaction with code.
 
 Types: if, if-else. else if, (+switch)
 
-___________________________________________________________________________________________________________
+1. **If** executes a block of code if it's true
+2. **If...else** is similar to a true/false, executes one block of code if the output is true and another if the output is false
+3. **Else... if** 
+Executes a block of code if the preceding if condition evaluates to false, **AND** its own specified condition evaluates to true. 
+4. **Switch** 
+Compares multiple possible outcomes, more complex than true/false.
 
+____________________________________________________
 
 **Think**: Imagine your morning alarm rings and you must decide whether to get up, snooze for 5 more minutes, or go back to sleep.
 
