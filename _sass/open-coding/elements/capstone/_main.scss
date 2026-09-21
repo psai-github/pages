@@ -331,6 +331,27 @@
   text-transform: uppercase;
 }
 
+.ocs__nav-card--stacked {
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.ocs__nav-card--stacked .ocs__nav-card-title {
+  flex: 0 0 auto;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.ocs__nav-card--stacked p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+
 @import "ocs-intelligence";
 
 .ocs__entity-list strong { color: var(--pref-text-color); }
