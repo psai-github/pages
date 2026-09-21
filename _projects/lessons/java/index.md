@@ -37,7 +37,7 @@ permalink: /navigation/java-reference/
     <div class="ocs__grid ocs__grid--card cols-3">
         {% for lesson in lessons %}
         <article class="ocs__grid-cell">
-            <span class="ocs__status-pill ocs__status-pill--neutral">{{ lesson.lesson_part | default: "reference" }}</span>
+            <span class="ocs__status-pill ocs__status-pill--neutral">{{ lesson.lesson_source | default: "reference" }}</span>
             <h2>{{ lesson.title | split: " " | first }}</h2>
             {% if lesson.lesson_topic %}<p><strong>Topic:</strong> {{ lesson.lesson_topic }}</p>{% endif %}
             {% if lesson.description %}<p>{{ lesson.description }}</p>{% endif %}
