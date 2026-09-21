@@ -271,7 +271,7 @@ build-cayman: use-cayman build-current
 build-so-simple: use-so-simple build-current
 build-yat: use-yat build-current
 
-build-current: clean convert split-courses
+build-current: clean build-registered-projects convert split-courses build-registered-docs
 	@bundle install
 	@echo "Generating dynamic SASS imports..."
 	@$(PYTHON) scripts/generate_sass_imports.py 2>&1 || echo "⚠️  SASS import generation failed"
