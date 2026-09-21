@@ -417,8 +417,10 @@ http://localhost:4500/sass/inputs/
 For a build-only check without keeping the preview server running:
 
 ```bash
-bundle exec jekyll build
+make build
 ```
+
+This project-aware build regenerates registered project assets, navigation includes, converted notebooks, and documentation before Jekyll runs.
 
 If a renamed or deleted lesson still appears locally, clear generated output and rebuild:
 
