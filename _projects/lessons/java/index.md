@@ -15,7 +15,6 @@ permalink: /navigation/java-reference/
 <div class="ocs__container" id="language-reference">
     <div class="ocs__badge">Lessons · Java</div>
     <h1>Java Reference</h1>
-
     <div class="language-reference__toolbar">
         <div class="language-reference__search search" aria-label="Search Java lessons">
             <div class="search-input-wrap">
@@ -30,23 +29,22 @@ permalink: /navigation/java-reference/
             <a class="ocs__btn pill" href="{{ '/navigation/sass/' | relative_url }}">SASS</a>
         </nav>
     </div>
-
-        {% if site.categories.Java %}
-            {% assign lessons = site.categories.Java | where_exp: "lesson", "lesson.hide != true" | sort: "title" %}
-        {% else %}
-            {% assign lessons = "" | split: "" %}
-        {% endif %}
-    <div class="ocs__grid ocs__grid--card cols-3">
+    {% if site.categories.Java %}
+        {% assign lessons = site.categories.Java | where_exp: "lesson", "lesson.hide != true" | sort: "title" %}
+    {% else %}
+        {% assign lessons = "" | split: "" %}
+    {% endif %}
+    <nav class="ocs__nav-grid">
         {% for lesson in lessons %}
-        <article class="ocs__grid-cell">
-            <span class="ocs__status-pill ocs__status-pill--neutral">{{ lesson.lesson_part | default: "reference" }}</span>
-            <h2>{{ lesson.title }}</h2>
-            {% if lesson.description %}<p>{{ lesson.description }}</p>{% endif %}
-            {% if lesson.lesson_topic %}<p><strong>Topic:</strong> {{ lesson.lesson_topic }}</p>{% endif %}
-            <a class="ocs__btn accent fill" href="{{ lesson.url | relative_url }}">Open lesson</a>
-        </article>
+        <a class="ocs__nav-card" href="{{ lesson.url | relative_url }}">
+            <h4 class="ocs__nav-card-kicker">{{ lesson.lesson_source | default: "reference" }}</h4>
+            <h2 class="ocs__nav-card-title">{{ lesson.title }}</h2>
+            {% if lesson.description %}
+            <p>{{ lesson.description }}</p>
+            {% endif %}
+        </a>
         {% endfor %}
-    </div>
+    </nav>
 </div>
 
 <!-- markdownlint-enable MD033 MD046 -->
