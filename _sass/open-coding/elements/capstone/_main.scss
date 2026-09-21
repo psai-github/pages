@@ -290,12 +290,6 @@
 .ocs__nav-card:hover {
   transform: translateY(-1px);
 }
-.ocs__nav-card:hover,
-.ocs__nav-card.is-active {
-  border-color: var(--pref-accent-color);
-  background: color-mix(in srgb, var(--pref-accent-color) 10%, var(--panel));
-  color: var(--pref-text-color);
-}
 
 .ocs__nav-card:hover {
   transform: translateY(-1px);
