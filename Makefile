@@ -67,15 +67,23 @@ ACTIVE_DEV_PROJECTS = $(sort $(DEV_PROJECTS) $(VALID_EXTRA_PROJECTS))
 
 define run_projects
 	@for proj in $(1); do \
-		if [ -d "_projects/$$proj" ]; then \
-			if [ ! -f "_projects/$$proj/Makefile" ]; then \
-				echo "📋 Generating Makefile for $$proj (from template)"; \
-				cp "_projects/_template/Makefile" "_projects/$$proj/Makefile"; \
+		if [ -d "_projects/$proj" ]; then \
+			case "$proj" in \
+				lessons/python|lessons/javascript|lessons/java) \
+					: ;; \
+				*) \
+					echo "📋 Syncing Makefile for $proj (from template)"; \
+					cp "_projects/_template/Makefile" "_projects/$proj/Makefile"; \
+					;; \
+			esac; \
+			if [ ! -f "_projects/$proj/Makefile" ]; then \
+				echo "⚠️  Missing Makefile for $proj"; \
+				continue; \
 			fi; \
-			echo "$(2): $$proj"; \
-			$(MAKE) -C "_projects/$$proj" $(3) 2>/dev/null || echo "  ⚠️  Failed: $$proj"; \
+			echo "$(2): $proj"; \
+			$(MAKE) -C "_projects/$proj" $(3) 2>/dev/null || echo "  ⚠️  Failed: $proj"; \
 		else \
-			echo "⚠️  Project directory not found: $$proj"; \
+			echo "⚠️  Project directory not found: $proj"; \
 		fi; \
 	done
 endef
@@ -197,15 +205,18 @@ serve-yat: use-yat clean
 generate-makefiles:
 	@echo "Generating Makefiles for registered projects..."
 	@for proj in $(ALL_PROJECTS); do \
-		if [ -d "_projects/$$proj" ]; then \
-			if [ ! -f "_projects/$$proj/Makefile" ]; then \
-				echo "📋 Generating Makefile for $$proj"; \
-				cp "_projects/_template/Makefile" "_projects/$$proj/Makefile"; \
-			else \
-				echo "✓ Makefile exists for $$proj"; \
-			fi; \
+		if [ -d "_projects/$proj" ]; then \
+			case "$proj" in \
+				lessons/python|lessons/javascript|lessons/java) \
+					echo "✓ Preserving custom Makefile for $proj"; \
+					;; \
+				*) \
+					echo "📋 Syncing Makefile for $proj"; \
+					cp "_projects/_template/Makefile" "_projects/$proj/Makefile"; \
+					;; \
+			esac; \
 		else \
-			echo "⚠️  Project directory not found: $$proj"; \
+			echo "⚠️  Project directory not found: $proj"; \
 		fi; \
 	done
 
