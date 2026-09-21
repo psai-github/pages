@@ -40,10 +40,7 @@ permalink: /navigation/java-reference/
             <span class="ocs__status-pill ocs__status-pill--neutral">
                 {{ lesson.lesson_source | default: "reference" }}
             </span>
-            <h2 class="ocs__nav-card-title">{{ lesson.title | split: " " | first }}</h2>
-            {% if lesson.lesson_topic %}
-            <p>{{ lesson.lesson_topic }}</p>
-            {% endif %}
+            <h2 class="ocs__nav-card-title">{{ lesson.title }}</h2>
             {% if lesson.description %}
             <p>{{ lesson.description }}</p>
             {% endif %}
