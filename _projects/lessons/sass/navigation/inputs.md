@@ -136,19 +136,12 @@ Run the example, type a name into the input, and observe how the displayed value
 {% endcapture %}
 
 {% capture input_value_code %}
-outputElement.innerHTML = `
-  <div class="ocs__card">
-    <label for="input-value-demo">Your name</label>
-    <input
-      id="input-value-demo"
-      name="studentName"
-      type="text"
-      class="ocs__input medium"
-      placeholder="Type your name"
-    >
-    <p id="input-value-result">Current value: ""</p>
-  </div>
-`;
+outputElement.innerHTML =
+  '<div class="ocs__card">' +
+    '<label for="input-value-demo">Your name</label>' +
+    '<input id="input-value-demo" name="studentName" type="text" class="ocs__input medium" placeholder="Type your name">' +
+    '<p id="input-value-result">Current value: ""</p>' +
+  '</div>';
 
 const field = outputElement.querySelector('#input-value-demo');
 const result = outputElement.querySelector('#input-value-result');
@@ -215,19 +208,13 @@ Type a message and click the rendered Submit button. Change the input type or si
 {% endcapture %}
 
 {% capture input_submit_code %}
-outputElement.innerHTML = `
-  <div class="ocs__card">
-    <label for="message-input-demo">Message</label>
-    <input
-      id="message-input-demo"
-      type="text"
-      class="ocs__input medium"
-      placeholder="Enter a message"
-    >
-    <button id="message-submit-demo" type="button" class="ocs__btn fill">Submit</button>
-    <p id="message-output-demo">Nothing submitted yet.</p>
-  </div>
-`;
+outputElement.innerHTML =
+  '<div class="ocs__card">' +
+    '<label for="message-input-demo">Message</label>' +
+    '<input id="message-input-demo" type="text" class="ocs__input medium" placeholder="Enter a message">' +
+    '<button id="message-submit-demo" type="button" class="ocs__btn fill">Submit</button>' +
+    '<p id="message-output-demo">Nothing submitted yet.</p>' +
+  '</div>';
 
 const input = outputElement.querySelector('#message-input-demo');
 const button = outputElement.querySelector('#message-submit-demo');
