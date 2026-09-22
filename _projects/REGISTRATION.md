@@ -101,12 +101,13 @@ Files under `notebooks/` are copied to `_notebooks/projects/<project-name>/` and
 
 **The build system automatically generates Makefiles** for all registered projects:
 
-- **Single Source of Truth**: Only `_projects/_template/Makefile` is version-controlled
+- **Shared Default**: `_projects/_template/Makefile` defines the standard project behavior
 - **Auto-Copy on Build**: When you run any make target, the template is copied to projects missing a Makefile
 - **Always Up-to-Date**: Template improvements instantly benefit all projects
-- **Clean Repository**: No duplicate build configuration in git
+- **Versioned Overrides**: Intentional tracked Makefiles are preserved by cleanup without path-specific exceptions
 
 **What this means for you:**
+
 1. ✅ Create new projects without copying/editing Makefiles
 2. ✅ Bug fixes in template propagate automatically
 3. ✅ Consistent build behavior across all projects
@@ -114,18 +115,22 @@ Files under `notebooks/` are copied to `_notebooks/projects/<project-name>/` and
 
 **First-Time Setup:**
 Before building individual projects directly, generate their Makefiles:
+
 ```bash
 make generate-makefiles
 ```
+
 This creates Makefiles for all registered projects listed in `_projects/.makeprojects`.
 
 **Build Workflows:**
+
 - **Coordinated builds** (e.g., `make build-registered-projects`, `make dev`) auto-generate Makefiles as needed
 - **Direct project builds** (e.g., `make -C _projects/systems/calendar build`) require Makefiles to exist first
 - **Incremental builds**: Project pages deploy to `_posts/projects/` which Jekyll watches for automatic incremental rebuilds
 
 **Build Timing & Order:**
 The template Makefile copies assets in a specific order to prevent timing issues:
+
 1. **JavaScript files** → `assets/js/projects/<name>/`
 2. **SASS files** → `_sass/projects/<name>/`
 3. **CSS entry point** → `assets/css/projects/<name>/`
@@ -146,9 +151,11 @@ Projects can seamlessly deploy standard styles and scripts to the global `assets
 The `_projects/_template/Makefile` is the single source that powers all projects. It includes:
 
 **Smart Depth Detection:**
+
 - Resolves the workspace root from `_projects/<category>/<project-name>/`
 
 **Standard Build Targets:**
+
 - `build` - Copy assets and notebooks to distribution directories
 - `assets` - Copy JS, SASS, images to assets directories
 - `notebooks` - Copy `notebooks/*.ipynb` into `_notebooks/projects/<project-name>/`
@@ -159,6 +166,7 @@ The `_projects/_template/Makefile` is the single source that powers all projects
 - `docs-clean` - Remove documentation posts
 
 **Watch System (Timestamp-Based, No External Dependencies):**
+
 - Uses POSIX `find -newer` with timestamp markers
 - No fswatch or inotify required
 - Individual markers per project: `/tmp/.project_<name>_marker`
@@ -167,6 +175,7 @@ The `_projects/_template/Makefile` is the single source that powers all projects
 - Filters out Makefile changes to avoid regeneration loops
 
 **Auto-Detection Features:**
+
 - Detects project name from directory
 - Handles nested category/project directories
 - Silently skips missing source directories (js/, sass/, images/)
@@ -176,6 +185,7 @@ The `_projects/_template/Makefile` is the single source that powers all projects
 Creating a new project is simple - **no Makefile needed!**
 
 **For a nested project:**
+
 ```bash
 # 1. Create in category subdirectory
 mkdir -p _projects/games/my-new-game
@@ -187,7 +197,10 @@ echo 'console.log("Hello");' > _projects/games/my-new-game/js/game.js
 # 3. Register with category path
 echo "games/my-new-game" >> _projects/.makeprojects
 
-# 4. Build it (Makefile auto-generated!)
+# 4. Generate its Makefile from the shared template
+make generate-makefiles
+
+# 5. Build it
 make -C _projects/games/my-new-game build
 ```
 

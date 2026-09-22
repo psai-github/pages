@@ -36,15 +36,13 @@ permalink: /navigation/java-reference/
     {% endif %}
     <div class="ocs__grid ocs__grid--card cols-2 language-reference__cards">
         {% for lesson in lessons %}
-        <article class="ocs__grid-cell">
-            <a class="ocs__card" href="{{ lesson.url | relative_url }}">
-                <span class="ocs__status-pill ocs__status-pill--neutral">{{ lesson.lesson_source | default: "reference" }}</span>
-                <h2>{{ lesson.title }}</h2>
-                {% if lesson.description %}<p>{{ lesson.description }}</p>{% endif %}
-            </a>
-        </article>
+        <a class="ocs__grid-cell ocs__card" href="{{ lesson.url | relative_url }}">
+            <span class="ocs__status-pill ocs__status-pill--neutral">{{ lesson.lesson_source | default: "reference" }}</span>
+            <h2>{{ lesson.title }}</h2>
+            {% if lesson.description %}<p>{{ lesson.description }}</p>{% endif %}
+        </a>
         {% endfor %}
-    </nav>
+    </div>
 </div>
 
 <!-- markdownlint-enable MD033 MD046 -->
