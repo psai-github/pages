@@ -34,15 +34,13 @@ permalink: /navigation/java-reference/
     {% else %}
         {% assign lessons = "" | split: "" %}
     {% endif %}
-    <div class="ocs__grid ocs__grid--card cols-3">
+    <div class="ocs__grid ocs__grid--card cols-2 language-reference__cards">
         {% for lesson in lessons %}
-        <article class="ocs__grid-cell">
+        <a class="ocs__grid-cell ocs__card" href="{{ lesson.url | relative_url }}">
             <span class="ocs__status-pill ocs__status-pill--neutral">{{ lesson.lesson_source | default: "reference" }}</span>
-            <h2>{{ lesson.title | split: " " | first }}</h2>
-            {% if lesson.lesson_topic %}<p><strong>Topic:</strong> {{ lesson.lesson_topic }}</p>{% endif %}
+            <h2>{{ lesson.title }}</h2>
             {% if lesson.description %}<p>{{ lesson.description }}</p>{% endif %}
-            <a class="ocs__btn accent fill" href="{{ lesson.url | relative_url }}">Open lesson</a>
-        </article>
+        </a>
         {% endfor %}
     </div>
 </div>
