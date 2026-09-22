@@ -41,26 +41,6 @@ rp_active: iterations
             <td>Split into three parallel input tracks, RFID, QR, and face scan, each with an owner: Vibha (RFID), Ruta (QR), Kush (Camera). Added a shared index issue and moved cross-cutting requirements (attendance reporting, roster import, door monitor) out of any single track.</td>
             <td>RFID alone can't answer RQ4 (which input works best) or test H4 (does combining inputs beat any single one). The three tracks needed to exist and be comparable before Cycle&nbsp;3 could run. See the <a href="https://github.com/vibha1019/crowpi-attendance/issues/9" target="_blank" rel="noopener">Presence System Index</a>.</td>
           </tr>
-          <tr>
-            <td>2026-09-21</td>
-            <td>Renamed project files, includes, and the data source from <code>rfid-presence-*</code> to <code>presence-system-*</code> to match the reframing.</td>
-            <td>Naming that says RFID everywhere works against the point of the reframe above. Internal CSS class names were left as <code>.rfid-presence-*</code> since renaming those is purely internal and touches no reader-facing content.</td>
-          </tr>
-          <tr>
-            <td>2026-09-21</td>
-            <td>Changed every page's URL from <code>/capstone/rfid-presence/...</code> to <code>/capstone/presence-system/...</code>. Every internal link and the links already shared in GitHub issues #3&ndash;#9 were updated to match; no redirect exists for the old URLs.</td>
-            <td>File names alone weren't enough, the public URL still said RFID everywhere too. No redirect plugin is installed on this site, so this was a clean break rather than a soft migration, worth knowing if an old link surfaces somewhere outside this project's own issues.</td>
-          </tr>
-          <tr>
-            <td>2026-09-21</td>
-            <td>Deleted the Live Demo page and Phases 2 through 4 as standalone pages. Phases 2&ndash;4 were condensed into one table on the Phases page, and the Funding page's itemized "asks" for those same stages were condensed the same way.</td>
-            <td>Live Demo had no link pointing to it anywhere on the site after an earlier nav change reverted, dead content nobody could reach. Phases 2&ndash;4 described UHF and room-scale hardware work that the Research Proposal explicitly pauses until the research cycles justify it, presenting that as an active roadmap and an active funding ask both contradicted the proposal a reader might have just read.</td>
-          </tr>
-          <tr>
-            <td>2026-09-21</td>
-            <td>Fixed contradictions left behind by the three-track split: the Overview page listed three inputs in one section and "two independent event sources" in the next, the Summary page's opening paragraph introduced three inputs then reverted to describing only two, and several sections describing the RFID and camera design specifically were unlabeled, reading as if they described the whole project.</td>
-            <td>Reflect-and-redesign is meant to catch exactly this kind of leftover inconsistency from a fast-moving edit. Caught during a deliberate read-through rather than by a reviewer.</td>
-          </tr>
         </tbody>
       </table>
     </div>
