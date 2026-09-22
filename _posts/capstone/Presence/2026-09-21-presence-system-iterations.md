@@ -53,21 +53,17 @@ rp_active: iterations
           </tr>
           <tr>
             <td>2026-09-21</td>
-            <td>Deleted the Live Demo page and Phases 2 through 4 as standalone pages. Phases 2&ndash;4 were condensed into one table on the Phases page instead.</td>
-            <td>Live Demo had no link pointing to it anywhere on the site after an earlier nav change reverted, dead content nobody could reach. Phases 2&ndash;4 described UHF and room-scale hardware work that the Research Proposal explicitly pauses until the research cycles justify it, three detailed pages describing paused work read as active roadmap, which contradicts the proposal a reader might have just read.</td>
+            <td>Deleted the Live Demo page and Phases 2 through 4 as standalone pages. Phases 2&ndash;4 were condensed into one table on the Phases page, and the Funding page's itemized "asks" for those same stages were condensed the same way.</td>
+            <td>Live Demo had no link pointing to it anywhere on the site after an earlier nav change reverted, dead content nobody could reach. Phases 2&ndash;4 described UHF and room-scale hardware work that the Research Proposal explicitly pauses until the research cycles justify it, presenting that as an active roadmap and an active funding ask both contradicted the proposal a reader might have just read.</td>
+          </tr>
+          <tr>
+            <td>2026-09-21</td>
+            <td>Fixed contradictions left behind by the three-track split: the Overview page listed three inputs in one section and "two independent event sources" in the next, the Summary page's opening paragraph introduced three inputs then reverted to describing only two, and several sections describing the RFID and camera design specifically were unlabeled, reading as if they described the whole project.</td>
+            <td>Reflect-and-redesign is meant to catch exactly this kind of leftover inconsistency from a fast-moving edit. Caught during a deliberate read-through rather than by a reviewer.</td>
           </tr>
         </tbody>
       </table>
     </div>
-  </div>
-
-  <div class="ocs__card">
-    <h3 class="ocs__section-title">What Didn't Change</h3>
-    <ul class="ocs__checklist">
-      <li class="done"><span class="ocs__checklist-box"></span><span>The bell-schedule and registration inputs to the presence engine, these were correct regardless of which sensing tool sits on top, and are called out as such in the original review feedback.</span></li>
-      <li class="done"><span class="ocs__checklist-box"></span><span>The Phase 1 RFID prototype itself, it's Cycle 0 of the current research design, not discarded work.</span></li>
-      <li class="done"><span class="ocs__checklist-box"></span><span>What each remaining page actually covers. Overview, Project Summary, Technical Detail, Funding, and Phase 1 kept their scope, only their naming and URLs changed, not their content.</span></li>
-    </ul>
   </div>
 
   <div class="ocs__card">
