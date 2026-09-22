@@ -10,6 +10,71 @@
     Submit Assignment
   </h2>
 
+  <div class="self-assessment" id="self-assessment">
+    <h4 class="self-assessment-title">
+      <i class="fas fa-clipboard-check"></i>
+      Self-Assessment
+    </h4>
+    <p class="self-assessment-hint">Rate your work on this assignment, then add a short reflection. All 5 fields are required before you can submit.</p>
+
+    <fieldset class="rating-group" data-field="technicalExcellence">
+      <legend class="rating-label">Technical Excellence</legend>
+      <p class="rating-question">Rate the technical quality of your work on this assignment — your use of tools, problem-solving, and technical growth.</p>
+      <div class="rating-scale" role="radiogroup" aria-label="Technical Excellence rating">
+        <label class="rating-option"><input type="radio" name="sa-technicalExcellence" value="1"><span>1</span></label>
+        <label class="rating-option"><input type="radio" name="sa-technicalExcellence" value="2"><span>2</span></label>
+        <label class="rating-option"><input type="radio" name="sa-technicalExcellence" value="3"><span>3</span></label>
+        <label class="rating-option"><input type="radio" name="sa-technicalExcellence" value="4"><span>4</span></label>
+        <label class="rating-option"><input type="radio" name="sa-technicalExcellence" value="5"><span>5</span></label>
+      </div>
+      <div class="rating-scale-hint">1 Explore &middot; 2 Understand &middot; 3 Apply &middot; 4 Analyze/Evaluate &middot; 5 Create/Extend</div>
+    </fieldset>
+
+    <fieldset class="rating-group" data-field="communication">
+      <legend class="rating-label">Communication</legend>
+      <p class="rating-question">Rate how clearly you communicated your work and process — explanations, documentation, and collaboration or help-seeking.</p>
+      <div class="rating-scale" role="radiogroup" aria-label="Communication rating">
+        <label class="rating-option"><input type="radio" name="sa-communication" value="1"><span>1</span></label>
+        <label class="rating-option"><input type="radio" name="sa-communication" value="2"><span>2</span></label>
+        <label class="rating-option"><input type="radio" name="sa-communication" value="3"><span>3</span></label>
+        <label class="rating-option"><input type="radio" name="sa-communication" value="4"><span>4</span></label>
+        <label class="rating-option"><input type="radio" name="sa-communication" value="5"><span>5</span></label>
+      </div>
+      <div class="rating-scale-hint">1 Beginning &middot; 2 Developing &middot; 3 Consistent &middot; 4 Strong &middot; 5 Model</div>
+    </fieldset>
+
+    <fieldset class="rating-group" data-field="workHabits">
+      <legend class="rating-label">Work Habits</legend>
+      <p class="rating-question">Rate your work habits on this assignment — time management, persistence, responsibility, and follow-through.</p>
+      <div class="rating-scale" role="radiogroup" aria-label="Work Habits rating">
+        <label class="rating-option"><input type="radio" name="sa-workHabits" value="1"><span>1</span></label>
+        <label class="rating-option"><input type="radio" name="sa-workHabits" value="2"><span>2</span></label>
+        <label class="rating-option"><input type="radio" name="sa-workHabits" value="3"><span>3</span></label>
+        <label class="rating-option"><input type="radio" name="sa-workHabits" value="4"><span>4</span></label>
+        <label class="rating-option"><input type="radio" name="sa-workHabits" value="5"><span>5</span></label>
+      </div>
+      <div class="rating-scale-hint">1 Beginning &middot; 2 Developing &middot; 3 Consistent &middot; 4 Strong &middot; 5 Model</div>
+    </fieldset>
+
+    <fieldset class="rating-group" data-field="aiOrchestration">
+      <legend class="rating-label">AI Orchestration</legend>
+      <p class="rating-question">Rate how effectively you used AI tools to support your work — prompting, verifying, extending, or accelerating your development process.</p>
+      <div class="rating-scale" role="radiogroup" aria-label="AI Orchestration rating">
+        <label class="rating-option"><input type="radio" name="sa-aiOrchestration" value="1"><span>1</span></label>
+        <label class="rating-option"><input type="radio" name="sa-aiOrchestration" value="2"><span>2</span></label>
+        <label class="rating-option"><input type="radio" name="sa-aiOrchestration" value="3"><span>3</span></label>
+        <label class="rating-option"><input type="radio" name="sa-aiOrchestration" value="4"><span>4</span></label>
+        <label class="rating-option"><input type="radio" name="sa-aiOrchestration" value="5"><span>5</span></label>
+      </div>
+      <div class="rating-scale-hint">1 Explore &middot; 2 Understand &middot; 3 Apply &middot; 4 Analyze/Evaluate &middot; 5 Create/Extend</div>
+    </fieldset>
+
+    <div class="form-group self-assessment-reflection">
+      <label for="self-assessment-reflection">Reflection</label>
+      <textarea id="self-assessment-reflection" placeholder="In a few sentences, describe what you learned, struggled with, or accomplished on this assignment. Include one specific example."></textarea>
+    </div>
+  </div>
+
   <div class="submission-options">
     <button class="ocs__btn ocs__btn--icon" onclick="switchSubmissionType('link')" type="button">
       <i class="fas fa-link"></i> Link Submission

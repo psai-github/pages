@@ -527,7 +527,7 @@ Check if this is a course lesson and determine which course context to use
     return CURRENT_ASSIGNMENT_ID;
   }
 
-  async function submitLinkToBackend(link, description) {
+  async function submitLinkToBackend(link, description, selfAssessment) {
     const assignmentId = await ensureAssignmentId();
     const { uid, personId } = await resolveCurrentUser();
     const content = { type: 'link', url: link, notes: description };
@@ -540,7 +540,12 @@ Check if this is a course lesson and determine which course context to use
         isGroupSubmission: false,
         content,
         comment: description,
-        isLate: false
+        isLate: false,
+        technicalExcellence: selfAssessment.technicalExcellence,
+        communication: selfAssessment.communication,
+        workHabits: selfAssessment.workHabits,
+        aiOrchestration: selfAssessment.aiOrchestration,
+        selfAssessmentReflection: selfAssessment.selfAssessmentReflection
       })
     });
     if (!res.ok) {
@@ -552,11 +557,11 @@ Check if this is a course lesson and determine which course context to use
     await fetch(`${javaURI}/api/grades`, {
       ...fetchOptions,
       method: 'POST',
-      body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: content, submittedAt: new Date().toISOString() })
+      body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: { ...content, selfAssessment }, submittedAt: new Date().toISOString() })
     }).catch(() => {}); // non-blocking — don't fail submission if grades write fails
   }
 
-  async function submitFilesToBackend(files, notes) {
+  async function submitFilesToBackend(files, notes, selfAssessment) {
     const assignmentId = await ensureAssignmentId();
     const { uid, personId } = await resolveCurrentUser();
     const assignmentName = await resolveAssignmentName();
@@ -569,6 +574,11 @@ Check if this is a course lesson and determine which course context to use
       fd.append('username', uid);
       fd.append('file', file);
       if (notes) fd.append('notes', notes);
+      fd.append('technicalExcellence', String(selfAssessment.technicalExcellence));
+      fd.append('communication', String(selfAssessment.communication));
+      fd.append('workHabits', String(selfAssessment.workHabits));
+      fd.append('aiOrchestration', String(selfAssessment.aiOrchestration));
+      fd.append('selfAssessmentReflection', selfAssessment.selfAssessmentReflection);
       const r = await fetch(`${javaURI}/api/assignment-submissions/upload`, {
         method: 'POST',
         mode: fetchOptions.mode,
@@ -585,7 +595,7 @@ Check if this is a course lesson and determine which course context to use
       await fetch(`${javaURI}/api/grades`, {
         ...fetchOptions,
         method: 'POST',
-        body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: content, submittedAt: new Date().toISOString() })
+        body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: { ...content, selfAssessment }, submittedAt: new Date().toISOString() })
       }).catch(() => {}); // non-blocking
     }
   }
@@ -711,6 +721,63 @@ Check if this is a course lesson and determine which course context to use
 
   /**
    * ============================================
+   * SELF-ASSESSMENT: Collect, validate & reset
+   * ============================================
+   */
+  const SELF_ASSESSMENT_RATING_FIELDS = {
+    technicalExcellence: 'Technical Excellence',
+    communication: 'Communication',
+    workHabits: 'Work Habits',
+    aiOrchestration: 'AI Orchestration'
+  };
+
+  function getSelfAssessmentData() {
+    const data = {};
+    for (const field of Object.keys(SELF_ASSESSMENT_RATING_FIELDS)) {
+      const checked = document.querySelector(`input[name="sa-${field}"]:checked`);
+      data[field] = checked ? parseInt(checked.value, 10) : null;
+    }
+    data.selfAssessmentReflection = document.getElementById('self-assessment-reflection')?.value.trim() || '';
+    return data;
+  }
+
+  function validateSelfAssessment(data) {
+    for (const [field, label] of Object.entries(SELF_ASSESSMENT_RATING_FIELDS)) {
+      const value = data[field];
+      if (!Number.isInteger(value) || value < 1 || value > 5) {
+        return `Please rate "${label}" before submitting.`;
+      }
+    }
+    if (!data.selfAssessmentReflection) {
+      return 'Please add a short self-assessment reflection before submitting.';
+    }
+    return null;
+  }
+
+  function resetSelfAssessment() {
+    document.querySelectorAll('#self-assessment input[type="radio"]').forEach(input => {
+      input.checked = false;
+      input.closest('.rating-option')?.classList.remove('selected');
+    });
+    const reflection = document.getElementById('self-assessment-reflection');
+    if (reflection) reflection.value = '';
+  }
+
+  function setupSelfAssessmentRatings() {
+    const container = document.getElementById('self-assessment');
+    if (!container) return;
+    container.addEventListener('change', (e) => {
+      const input = e.target;
+      if (input.tagName !== 'INPUT' || input.type !== 'radio') return;
+      const group = input.closest('.rating-scale');
+      if (!group) return;
+      group.querySelectorAll('.rating-option').forEach(opt => opt.classList.remove('selected'));
+      input.closest('.rating-option')?.classList.add('selected');
+    });
+  }
+
+  /**
+   * ============================================
    * FORM SUBMISSION: Handle submissions
    * ============================================
    */
@@ -722,13 +789,20 @@ Check if this is a course lesson and determine which course context to use
         const link = document.getElementById('submission-link').value.trim();
         const description = document.getElementById('link-description').value.trim();
         const submitBtn = linkForm.querySelector('button[type="submit"]');
+        const selfAssessment = getSelfAssessmentData();
+        const selfAssessmentError = validateSelfAssessment(selfAssessment);
+        if (selfAssessmentError) {
+          showStatus('error', selfAssessmentError);
+          return;
+        }
         submitBtn.disabled = true;
         showStatus('loading', 'Submitting...');
         try {
-          await submitLinkToBackend(link, description);
-          saveSubmissionLocally('link', { link, description });
+          await submitLinkToBackend(link, description, selfAssessment);
+          saveSubmissionLocally('link', { link, description, selfAssessment });
           showStatus('success', 'Link submitted successfully!');
           this.reset();
+          resetSelfAssessment();
         } catch (err) {
           showStatus('error', err.message);
         } finally {
@@ -744,6 +818,12 @@ Check if this is a course lesson and determine which course context to use
         const fileInput = document.getElementById('file-input');
         const notes = document.getElementById('file-notes')?.value?.trim() || '';
         const submitBtn = fileForm.querySelector('button[type="submit"]');
+        const selfAssessment = getSelfAssessmentData();
+        const selfAssessmentError = validateSelfAssessment(selfAssessment);
+        if (selfAssessmentError) {
+          showStatus('error', selfAssessmentError);
+          return;
+        }
         submitBtn.disabled = true;
         showStatus('loading', 'Uploading...');
         try {
@@ -752,12 +832,13 @@ Check if this is a course lesson and determine which course context to use
               throw new Error(`${file.name} exceeds ${FILE_SIZE_LIMIT_MB}MB limit.`);
             }
           }
-          await submitFilesToBackend(Array.from(fileInput.files), notes);
-          saveSubmissionLocally('file', { files: Array.from(fileInput.files).map(f => f.name), notes });
+          await submitFilesToBackend(Array.from(fileInput.files), notes, selfAssessment);
+          saveSubmissionLocally('file', { files: Array.from(fileInput.files).map(f => f.name), notes, selfAssessment });
           showStatus('success', `${fileInput.files.length} file(s) submitted successfully!`);
           fileInput.value = '';
           updateFileListDisplay();
           this.reset();
+          resetSelfAssessment();
         } catch (err) {
           showStatus('error', err.message);
         } finally {
@@ -845,6 +926,7 @@ Check if this is a course lesson and determine which course context to use
     
     // Assignment submission
     setupSubmissionForms();
+    setupSelfAssessmentRatings();
     
     // File upload handling
     const fileUploadArea = document.getElementById('file-upload-area');
@@ -1025,6 +1107,95 @@ Check if this is a course lesson and determine which course context to use
 
   .assignment-submission-icon {
     color: #2563eb;
+  }
+
+  /* Self-Assessment */
+  .self-assessment {
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+  }
+
+  .self-assessment-title {
+    color: #333;
+    font-size: 1rem;
+    margin: 0 0 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .self-assessment-hint {
+    color: #666;
+    font-size: 13px;
+    margin: 0 0 16px 0;
+  }
+
+  .rating-group {
+    border: none;
+    padding: 0;
+    margin: 0 0 18px 0;
+  }
+
+  .rating-label {
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 0;
+    margin-bottom: 4px;
+  }
+
+  .rating-question {
+    color: #555;
+    font-size: 13px;
+    margin: 0 0 8px 0;
+  }
+
+  .rating-scale {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .rating-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    background: white;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .rating-option:has(input:checked),
+  .rating-option.selected {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+  }
+
+  .rating-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .rating-scale-hint {
+    color: #999;
+    font-size: 11px;
+    margin-top: 6px;
+  }
+
+  .self-assessment-reflection {
+    margin-bottom: 0;
   }
 
   .submission-options {
