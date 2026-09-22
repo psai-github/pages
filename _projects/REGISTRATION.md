@@ -59,7 +59,7 @@ The Makefile reads `.makeprojects` and includes each project:
 
 ### 3. No Project-Specific Targets in Makefile
 
-The main Makefile contains **zero** project-specific code. All project targets come from individual Makefiles.
+The main Makefile contains **zero** named project-specific code. It applies the same build rules to registered projects and shared category includes.
 
 ## Project Structure Requirements
 
@@ -68,28 +68,33 @@ Registered projects use a nested category and project name. Their Makefile is ge
 **Nested Structure:**
 
 ```text
-_projects/<category>/<project-name>/
-├── index.md                    # Optional project index; use this or index.ipynb
-├── index.ipynb                 # Optional notebook index; never use with index.md
-├── notebooks/                  # Optional lesson notebooks; copied and converted
-│   └── lesson.ipynb
-├── navigation/                 # Optional navigation pages and includes
-│   ├── page.md
-│   ├── include.html
-│   └── page.ipynb
-├── js/                         # JavaScript source code
-├── sass/                       # SCSS definitions; main.scss is the entry point
-├── levels/                     # Optional OCS game engine code
-├── model/                      # Optional model code
-├── services/                   # Optional service code
-├── data/                       # Optional project data
-├── images/                     # Assets
-├── favicon.png                 # Optional catalog image
-├── docs/                       # Optional project documentation
-└── Makefile                    # Generated from _projects/_template/Makefile
+_projects/<category>/
+├── _includes/                  # Optional includes shared by the category
+│   └── shared-view.html
+└── <project-name>/
+   ├── index.md                # Optional project index; use this or index.ipynb
+   ├── index.ipynb             # Optional notebook index; never use with index.md
+   ├── notebooks/              # Optional lesson notebooks; copied and converted
+   │   └── lesson.ipynb
+   ├── navigation/             # Optional navigation pages and includes
+   │   ├── page.md
+   │   ├── include.html
+   │   └── page.ipynb
+   ├── js/                     # JavaScript source code
+   ├── sass/                   # SCSS definitions; main.scss is the entry point
+   ├── levels/                 # Optional OCS game engine code
+   ├── model/                  # Optional model code
+   ├── services/               # Optional service code
+   ├── data/                   # Optional project data
+   ├── images/                 # Assets
+   ├── favicon.png             # Optional catalog image
+   ├── docs/                   # Optional project documentation
+   └── Makefile                # Generated from _projects/_template/Makefile
 ```
 
 Files under `notebooks/` are copied to `_notebooks/projects/<project-name>/` and converted into posts under `_posts/projects/<project-name>/`. The `index.md` and `index.ipynb` files represent the project index, so a project may provide at most one of them.
+
+Files under `_projects/<category>/_includes/` are copied to `_includes/projects/<category>/`. Project pages reference them with `{% raw %}{% include projects/<category>/shared-view.html %}{% endraw %}`. The generated `_includes/projects/` tree is ignored by Git and removed by `make clean`; edit only the local source under `_projects/`.
 
 **Recommended Categories:**
 
