@@ -92,9 +92,12 @@ _projects/<project-name>/
 ```text
 _projects/games/<project-name>/
 ├── README.md                   # Documentation
-├── notebook.src.ipynb          # Source notebook (optional)
+├── index.md                    # Index in markdown (optional md or ipynb)
+├── index.ipynb                 # Index in notebook (optional md or ipynb)
+├── notebooks/                  # Notebook code 
 ├── js/                         # JavaScript source code
 ├── sass/                       # SCSS definitions
+├── levels/                     # OCS game engine code 
 ├── images/                     # Assets
 └── docs/                       # Project docs
 ```
