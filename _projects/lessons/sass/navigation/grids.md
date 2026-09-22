@@ -5,7 +5,7 @@ title: OCS Grid Grammar
 categories: [SASS, Grids]
 lesson_language: SASS
 lesson_topic: Grids
-lesson_part: interactive
+lesson_source: OCS
 lesson_type: lesson
 permalink: /sass/grids/
 author: Aryan M, Raymond L, Pranay K
