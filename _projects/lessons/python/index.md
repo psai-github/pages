@@ -34,7 +34,7 @@ permalink: /navigation/py-reference/
     {% else %}
         {% assign lessons = "" | split: "" %}
     {% endif %}
-    <div class="ocs__grid ocs__grid--card cols-3 language-reference__cards">
+    <div class="ocs__grid ocs__grid--card cols-2 language-reference__cards">
         {% for lesson in lessons %}
         <article class="ocs__grid-cell">            
             <a class="ocs__card" href="{{ lesson.url | relative_url }}">
