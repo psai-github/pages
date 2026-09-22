@@ -77,7 +77,8 @@ Each project must have a Makefile, regardless of structure:
 ```text
 _projects/<project-name>/
 ├── README.md                   # Documentation
-├── notebook.src.ipynb          # Source notebook (optional)
+├── notebooks/                  # Source notebooks (optional)
+│   └── lesson.ipynb
 ├── js/                         # JavaScript source code
 ├── sass/                       # SCSS definitions (must include a main.scss)
 ├── levels/                     # Legacy project code
@@ -159,6 +160,8 @@ The `_projects/_template/Makefile` is the single source that powers all projects
 **Standard Build Targets:**
 - `build` - Copy assets and notebooks to distribution directories
 - `assets` - Copy JS, SASS, images to assets directories
+- `notebooks` - Copy `notebooks/*.ipynb` into `_notebooks/projects/<project-name>/`
+- `convert` - Convert copied notebooks into Jekyll posts
 - `clean` - Remove distributed files (preserves source)
 - `watch` - Auto-rebuild on file changes (for dev mode)
 - `docs` - Copy documentation to _posts
