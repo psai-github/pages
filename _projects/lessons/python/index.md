@@ -15,7 +15,6 @@ permalink: /navigation/py-reference/
 <div class="ocs__container" id="language-reference">
     <div class="ocs__badge">Lessons · Python</div>
     <h1>Python Reference</h1>
-
     <div class="language-reference__toolbar">
         <div class="language-reference__search search" aria-label="Search Python lessons">
             <div class="search-input-wrap">
@@ -30,12 +29,11 @@ permalink: /navigation/py-reference/
             <a class="ocs__btn pill" href="{{ '/navigation/sass/' | relative_url }}">SASS</a>
         </nav>
     </div>
-
-        {% if site.categories.Python %}
-            {% assign lessons = site.categories.Python | where_exp: "lesson", "lesson.hide != true" | sort: "title" %}
-        {% else %}
-            {% assign lessons = "" | split: "" %}
-        {% endif %}
+    {% if site.categories.Python %}
+        {% assign lessons = site.categories.Python | where_exp: "lesson", "lesson.hide != true" | sort: "title" %}
+    {% else %}
+        {% assign lessons = "" | split: "" %}
+    {% endif %}
     <div class="ocs__grid ocs__grid--card cols-3 language-reference__cards">
         {% for lesson in lessons %}
         <article class="ocs__grid-cell">            
