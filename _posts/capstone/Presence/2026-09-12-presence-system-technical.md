@@ -2,14 +2,14 @@
 microblog: true
 toc: false
 layout: post
-title: RFID Presence, Technical Detail & Flow
-description: System architecture, the presence-state machine, data model, and attendance-window logic for the RFID + camera-correlated classroom presence project.
-permalink: /capstone/rfid-presence/technical/
+title: Classroom Presence System, Technical Detail & Flow
+description: System architecture, the presence-state machine, data model, and attendance-window logic for the classroom presence project.
+permalink: /capstone/presence-system/technical/
 year: "2026-2027"
 rp_active: technical
 ---
 
-{% assign data = site.data.rfid_presence_infograph %}
+{% assign data = site.data.presence_system_infograph %}
 <!-- markdownlint-disable MD033 MD010 MD012 -->
 <div class="rfid-presence-infograph">
   <div class="rfid-presence-header">
@@ -18,7 +18,7 @@ rp_active: technical
     <p class="ocs__description">How the RFID and camera signals get correlated into an attendance record, for readers who want the mechanism and not just the pitch.</p>
   </div>
 
-  {% include rfid-presence-nav.html %}
+  {% include presence-system-nav.html %}
 
   <div class="ocs__card">
     <h3 class="ocs__section-title">System Architecture</h3>
@@ -139,14 +139,14 @@ Computer unlinked"]</pre>
       <li><strong>Frontend</strong>: rough dashboard, being replaced with a roster and admin view in Phase 2.</li>
     </ul>
     <div class="ocs__callout">
-      The full RFID and camera architecture above is the <strong>target design</strong> the team is building toward. The current running system implements only the leftmost slice of it: RFID read, log, dashboard, with no camera correlation yet. See <a href="/capstone/rfid-presence/phases/">Phases</a> for how the gap closes.
+      The full RFID and camera architecture above is the <strong>target design</strong> the team is building toward. The current running system implements only the leftmost slice of it: RFID read, log, dashboard, with no camera correlation yet. See <a href="/capstone/presence-system/phases/">Phases</a> for how the gap closes.
     </div>
   </div>
 
   <div class="ocs__card">
     <h3 class="ocs__section-title">Open Technical Questions</h3>
     <ul class="ocs__checklist">
-      <li class="open"><span class="ocs__checklist-box"></span><span>Bag-orientation reliability: a tagged laptop inside a closed backpack has no guaranteed tag-to-reader orientation, and UHF read reliability drops off-axis. Not yet solved. See <a href="/capstone/rfid-presence/summary/">Project Summary</a> for candidate antenna designs that address this directly.</span></li>
+      <li class="open"><span class="ocs__checklist-box"></span><span>Bag-orientation reliability: a tagged laptop inside a closed backpack has no guaranteed tag-to-reader orientation, and UHF read reliability drops off-axis. Not yet solved. See <a href="/capstone/presence-system/summary/">Project Summary</a> for candidate antenna designs that address this directly.</span></li>
       <li class="open"><span class="ocs__checklist-box"></span><span>Camera system interface: what the face-scanning system exposes (API, event stream, or file) still needs to be defined, including how it reports a student who has opted out.</span></li>
       <li class="open"><span class="ocs__checklist-box"></span><span>Tag mounting standard: a single mounting spot on the laptop (for example, the underside near a plastic vent) so tag type (on-metal versus standard) can be standardized across devices.</span></li>
     </ul>

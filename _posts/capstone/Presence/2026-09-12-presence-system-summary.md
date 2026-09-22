@@ -2,23 +2,23 @@
 microblog: true
 toc: false
 layout: post
-title: RFID Presence, Project Summary
-description: A plain-language summary of the RFID + camera-correlated classroom presence project for mentors, covering the problem, the idea, and the design rationale.
-permalink: /capstone/rfid-presence/summary/
+title: Classroom Presence System, Project Summary
+description: A plain-language summary of the classroom presence project for mentors, covering the problem, the idea, and the design rationale.
+permalink: /capstone/presence-system/summary/
 year: "2026-2027"
 rp_active: summary
 ---
 
-{% assign data = site.data.rfid_presence_infograph %}
+{% assign data = site.data.presence_system_infograph %}
 <!-- markdownlint-disable MD033 MD010 MD012 -->
 <div class="rfid-presence-infograph">
   <div class="rfid-presence-header">
     <div class="ocs__badge">Project Summary, For Mentors</div>
     <h1 class="rfid-presence-title">Classroom Presence System</h1>
-    <p class="ocs__description">The idea, why it's designed this way, where it stands today, and how it compares to what already exists. See the <a href="/capstone/rfid-presence/">Overview</a> page for the problem statement and research question.</p>
+    <p class="ocs__description">The idea, why it's designed this way, where it stands today, and how it compares to what already exists. See the <a href="/capstone/presence-system/">Overview</a> page for the problem statement and research question.</p>
   </div>
 
-  {% include rfid-presence-nav.html %}
+  {% include presence-system-nav.html %}
 
   <div class="ocs__card">
     <h3 class="ocs__section-title">The Idea, in One Paragraph</h3>
@@ -40,7 +40,7 @@ rp_active: summary
       </table>
     </div>
     <div class="ocs__callout">
-      The full technical rationale, state model, and data schema are on the <a href="/capstone/rfid-presence/technical/">Technical Detail</a> page.
+      The full technical rationale, state model, and data schema are on the <a href="/capstone/presence-system/technical/">Technical Detail</a> page.
     </div>
   </div>
 
@@ -60,7 +60,7 @@ rp_active: summary
     <h3 class="ocs__section-title">Where It Stands Today</h3>
     <p class="rfid-presence-about">We're in <strong>Phase 1</strong>: a working contact-tap prototype on a CrowPi board, with one scan pad, 10 demo tags, a Flask backend, and a rough dashboard. It proves the core read, log, and display loop end to end. It does not yet include the camera correlation, UHF doorway detection, or tamper-evident tags described above. Those arrive in later phases, moving from proving the concept works to proving it works contactlessly, at classroom scale.</p>
     <div class="ocs__callout">
-      The full four-phase roadmap, including what's built versus still needed, is on the <a href="/capstone/rfid-presence/phases/">Phases</a> page.
+      The full four-phase roadmap, including what's built versus still needed, is on the <a href="/capstone/presence-system/phases/">Phases</a> page.
     </div>
   </div>
 
@@ -196,7 +196,7 @@ rp_active: summary
           </tr>
           <tr>
             <td><a href="https://www.beontag.com/blog/rfid-read-range/" target="_blank" rel="noopener">RFID Read Range: What Really Affects It</a></td>
-            <td>Practical vendor reference on the factors (power, polarization, orientation, material) behind the read-range numbers used in the <a href="/capstone/rfid-presence/funding/">Funding</a> page bill of materials.</td>
+            <td>Practical vendor reference on the factors (power, polarization, orientation, material) behind the read-range numbers used in the <a href="/capstone/presence-system/funding/">Funding</a> page bill of materials.</td>
           </tr>
           <tr>
             <td><a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/mop.27610" target="_blank" rel="noopener">Card-Type Slot Antenna for UHF RFID Tag Close to the Chest of a Human Body</a></td>

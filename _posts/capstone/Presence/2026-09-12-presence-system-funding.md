@@ -2,9 +2,9 @@
 microblog: true
 toc: false
 layout: post
-title: RFID Presence, Funding & Budget
-description: Bill of materials, cost estimates, and the funding ask by phase for the RFID + camera-correlated classroom presence project.
-permalink: /capstone/rfid-presence/funding/
+title: Classroom Presence System, Funding & Budget
+description: Bill of materials, cost estimates, and the funding ask by phase for the classroom presence project.
+permalink: /capstone/presence-system/funding/
 year: "2026-2027"
 rp_active: funding
 ---
@@ -15,7 +15,7 @@ rp_active: funding
   <div class="ocs__badge">Funding &amp; Budget</div>
   <h1 class="rfid-presence-title">Bill of Materials &amp; Funding Ask</h1>
   <p class="ocs__description">What's already covered, what the next phase needs, and the itemized hardware behind it.</p>
-</div>{% include rfid-presence-nav.html %}
+</div>{% include presence-system-nav.html %}
 <div class="ocs__card">
   <h3 class="ocs__section-title">Funding Need by Phase</h3>
   <div class="rfid-presence-table-wrap">
