@@ -29,9 +29,9 @@ KNOWN_TARGETS := \
 	build-minima build-cayman build-yat build-so-simple \
 	convert convert-docx convert-docx-config convert-single convert-registered-notebooks \
 	watch-notebooks watch-projects watch-files bundle-install jekyll-serve \
-	build-registered-projects build-registered-docs build-dev-projects \
+	generate-makefiles build-registered-projects build-registered-docs build-dev-projects \
 	watch-registered-projects clean-registered-projects watch-dev-projects \
-	list-projects split-courses clean-courses use-minima use-cayman use-yat \
+	list-projects split-courses clean-courses clean-generated-makefiles use-minima use-cayman use-yat \
 	use-so-simple use-hydejack watch-rebuild
 
 ###########################################
@@ -347,8 +347,17 @@ clean: stop
 	done
 	@echo "Removing _site directory..."
 	@rm -rf _site
+	@$(MAKE) clean-generated-makefiles
+
+# Remove generated project Makefiles while preserving any versioned overrides.
+clean-generated-makefiles:
 	@echo "Cleaning auto-generated Makefiles..."
-	@find _projects -name "Makefile" ! -path "*/_template/*" ! -path "_projects/lessons/python/Makefile" ! -path "_projects/lessons/javascript/Makefile" ! -path "_projects/lessons/java/Makefile" -type f -exec rm {} +
+	@find _projects -name "Makefile" ! -path "*/_template/*" -type f -print0 | \
+		while IFS= read -r -d '' makefile; do \
+			if ! git ls-files --error-unmatch "$$makefile" >/dev/null 2>&1; then \
+				rm -f "$$makefile"; \
+			fi; \
+		done
 
 stop:
 	@echo "Stopping server..."
@@ -618,7 +627,7 @@ list-projects:
 		fi; \
 	done || echo "  None found"
 
-.PHONY: list-projects build-registered-projects convert-registered-notebooks build-registered-docs watch-registered-projects clean-registered-projects
+.PHONY: generate-makefiles list-projects build-registered-projects convert-registered-notebooks build-registered-docs watch-registered-projects clean-registered-projects clean-generated-makefiles
 
 ###########################################
 # Allow unknown targets (project selectors)
