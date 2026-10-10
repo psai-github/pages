@@ -74,7 +74,7 @@ _projects/<category>/
 └── <project-name>/
    ├── index.md                # Optional project index; use this or index.ipynb
    ├── index.ipynb             # Optional notebook index; never use with index.md
-   ├── notebooks/              # Optional lesson notebooks; copied and converted
+   ├── notebooks/              # Optional lesson notebooks; converted directly
    │   └── lesson.ipynb
    ├── navigation/             # Optional navigation pages and includes
    │   ├── page.md
@@ -92,7 +92,100 @@ _projects/<category>/
    └── Makefile                # Generated from _projects/_template/Makefile
 ```
 
-Files under `notebooks/` are copied to `_notebooks/projects/<project-name>/` and converted into posts under `_posts/projects/<project-name>/`. The `index.md` and `index.ipynb` files represent the project index, so a project may provide at most one of them.
+Files under `notebooks/` are converted directly into posts under
+`_posts/projects/<project-name>/`; there is no intermediate notebook copy.
+`index.ipynb` retains the dated `<date>-<project-name>_IPYNB_2_.md` output in that
+directory. The `index.md` and `index.ipynb` files represent the project index,
+so a project may provide at most one of them.
+
+One Python invocation handles a project's index, lesson, and navigation
+notebooks, with at most four conversion workers by default. A content-based
+cache in `.notebook-conversion-cache/` skips unchanged sources, invalidates when
+the converter changes or output is missing/modified, and avoids rewriting
+identical Markdown. Set `CONVERT_JOBS=1` for sequential conversion or
+`CONVERT_FLAGS=--force` to bypass the cache. Batch failures stop Make with the
+source filename and error; they do not report success.
+
+Old `_notebooks/projects/` copies are obsolete generated artifacts, not inputs
+to global conversion or notebook splitting. Project multi-course posts are
+still split from `_posts` by `make split-courses`. Do not hand-edit copied
+notebooks, generated posts, or course-split files.
+
+### CSA Curriculum Source Ownership
+
+CSA sources are registered lesson projects under `lessons/cs112`, `lessons/cs113`,
+`lessons/csa1`, `lessons/csa2`, and `lessons/ds2`, in that ownership priority order.
+Keep one authoritative source even when its topic supports multiple stages.
+Notebook lessons belong directly in `notebooks/` (the template does not recurse);
+authored Markdown pages belong directly in `docs/`. Include the original year or
+variant in a filename when flattening would create a collision. Historical
+full-stack Markdown exports without notebook originals are retained as references.
+
+`lesson_group` identifies ownership for the collection indexes. Existing
+`courses.csa.week` values still drive the shared CSA timeline, regardless of folder.
+CS112/CS113 sources also carry `articulation: {institution: MiraCosta College,
+course: CS112}` (or `CS113`), separate from `courses` and without outcome IDs.
+This records curriculum alignment, not mastery or awarded credit. Preserve
+explicit permalinks, existing course assignments, and lesson bodies when moving
+sources; never move or edit generated notebook posts as authoritative lessons.
+Project publication regenerates those posts from the new notebook sources.
+
+The curated weeks 13-37 follow `_data/csa.yml`, with at most three primary topic
+documents per instructional week across the curriculum and `lessons/java`.
+Runner-backed AP FRQs already aligned to CS112 may exceed that limit as
+supplemental practice in the matching instructional week. Tag these with
+`lesson_type: ap-practice`; they are not new primary topics. Use topic-first
+titles such as `FRQ 3 - Array or ArrayList Manipulation - 2017 Exam Q1 - CS112`
+and filenames `<date>-frq3-arrays-arraylists-2017-exam-q1-cs112.ipynb`,
+preserving the permalink. `ap_frq_category` records the four-question AP
+category (1 methods/control, 2 class writing/design, 3 arrays/ArrayLists,
+4 2D arrays); `ap_exam_year` and `ap_exam_question` record historical exam
+identity separately. Audit the exercise, not its old title or question number.
+Use plain-text descriptions, not `{{ page.year }}` or other Liquid expressions
+inside frontmatter: cards do not recursively render metadata, and the notebook
+converter's unquoted output treats `#` as a YAML comment.
+Older exams mixed skills and used different ordering. The leading FRQ number
+is a practice classification, not a claim that the historical question was
+renumbered or had today's scoring format. Overview pages omit exam identity.
+The CS112 report follows MiraCosta's original five-section outline and lab
+outline, using `_data/cs112_topics.json`. Map stable source permalinks, not
+filenames, titles, or AP question numbers; renamed lessons retain their topic
+placement. The report reads current titles, weeks, and supplemental status from
+published lesson metadata. A lesson can support multiple subtopics without
+changing its schedule. FRQs are taught in CSA2 and beyond; CS112 topic placement
+does not move FRQ instruction into CSA1. POJO, JPA, and APIs are introduced in
+CSA1 week 4 as an entry point for students with prior APCSP Python Web/API
+experience. Later CSA2 and DS2 work deepens these CS112-aligned foundations;
+articulation alignment does not impose a minimum teaching week.
+Each subtopic shows available material, strengthening
+needs, and a PBL observation/extension. Draft links are explicitly unfinished,
+and persistence references do not claim file-I/O coverage. Deleted lessons are
+not rendered; new unmapped lessons appear in an awaiting-mapping section.
+Update the mapping and coverage notes when adding or removing sources. Validate
+with `bundle exec ruby scripts/test_cs112_report.rb`.
+The exact supplemental selection is recorded in
+`tests/fixtures/csa_frq_practice.json`. CSA week cards and sidebar lessons share
+title ordering so topic groups also stay together in the lesson player.
+Non-runner examples and other unselected
+FRQs remain accessible references without a CSA week; do not refill a week
+with every alternate example. The expected primary-source
+selection is recorded in `tests/fixtures/csa_week_schedule.json` for regression
+checks; frontmatter remains the publishing source of truth. Java references
+stay in their existing project and do not acquire articulation ownership.
+
+Summative, presentation, AP-review, and finals weeks use one checklist document
+with links to previously introduced work, not newly assigned FRQs. The shared
+`csa-checkpoint.html` reads the existing week goals. Do not enable challenge
+submission on these checkpoints. `lesson_notes` in the course outline identifies
+remaining authoring gaps; a library example is not a completed custom
+implementation lesson. Keep gaps visible rather than scheduling unfinished drafts.
+
+Unfinished notebook skeletons use `lesson_status: draft`, `hide: true`,
+`search_exclude: true`, and `planned_week`, with no `courses` assignment.
+The timeline does not use `hide` to exclude lessons, so omitting `courses` is
+essential until a draft is ready. Finish the exercise and assessment before
+assigning its week and enabling challenge submissions. Advanced CS113 layers
+remain differentiated; the DS2 ML/AI collection is a separate project pathway.
 
 Files under `_projects/<category>/_includes/` are copied to `_includes/projects/<category>/`. Project pages reference them with `{% raw %}{% include projects/<category>/shared-view.html %}{% endraw %}`. The generated `_includes/projects/` tree is ignored by Git and removed by `make clean`; edit only the local source under `_projects/`.
 
@@ -107,7 +200,7 @@ Files under `_projects/<category>/_includes/` are copied to `_includes/projects/
 **The build system automatically generates Makefiles** for all registered projects:
 
 - **Shared Default**: `_projects/_template/Makefile` defines the standard project behavior
-- **Auto-Copy on Build**: When you run any make target, the template is copied to projects missing a Makefile
+- **Auto-Copy on Build**: Registered-project builds and `make generate-makefiles` create or refresh untracked generated Makefiles when the template changes
 - **Always Up-to-Date**: Template improvements instantly benefit all projects
 - **Versioned Overrides**: Intentional tracked Makefiles are preserved by cleanup without path-specific exceptions
 
@@ -161,10 +254,11 @@ The `_projects/_template/Makefile` is the single source that powers all projects
 
 **Standard Build Targets:**
 
-- `build` - Copy assets and notebooks to distribution directories
+- `build` - Copy assets and incrementally publish source notebooks
 - `assets` - Copy JS, SASS, images to assets directories
-- `notebooks` - Copy `notebooks/*.ipynb` into `_notebooks/projects/<project-name>/`
-- `convert` - Convert copied notebooks into Jekyll posts
+- `notebooks` - Compatibility alias for `convert`
+- `convert` - Batch-convert changed index, lesson, and navigation notebooks directly into Jekyll posts
+- `convert-single NOTEBOOK_FILE=notebooks/<filename>.ipynb` - Convert only one project source
 - `clean` - Remove distributed files (preserves source)
 - `watch` - Auto-rebuild on file changes (for dev mode)
 - `docs` - Copy documentation to _posts
@@ -176,7 +270,7 @@ The `_projects/_template/Makefile` is the single source that powers all projects
 - No fswatch or inotify required
 - Individual markers per project: `/tmp/.project_<name>_marker`
 - Checks for changes every 2 seconds
-- Automatically rebuilds assets when JS, SASS, images, or notebooks change
+- Converts only the edited notebook; rebuilds assets when JS, SASS, or images change
 - Filters out Makefile changes to avoid regeneration loops
 
 **Auto-Detection Features:**
@@ -227,7 +321,8 @@ the standard project Makefile:
 
 - `.md` files go to `_posts/projects/<project-name>/` with the navigation date prefix.
 - `.html` files go to `_includes/projects/<project-name>/`.
-- `.ipynb` files go to `_notebooks/projects/<project-name>/` with the navigation date prefix.
+- `.ipynb` files convert directly to `_posts/projects/<project-name>/` with the
+  navigation date prefix and `_IPYNB_2_.md` suffix.
 
 ### Game Catalog Images
 

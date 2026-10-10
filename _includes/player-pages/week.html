@@ -34,6 +34,9 @@
     <div class="ocs__keypoint"><span class="ocs__check">&check;</span>{{ goal }}</div>
     {%- endfor %}
   </div>
+  {%- if weekData.lesson_notes %}
+  <p class="ocs__text">{{ weekData.lesson_notes | escape }}</p>
+  {%- endif %}
 </div>
 {%- endif %}
 
@@ -53,11 +56,11 @@
   <div class="ocs__nav-grid ocs__nav-grid--in-card">
     {%- for post in weekPosts %}
     <a class="ocs__nav-card" href="{{ site.baseurl }}{{ post.url }}">
-      <span class="ocs__nav-card-kicker">{% if post.assignment == true %}Assignment{% else %}Lesson{% endif %}</span>
+      <span class="ocs__nav-card-kicker">{% if post.lesson_type == 'ap-practice' %}Supplemental AP practice{% elsif post.assignment == true %}Assignment{% else %}Lesson{% endif %}</span>
       <span class="ocs__nav-card-title">{{ post.title | escape }}</span>
-      {%- if post.description %}
-      <span class="ocs__text">{{ post.description | strip_html | truncate: 140 }}</span>
-      {%- endif %}
+      {% if post.description %}
+      <span class="ocs__text">{{ post.description | strip_html | truncate: 140 | escape }}</span>
+      {% endif %}
     </a>
     {%- endfor %}
   </div>
