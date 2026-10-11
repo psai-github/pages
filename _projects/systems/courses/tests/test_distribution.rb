@@ -137,8 +137,8 @@ class ProjectDistributionTest < Minitest::Test
     assert_includes template, 'scripts/publish_project.rb" fingerprint'
     assert_includes File.read(File.expand_path("../../../.makeprojects", __dir__)), "systems/courses:dev"
     ProjectPublisher.run("clean", project, @workspace)
-    assert File.file?(File.join(project, "layouts/post.html"))
-    refute File.exist?(File.join(@workspace, "_layouts/post.html"))
+    assert File.file?(File.join(project, "_includes/course-document-player.html"))
+    refute File.exist?(File.join(@workspace, "_includes/course-document-player.html"))
   end
 
   def test_shared_makefile_publishes_the_kit_and_keeps_calendar_conventions
@@ -149,7 +149,7 @@ class ProjectDistributionTest < Minitest::Test
     stdout, stderr, status = Open3.capture3("make", "-f", template, "-C", project,
                                           "assets", "WORKSPACE_ROOT=#{@workspace}")
     assert status.success?, "#{stdout}\n#{stderr}"
-    assert_equal File.read(File.join(project, "layouts/post.html")), File.read(File.join(@workspace, "_layouts/post.html"))
+    assert_equal File.read(File.join(project, "_includes/course-document-player.html")), File.read(File.join(@workspace, "_includes/course-document-player.html"))
     assert_includes File.read(File.join(@workspace, "assets/css/projects/courses/main.scss")), '@import "projects/courses/main";'
     refute File.exist?(File.join(@workspace, "assets/js/projects/courses/announcement-calendar"))
     css_entry = File.join(@workspace, "assets/css/projects/courses/main.scss")

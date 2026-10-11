@@ -6,6 +6,7 @@ require "open3"
 
 ROOT = File.expand_path("../../../..", __dir__)
 PROJECT = File.expand_path("..", __dir__)
+BLOGS = File.expand_path("../../blogs", __dir__)
 
 def assert(condition, message)
   abort("FAIL: #{message}") unless condition
@@ -13,14 +14,17 @@ end
 
 Dir.mktmpdir("course-landing-") do |source|
   FileUtils.mkdir_p(File.join(source, "_layouts"))
-  FileUtils.cp(File.join(PROJECT, "layouts/post.html"), File.join(source, "_layouts"))
+  FileUtils.cp(File.join(BLOGS, "layouts/post.html"), File.join(source, "_layouts"))
   File.write(File.join(source, "_layouts/opencs.html"), '{% include themes/minima/header.html %}{{ content }}')
   FileUtils.mkdir_p(File.join(source, "_includes/themes/minima"))
   FileUtils.cp(File.join(ROOT, "_includes/themes/minima/header.html"),
                File.join(source, "_includes/themes/minima/header.html"))
   FileUtils.mkdir_p(File.join(source, "_includes/player-pages"))
-  %w[course-nav.html course-title.html lesson-sidebar-nav.html lesson-topbar.html lesson-modals.html announcement_chat.html blog-catalog.html post_list_image_card.html].each do |name|
+  %w[course-document-player.html course-nav.html course-title.html lesson-sidebar-nav.html lesson-topbar.html lesson-modals.html announcement_chat.html].each do |name|
     FileUtils.cp(File.join(PROJECT, "_includes", name), File.join(source, "_includes"))
+  end
+  %w[blog-catalog.html post_list_image_card.html blog-reader.html].each do |name|
+    FileUtils.cp(File.join(BLOGS, "_includes", name), File.join(source, "_includes"))
   end
   FileUtils.cp(File.join(ROOT, "_includes/reading_time.html"), File.join(source, "_includes"))
   %w[home.html sprint.html week.html blogs.html].each do |name|

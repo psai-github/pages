@@ -411,11 +411,16 @@ outputs and preserves sources. Watchers fingerprint these mappings and fail
 explicitly if publication fails. Add exact generated paths to root `.gitignore`
 and remove their old tracked copies when migrating ownership.
 
-The [courses kit](systems/courses/README.md) is the reference implementation.
-It is registered as `systems/courses:dev`; its manifest preserves established
-runtime paths while its sources and focused tests remain inside the project.
-Validate this support with `bundle exec ruby scripts/test_course_distribution.rb`.
-Restart watchers after changing the shared template.
+The [Courses composition kit](systems/courses/README.md) and reusable
+[Blogs system](systems/blogs/README.md) are reference implementations, both
+registered as `:dev`. Their manifests have disjoint runtime ownership; generic
+document layouts live in Blogs and call a Courses adapter only for course pages.
+See [architecture](systems/courses/docs/ARCHITECTURE.md).
+When transferring outputs between systems in an existing checkout, publish the
+old owner's updated manifest before the new owner's to release cached ownership.
+Validate with `bundle exec ruby scripts/test_course_distribution.rb` and
+`bundle exec ruby scripts/test_blogs_system.rb`.
+Restart watchers after changing boundaries or the shared template.
 
 ### Game Catalog Images
 

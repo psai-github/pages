@@ -69,6 +69,8 @@ images/projects/
 /_includes/lesson-submission-form.html
 /_includes/calendar.html
 /_includes/blog-catalog.html
+/_includes/blog-reader.html
+/_includes/course-document-player.html
 /_includes/post_list_image_card.html
 /_includes/announcement_calendar_demo.html
 /_includes/ocs_calendar_card.html
@@ -80,6 +82,7 @@ images/projects/
 /_layouts/sprint.html
 /_layouts/courses.html
 /_layouts/blogs.html
+/_layouts/blog-reader.html
 /_layouts/lessonbase.html
 /_layouts/lessonbasecapture.html
 /_layouts/notebook.html

@@ -1,7 +1,10 @@
-# Courses and Document Viewing Kit
+# Courses Composition System
 
-This project owns the course entry, Blogs catalog, lesson player, sprint/week
-navigation, reading completion, and course chat/calendar interfaces. Its sources
+This project owns course entry, the course-player adapter, sprint/week
+navigation, completion controls, and course chat/calendar interfaces. It composes
+the reusable [Blogs system](../blogs/README.md), which owns shared document
+layouts, the catalog and reader. See [architecture](docs/ARCHITECTURE.md).
+Its sources
 live here; the registered project build publishes them to the existing Jekyll
 and browser paths. Do not edit those generated copies.
 
@@ -11,33 +14,31 @@ and browser paths. Do not edit those generated copies.
 | --- | --- | --- |
 | `navigation/{csse,csp,csa,csh}.md` | Course home entry pages | Dated posts in `_posts/projects/courses/` |
 | `pages/course.md`, `pages/blog.md` | Legacy course chooser and global Blogs catalog | `navigation/course.md`, `navigation/blog.md` |
-| `layouts/post.html` | Course document player and conventional post rendering | `_layouts/post.html` |
-| `layouts/sprint.html`, `layouts/courses.html`, `layouts/blogs.html` | Legacy sprint view and catalog wrappers | `_layouts/` |
-| `layouts/lessonbase*.html`, `layouts/notebook.html` | Legacy study/flashcard/capture viewers and notebook wrapper | `_layouts/` |
+| `_includes/course-document-player.html` | Course branch used by the Blogs-owned post layout | `_includes/course-document-player.html` |
+| `layouts/sprint.html`, `layouts/courses.html` | Legacy sprint view and course wrapper | `_layouts/` |
 | `_includes/course-*.html` | Course pills and selected course title | `_includes/` |
 | `_includes/lesson-{sidebar-nav,topbar,modals}.html` | Desktop/mobile player controls | `_includes/` |
 | `_includes/player-pages/` | Home, sprint, week, chat, and Blogs page bodies | `_includes/player-pages/` |
 | `_includes/sprint-*.html` | Sprint cards, week cards, and progression modal | `_includes/` |
-| `_includes/{blog-catalog,post_list_image_card}.html` | Blog filtering and document cards | `_includes/` |
 | `_includes/{announcement_chat,week_chat,lesson_chat}.html` | Course, week, and document chat | `_includes/` |
-| `_includes/lesson-submission-form.html` | Player assignment submission UI | `_includes/` |
 | `_includes/{calendar,ocs_calendar_card,announcement_calendar_demo}.html` | Calendar integration and preview interfaces | `_includes/` |
 | `plugins/lesson_player_pages.rb` | Generates course player pages from schedule data | `_plugins/lesson_player_pages.rb` |
 | `data/{cs,csa,csp,csse,csh}.yml` | Shared sprint definitions and course schedules | `_data/` |
-| `js/player/` | Direct course entry, navigation state, legacy completion helpers | Existing `assets/js/` filenames |
+| `js/player/` | Direct course entry and navigation state | Existing `assets/js/` filenames |
 | `js/announcement-calendar/` | Calendar cards, commands, data, feeds, and composer | `assets/js/chat/calendar/` |
 | `js/courses.js` | Legacy sprint progression and certificates | `assets/js/projects/courses/courses.js` |
 | `sass/main.scss` | Registered project's legacy sprint styling | `_sass/projects/courses/main.scss` |
-| `sass/viewing/` | Player, Blogs, timeline, announcement-calendar styling | Existing `_sass/open-coding/` filenames |
+| `sass/viewing/` | Timeline and announcement-calendar styling | Existing `_sass/open-coding/` filenames |
 | `tests/` | Entry, state, completion, rendering, and publication regressions | Not published; root test files delegate here |
 
 The exact file mappings are in [distribution.json](distribution.json). Directory
 mappings include all their files recursively. New shared-path resources must be
 added there and their generated paths ignored in the root `.gitignore`.
 
-`layouts/post.html` intentionally retains both the player and conventional post
-branches. Moving the layout intact preserves assignment/export/chat behavior on
-non-course documents; this kit supplies the shared document-viewing layout.
+Blogs owns `layouts/post.html`. Its course branch delegates to the Courses-owned
+player include; conventional documents render without that adapter. Courses'
+Blogs page delegates to Blogs' reusable reader. Both systems preserve the
+existing runtime paths and are always-on `:dev` projects.
 
 ## Build and development
 
@@ -50,6 +51,7 @@ publishes it before Jekyll starts.
 ```sh
 make generate-makefiles
 make -C _projects/systems/courses assets
+make -C _projects/systems/blogs assets
 make -C _projects/systems/courses build
 make -C _projects/systems/courses watch
 ```
@@ -96,7 +98,7 @@ This is a reusable frontend kit, not a standalone backend or complete theme:
   runner I/O, grading/submission helpers, and Utterances remain shared. Lesson
   sources remain in their registered lesson projects, notebooks, and DOCX.
   Subject/activity-specific lesson layouts and games remain separate; their
-  existing completion-helper URLs are supplied by this kit. Legacy study/capture
+  existing completion-helper URLs are supplied by Blogs. Legacy study/capture
   viewers still consume shared Fabric.js and `assets/js/solitaire/ai-grader.js`.
 - **Chat:** shared `assets/js/chat/rich-text.js`, group-management clients,
   SockJS/STOMP libraries, and Spring `/ws-chat` remain external dependencies.

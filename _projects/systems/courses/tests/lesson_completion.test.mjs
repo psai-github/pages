@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
 
-const layout = readFileSync(new URL('../layouts/post.html', import.meta.url), 'utf8');
+const layout = readFileSync(new URL('../_includes/course-document-player.html', import.meta.url), 'utf8');
 const updateFunction = layout.match(/  function updateCompleteButton\(isCompleted\) \{[\s\S]*?(?=\n  function updateLessonItems)/)[0];
 const completionFunctions = layout.slice(
   layout.indexOf('  function getCompletionData()'),
