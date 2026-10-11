@@ -193,6 +193,16 @@ Nov 2026"]
       <p>Shadow/light invariance, edge background subtraction, patent reviews, and commercial product comparisons.</p>
       <span>Explore Research 4</span>
     </a>
+    <a href="/capstone/jarvis/progress/" class="ocs__hub-card">
+      <span class="ocs__hub-card-title">Progress</span>
+      <p>The next release checkpoint and planned work.</p>
+      <span>View Progress</span>
+    </a>
+    <a href="/capstone/jarvis/future-plans/" class="ocs__hub-card">
+      <span class="ocs__hub-card-title">Future Plans</span>
+      <p>Feature development and integration goals for the October 25th target release.</p>
+      <span>View Future Plans</span>
+    </a>
   </div>
 
   {% include jarvis-footer.html %}
