@@ -53,3 +53,31 @@ export function clampToCorridor(pos, radius, segments, halfWidth) {
   const dx = pos.x - best.c.x, dy = pos.y - best.c.y;
   return { x: best.c.x + (dx / best.d) * limit, y: best.c.y + (dy / best.d) * limit };
 }
+
+// Closed loop through `points` with rounded corners (quadratic spline per corner).
+// Returns { points, mids }: dense points (first repeated at the end) and, per input
+// vertex, the index of the sample at the middle of its corner.
+export function roundedLoop(points, radius, steps = 8) {
+  const n = points.length;
+  const out = [];
+  const mids = [];
+  for (let i = 0; i < n; i++) {
+    const prev = points[(i - 1 + n) % n], cur = points[i], next = points[(i + 1) % n];
+    const d1 = Math.hypot(prev.x - cur.x, prev.y - cur.y);
+    const d2 = Math.hypot(next.x - cur.x, next.y - cur.y);
+    if (!d1 || !d2) { mids.push(out.length); out.push({ x: cur.x, y: cur.y }); continue; }
+    const r = Math.min(radius, d1 / 2, d2 / 2);
+    const a = { x: cur.x + ((prev.x - cur.x) / d1) * r, y: cur.y + ((prev.y - cur.y) / d1) * r };
+    const b = { x: cur.x + ((next.x - cur.x) / d2) * r, y: cur.y + ((next.y - cur.y) / d2) * r };
+    mids.push(out.length + Math.floor(steps / 2));
+    for (let s = 0; s <= steps; s++) {
+      const t = s / steps, u = 1 - t;
+      out.push({
+        x: u * u * a.x + 2 * u * t * cur.x + t * t * b.x,
+        y: u * u * a.y + 2 * u * t * cur.y + t * t * b.y,
+      });
+    }
+  }
+  if (out.length) out.push({ ...out[0] });
+  return { points: out, mids };
+}

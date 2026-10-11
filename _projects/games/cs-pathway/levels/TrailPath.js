@@ -36,6 +36,7 @@ class TrailPath extends GameObject {
     this.getStatus = typeof data.getStatus === 'function' ? data.getStatus : () => STATION_STATUS.LOCKED;
     this.getLaneWidth = typeof data.getLaneWidth === 'function' ? data.getLaneWidth : () => 0;
     this.getLanePoints = typeof data.getLanePoints === 'function' ? data.getLanePoints : () => [];
+    this.getRoadPath = typeof data.getRoadPath === 'function' ? data.getRoadPath : () => null;
   }
 
   update() {
@@ -126,9 +127,14 @@ class TrailPath extends GameObject {
       dashOffset = -((t / 40) % (dash[0] + dash[1]));
     }
 
+    const roadPath = this.getRoadPath(fromStation.id, toStation.id);
     ctx.beginPath();
-    ctx.moveTo(from.x, from.y);
-    ctx.lineTo(to.x, to.y);
+    if (roadPath && roadPath.length > 1) {
+      roadPath.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+    } else {
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x, to.y);
+    }
     ctx.setLineDash(dash);
     ctx.lineDashOffset = dashOffset;
     ctx.strokeStyle = color;
