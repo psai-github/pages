@@ -67,6 +67,9 @@ language-reference pages host the same browser with their category selected.
 Use `{% include topics-browser.html course_context=true %}` within a course
 document to show weeks and link to original course views. The ordinary include
 uses Topics views even when a reference page also carries course/week metadata.
+The shared language-reference include selects course context when the page has
+course metadata. Course reference sources use `layout: post` to retain the
+course player; `layout: opencs` bypasses that adapter.
 
 ## Resource map
 

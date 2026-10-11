@@ -56,6 +56,10 @@ class TopicsTest < Minitest::Test
         ---
         {% include topics-browser.html course_context=true %}
       DOC
+      reference_includes = File.join(source, "_includes/projects/lessons")
+      FileUtils.mkdir_p(reference_includes)
+      FileUtils.cp(File.join(ROOT, "_projects/lessons/_includes/language-reference.html"), reference_includes)
+      FileUtils.cp(File.join(ROOT, "_projects/lessons/javascript/index.md"), File.join(source, "javascript-reference.md"))
       %w[hidden draft excluded].each do |kind|
         flag = { "hidden" => "hide: true", "draft" => "lesson_status: draft", "excluded" => "search_exclude: true" }.fetch(kind)
         File.write(File.join(source, "#{kind}.md"), "---\nlayout: post\ncategories: [Java]\n#{flag}\n---\nExcluded\n")
@@ -120,6 +124,12 @@ class TopicsTest < Minitest::Test
       course_browser = File.read(File.join(source, "_site/course-browser/index.html"))
       assert_includes course_browser, "CSA week 14"
       assert_includes course_browser, 'href="/preview/java/algorithms/"'
+      reference = File.read(File.join(source, "_site/navigation/js-reference/index.html"))
+      assert_includes reference, 'id="course-player"'
+      assert_includes reference, 'data-course-context="true"'
+      assert_includes reference, 'data-initial-category="javascript"'
+      assert_includes reference, 'href="/preview/java/algorithms/"'
+      refute_includes reference, 'href="/preview/topics/view/java/algorithms/"'
     end
 
   end
