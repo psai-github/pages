@@ -47,6 +47,7 @@ lessons/ds2
 systems/ai-ab-engine
 systems/calendar
 systems/blogs:dev
+systems/topics:dev
 systems/courses:dev
 systems/gamebuilder:dev
 systems/auto-generator

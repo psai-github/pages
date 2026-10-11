@@ -3,7 +3,7 @@ layout: post
 title: Plain Old Java Objects (POJO)
 description: A short reference for defining a Spring data object and JPA entity.
 permalink: /java/spring/pojo/
-categories: ['Java Spring']
+categories: [Java, Spring]
 courses: {'csa': {'week': 4}}
 lesson_group: "cs112"
 articulation: {"institution":"MiraCosta College","course":"CS112"}

@@ -71,6 +71,13 @@ images/projects/
 /_includes/blog-catalog.html
 /_includes/blog-reader.html
 /_includes/course-document-player.html
+/_includes/topics-browser.html
+/_includes/topics-document-nav.html
+/_plugins/topics.rb
+/_data/topics_primary.yml
+/navigation/search.md
+/navigation/topics.md
+/assets/js/topics/
 /_includes/post_list_image_card.html
 /_includes/announcement_calendar_demo.html
 /_includes/ocs_calendar_card.html

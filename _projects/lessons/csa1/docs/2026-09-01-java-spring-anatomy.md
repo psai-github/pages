@@ -4,7 +4,7 @@ title: Anatomy of a Spring Boot Project
 description: A discussion of key elements in a Java Spring Boot backend project.  This includes preparing a project for deployment.
 permalink: /java/spring/anatomy
 courses: {'csa': {'week': 4}}
-categories: ['Java Spring']
+categories: [Java, Spring]
 type: coding 
 lesson_group: "csa1"
 ---

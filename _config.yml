@@ -134,4 +134,4 @@ minima:
   nav_pages:
     - navigation/course.md
     - navigation/capstone.md
-    - navigation/search.md
+    - navigation/topics.md

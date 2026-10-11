@@ -37,9 +37,14 @@ Sprint and blogs pages are not part of one week, so their current_week is null.
 {% assign is_course_lesson = true %}
 {% endif %}
 
+{% if page.topics_context %}{% assign is_course_lesson = false %}{% endif %}
 {% if is_course_lesson %}
 {% include course-document-player.html %}
 {% else %}
+{% if page.topics_context and page.topics_nav_in_content != true %}
+{% include topics-document-nav.html %}
+<script type="module" src="{{ '/assets/js/topics/document.js' | relative_url }}"></script>
+{% endif %}
 {% comment %}
 === REGULAR BLOG POST LAYOUT FOR NON-CSP POSTS ===
 {% endcomment %}
@@ -195,7 +200,7 @@ Sprint and blogs pages are not part of one week, so their current_week is null.
     Categories:
     {% for category in page.categories %}
     {%- assign prefix = category | slice: 0 -%}
-    <a class="category-tags-link" href="{{site.baseurl}}/search/#{{category|slugize}}">{{category}}</a>
+    <a class="category-tags-link" href="{{ '/topics/' | relative_url }}?category={{ category | downcase | url_encode }}">{{ category | escape }}</a>
     {% unless forloop.last %}&nbsp;{% endunless %}
     {% endfor %}
     {% endif %}
@@ -426,7 +431,7 @@ Sprint and blogs pages are not part of one week, so their current_week is null.
       // exclusively in the other branch's script, which never renders here. A course
       // was never actually required by the backend - this was a frontend gap where
       // the "blog" layout's assignment support was always a stub.
-      const CURRENT_LESSON_ID_BLOG = '{{ page.url }}';
+      const CURRENT_LESSON_ID_BLOG = {{ page.topics_original_url | default: page.url | jsonify }};
       let CURRENT_ASSIGNMENT_ID_BLOG = FRONTMATTER_ASSIGNMENT_ID_BLOG;
       let CURRENT_ASSIGNMENT_NAME_BLOG = FRONTMATTER_ASSIGNMENT_NAME_BLOG;
       let ASSIGNMENT_RESOLVE_PROMISE_BLOG = null;
