@@ -34,7 +34,7 @@ rp_active: overview
       <span class="jv-flow-node-sub">Timestamped Images</span>
     </div>
     <span class="jv-flow-arrow">→</span>
-    <div class="jv-flow-node active">
+    <div class="jv-flow-node">
       <span class="jv-flow-node-label">Object Detector</span>
       <span class="jv-flow-node-sub">Object Detection</span>
     </div>
@@ -44,7 +44,7 @@ rp_active: overview
       <span class="jv-flow-node-sub">Precise Segmentation</span>
     </div>
     <span class="jv-flow-arrow">→</span>
-    <div class="jv-flow-node">
+    <div class="jv-flow-node active">
       <span class="jv-flow-node-label">Room Model</span>
       <span class="jv-flow-node-sub">Identity + Location</span>
     </div>
