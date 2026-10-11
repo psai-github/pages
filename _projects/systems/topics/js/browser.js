@@ -11,6 +11,8 @@ if (root) {
   const titleHeading = root.querySelector('[data-topics-title-heading]');
   const bodySection = root.querySelector('[data-topics-body-section]');
   const bodyResults = root.querySelector('[data-topics-body-results]');
+  const searchClear = root.querySelector('[data-topics-search-clear]');
+  const filterClear = root.querySelector('[data-topics-clear]');
   const cardByUrl = new Map(cards.map((card) => [card.dataset.topicUrl, card]));
   let state = readState(location.search);
   if (!state.categories.length && root.dataset.initialCategory) {
@@ -60,6 +62,10 @@ if (root) {
     root.classList.toggle('topics-browser--list', !searching && state.view === 'list');
     titleHeading.hidden = !searching || !groups.title.length;
     bodySection.hidden = !searching || !groups.body.length;
+    root.querySelector('[data-topics-title-count]').textContent = `(${groups.title.length})`;
+    root.querySelector('[data-topics-body-count]').textContent = `(${groups.body.length})`;
+    searchClear.disabled = !state.query;
+    filterClear.disabled = !state.categories.length;
     bodyResults.replaceChildren();
     for (const match of groups.body) {
       const item = document.createElement('li');
@@ -75,8 +81,7 @@ if (root) {
       bodyResults.append(item);
     }
     const count = selected.length + (searching ? groups.body.length : 0);
-    status.textContent = count ? (searching ?
-      `${groups.title.length} title matches · ${groups.body.length} text matches` : `${count} documents`) :
+    status.textContent = count ? `${count} documents` :
       'No documents match these categories and search.';
   }
 
@@ -110,10 +115,14 @@ if (root) {
       query.addEventListener('input', update);
       filters.forEach((filter) => filter.addEventListener('change', update));
       view.addEventListener('change', update);
-      root.querySelector('[data-topics-clear]').addEventListener('click', () => {
+      filterClear.addEventListener('click', () => {
         filters.forEach((filter) => { filter.checked = false; });
+        update();
+      });
+      searchClear.addEventListener('click', () => {
         query.value = '';
         update();
+        query.focus();
       });
       window.addEventListener('popstate', () => { state = readState(location.search); render(); });
     } catch (error) {

@@ -88,9 +88,27 @@ class TopicsTest < Minitest::Test
       browser = File.read(File.join(source, "_site/topics/index.html"))
       assert_includes browser, "Java Algorithms"
       assert_includes browser, "/preview/topics/view/java/algorithms/"
-      assert_includes browser, "<legend>Primary topics</legend>"
-      primary = browser.split('<legend>Primary topics</legend>', 2).last.split('</fieldset>', 2).first
-      secondary = browser.split('<legend>Categories</legend>', 2).last.split('</fieldset>', 2).first
+      assert_includes browser, '<h2>Topics</h2>'
+      assert_includes browser, '<summary><h3>Topic Filter</h3></summary>'
+      assert_includes browser, '<summary><h3>Categories Filter</h3></summary>'
+      primary = browser.split('<legend class="topics-browser__accessible-label">Topic Filter</legend>', 2).last.split('</fieldset>', 2).first
+      secondary = browser.split('<legend class="topics-browser__accessible-label">Categories Filter</legend>', 2).last.split('</fieldset>', 2).first
+      assert_match(/<details[^>]*data-topics-primary[^>]*\bopen\b/, browser)
+      assert_match(/<details[^>]*data-topics-secondary/, browser)
+      refute_match(/<details[^>]*data-topics-secondary[^>]*\bopen\b/, browser)
+      refute_includes browser, "Explore reference material by category."
+      assert_includes browser, '<h2><label for="topics-query">Search</label></h2>'
+      assert_includes browser, '<select class="ocs__input" id="topics-view">'
+      filter_box = browser.split('id="topics-filters"', 2).last.split('</div>', 2).first
+      assert_includes filter_box, 'data-topics-clear'
+      assert_match(/<button[^>]*data-topics-clear[^>]*\bdisabled\b/, filter_box)
+      assert_includes browser, '<label class="topics-browser__accessible-label" for="topics-view">View</label>'
+      assert_operator browser.index('id="topics-query"'), :<, browser.index('id="topics-view"')
+      assert_operator browser.index('data-topics-clear'), :<, browser.index('data-topics-results')
+      assert_includes browser, 'aria-controls="topics-filters"'
+      assert_includes browser, 'data-topics-search-clear'
+      assert_includes browser, 'data-topics-title-count'
+      assert_includes browser, 'data-topics-body-count'
       %w[sass python java javascript flask spring cs111 cs112 cs113].each do |category|
         assert_includes primary, "value=\"#{category}\""
         refute_includes secondary, "value=\"#{category}\""

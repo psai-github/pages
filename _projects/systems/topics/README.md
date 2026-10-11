@@ -20,7 +20,15 @@ Hidden, draft and search-excluded documents are omitted.
 
 [Primary topics YAML](data/topics_primary.yml) promotes SASS, Python, Java,
 JavaScript, Flask, Spring, CS111, CS112 and CS113 into a separate, ordered
-selection box. All remaining category names appear in the Categories box.
+disclosure labeled Topic Filter, expanded by default. All remaining category
+names appear in Categories Filter, collapsed by default. Both remain multi-select.
+Search follows the grouped filters and uses the same heading typography as
+Title matches and Text matches. Topics uses a semantic `h2`; filter titles use
+`h3` headings kept inline with their disclosure markers. Clear Filters sits inside the filter box; the Cards/List selector sits
+above the output with an accessible, visually hidden View label.
+Clear Filters clears only topic/category selections; Clear Search clears only
+the query. Each clear button is dimmed and disabled when its corresponding
+selection is empty. Each search result heading shows its own count beside the heading.
 Both boxes use the same category intersection rules; YAML controls prominence,
 not document membership. Primary topics remain visible even when they have no
 published documents. No `topics:` attribute is required.
