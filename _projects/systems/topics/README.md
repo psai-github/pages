@@ -4,6 +4,9 @@ Topics is a category-driven reference browser, independent of Courses' weekly
 schedule, announcements and chat. Its landing page is `/topics/`; `/search/`
 is a compatibility redirect. The site's top menu links to Topics.
 
+See [Topics architecture](docs/ARCHITECTURE.md) for the system model,
+document-viewing contracts and integration boundaries.
+
 ## Content model
 
 Use existing frontmatter:
