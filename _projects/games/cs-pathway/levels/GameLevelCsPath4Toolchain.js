@@ -41,7 +41,7 @@ import TrailPath from './TrailPath.js';
 import PathwayScoreboard from './PathwayScoreboard.js';
 import MacSetupCheck from './MacSetupCheck.js';
 import SystemSetupCheck from './SystemSetupCheck.js';
-import { sampleSpline, resolveCircle, clampToCorridor } from '../model/splineBarriers.js';
+import { sampleSpline, resolveCircle, clampToCorridor, roundedLoop } from '../model/splineBarriers.js';
 import { recordLevelRatio } from '../model/pathwayScores.js';
 import {
   STATION_STATUS,
@@ -53,6 +53,19 @@ import {
 const PROFILE_PANEL_ID = 'toolchain-trail-profile-panel';
 // Flip to false to compare the level with and without the road.
 const ROAD_ENABLED = true;
+// Stations sit on a ring, clockwise in progression order (fractions of the map;
+// x/y are the sprite's top-left, like the original positions).
+const RING_LAYOUT = Object.freeze({
+  'terminal-town-gate': { x: 0.16, y: 0.14 },
+  'compiler-canyon-forge': { x: 0.45, y: 0.14 },
+  'editor-isle-tower': { x: 0.76, y: 0.14 },
+  'git-village-hall': { x: 0.90, y: 0.44 },
+  'github-gateway-arch': { x: 0.76, y: 0.70 },
+  'build-bridge': { x: 0.45, y: 0.70 },
+  'integration-summit': { x: 0.16, y: 0.70 },
+});
+// Road corner roundness, as a fraction of the shorter map side.
+const ROAD_CORNER = 0.08;
 // Which side of each building the road passes on (so buildings never block it).
 const ROAD_SIDES = Object.freeze({
   'terminal-town-gate': 'right',
@@ -512,6 +525,12 @@ class GameLevelCsPath4Toolchain {
         funFact: 'Every station verified end-to-end — your development environment is complete.',
       },
     ];
+    if (ROAD_ENABLED) {
+      this.STATIONS.forEach((st) => {
+        const p = RING_LAYOUT[st.id];
+        if (p) st.position = { x: width * p.x, y: height * p.y };
+      });
+    }
     this._stationById = Object.fromEntries(this.STATIONS.map((s) => [s.id, s]));
     this._nonBossOrder = this.STATIONS.filter((s) => !s.isBoss).map((s) => s.id);
 
@@ -568,7 +587,7 @@ class GameLevelCsPath4Toolchain {
       SCALE_FACTOR: PLAYER_SCALE_FACTOR,
       STEP_FACTOR: 1000,
       ANIMATION_FPS: 8,
-      INIT_POSITION: ROAD_ENABLED ? this._roadWaypoints()[0] : { x: width * 0.5, y: height * 0.52 },
+      INIT_POSITION: ROAD_ENABLED ? (() => { const l = this._roadLoop(); return l.points[l.mids[0]]; })() : { x: width * 0.5, y: height * 0.52 },
       pixels: { height: 1024, width: 1024 },
       orientation: { rows: 2, columns: 2 },
       down: { row: 0, start: 0, columns: 1 },
@@ -655,7 +674,8 @@ class GameLevelCsPath4Toolchain {
           stations: this.STATIONS,
           getStatus: (stationId) => level.getStationStatus(stationId),
           getLaneWidth: () => (level._laneHalf || 0) * 2,
-          getLanePoints: () => (ROAD_ENABLED ? level._roadWaypoints() : []),
+          getLanePoints: () => (ROAD_ENABLED ? level._roadLoop().points : []),
+          getRoadPath: (a, b) => (ROAD_ENABLED ? level._roadPath(a, b) : null),
         },
       },
       { class: CsPathwayPlayer, data: player_data },
@@ -1227,7 +1247,7 @@ class GameLevelCsPath4Toolchain {
       const w = player.width || 0, h = player.height || 0;
       const radius = Math.max(6, Math.min(w, h) * 0.2);
       const c = { x: player.position.x + w / 2, y: player.position.y + h / 2 };
-      this._laneHalf = ROAD_ENABLED ? Math.max(70, radius + 45) : 0;
+      this._laneHalf = ROAD_ENABLED ? Math.max(60, radius + 38) : 0;
       const road = this._roadSegments();
       const walls = [...this._barrierPolylines, ...this._hudPolylines()];
       let p = c;
@@ -1242,7 +1262,54 @@ class GameLevelCsPath4Toolchain {
     }
   }
 
-  // Road waypoints: one per station, offset to the side so the building's solid
+  // Perimeter road: a rounded rectangle just inside the ring of stations.
+  // The center stays empty, and the player is kept on the road.
+  _roadLoop() {
+    const now = performance.now();
+    if (this._loopCache && now - this._loopCacheAt < 50) return this._loopCache;
+    const W = this.gameEnv.innerWidth, H = this.gameEnv.innerHeight;
+    const est = H / 5;
+    const info = {};
+    this.STATIONS.forEach((st) => {
+      const gk = (this._gatekeeperObjects || []).find((o) => o?.spriteData?.id === st.id);
+      const live = (gk?.width || 0) > 0;
+      const c = live ? this._getObjectCenter(gk) : { x: st.position.x, y: st.position.y };
+      const w = live ? gk.width : est;
+      const h = live ? (gk.height || gk.width) : est;
+      info[st.id] = { c, dx: 0.2 * w + 0.2 * est + ROAD_PAD, dy: 0.2 * h + 0.2 * est + ROAD_PAD };
+    });
+    const g = info['terminal-town-gate'], f = info['compiler-canyon-forge'], t = info['editor-isle-tower'];
+    const gh = info['git-village-hall'], a = info['github-gateway-arch'];
+    const b = info['build-bridge'], s = info['integration-summit'];
+    const topY = Math.max(g.c.y + g.dy, f.c.y + f.dy, t.c.y + t.dy);
+    const bottomY = Math.min(a.c.y - a.dy, b.c.y - b.dy, s.c.y - s.dy);
+    const rightX = gh.c.x - gh.dx;
+    const leftX = Math.min(g.c.x, s.c.x);
+    // Vertices clockwise from the Gate; indexes 0,1,2,4,6,7,8 are stations 1..7.
+    const verts = [
+      { x: leftX, y: topY }, { x: f.c.x, y: topY }, { x: t.c.x, y: topY },
+      { x: rightX, y: topY }, { x: rightX, y: gh.c.y }, { x: rightX, y: bottomY },
+      { x: a.c.x, y: bottomY }, { x: b.c.x, y: bottomY }, { x: leftX, y: bottomY },
+    ];
+    const loop = roundedLoop(verts, Math.min(W, H) * ROAD_CORNER);
+    loop.vertexOf = {
+      'terminal-town-gate': 0, 'compiler-canyon-forge': 1, 'editor-isle-tower': 2,
+      'git-village-hall': 4, 'github-gateway-arch': 6, 'build-bridge': 7, 'integration-summit': 8,
+    };
+    this._loopCache = loop;
+    this._loopCacheAt = now;
+    return loop;
+  }
+
+  // The stretch of road between two stations (used to draw the status line).
+  _roadPath(fromId, toId) {
+    const loop = this._roadLoop();
+    const i = loop.vertexOf[fromId], j = loop.vertexOf[toId];
+    if (i === undefined || j === undefined || i >= j) return null;
+    return loop.points.slice(loop.mids[i], loop.mids[j] + 1);
+  }
+
+  // (old) Road waypoints: one per station, offset to the side so the building's solid
   // box is clear of the centerline, plus a hub point between Tower and Git Hall.
   _roadWaypoints() {
     const width = this.gameEnv.innerWidth;
@@ -1273,7 +1340,7 @@ class GameLevelCsPath4Toolchain {
   // Station-to-station road segments, built from the same centers TrailPath draws.
   _roadSegments() {
     if (!ROAD_ENABLED) return [];
-    const centers = this._roadWaypoints();
+    const centers = this._roadLoop().points;
     const segs = [];
     for (let i = 0; i < centers.length - 1; i++) segs.push([centers[i], centers[i + 1]]);
     return segs;
