@@ -139,6 +139,60 @@ monitor_1, monitor_2 PRESENT
 laptop_3            not detected (1/2)
 NEW OBJECT DETECTED: chair_5
 NEW OBJECT DETECTED: chair_6   ← should be one chair</pre>
+    <div class="jv-figure-grid">
+      <figure class="jv-figure">
+        <img src="/images/capstone/jarvis-progress/sam3-dashboard.png" alt="Jarvis dashboard showing SAM3 person overlays on the latest frame and a grid of recent captures">
+        <figcaption>SAM3 overlay on latest frame + recent captures</figcaption>
+      </figure>
+      <figure class="jv-figure">
+        <img src="/images/capstone/jarvis-progress/captain-log.png" alt="Captain Log screen recording video and audio of a student saying Hey Jarvis end log">
+        <figcaption>Captain Log: voice-started video + audio, ended with "Hey Jarvis … end log"</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <h2 class="ocs__section-title">Depth Detection</h2>
+  <section class="ocs__card">
+    <div class="ocs__diagram">
+      <pre class="mermaid">flowchart LR
+    S["SAM3 overlay<br/>object masks"] --> D["Depth model"]
+    D --> O["Distance from<br/>camera per object"]
+    D -.-> P["Low accuracy<br/>no reference point"]
+    P -.-> A["Try other<br/>depth models"]
+    P -.-> B["Two cameras<br/>stereo depth"]</pre>
+    </div>
+    <div class="ocs__table-wrap">
+      <table class="ocs__table">
+        <thead><tr><th>Piece</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>SAM3 overlay → distance</td><td><span class="ocs__status-pill ocs__status-pill--good">WORKING</span></td></tr>
+          <tr><td>Distance accuracy</td><td><span class="ocs__status-pill ocs__status-pill--bad">INACCURATE</span></td></tr>
+          <tr><td>Alternative depth models</td><td><span class="ocs__status-pill ocs__status-pill--warn">TESTING</span></td></tr>
+          <tr><td>Two-camera stereo depth</td><td><span class="ocs__status-pill ocs__status-pill--neutral">EXPLORING</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <h2 class="ocs__section-title">Hand Gesture Recognition</h2>
+  <section class="ocs__card">
+    <div class="ocs__diagram">
+      <pre class="mermaid">flowchart LR
+    C["Camera"] --> H["Hand tracking"]
+    H --> F["Fist"]
+    H --> O["Open hand"]
+    H --> M["Hand height<br/>high vs low"]
+    F --> V["Volume control<br/>working"]
+    O --> V
+    M --> V
+    V -.-> N["More controls<br/>planned"]</pre>
+    </div>
+    <div class="jv-decision-grid">
+      <div class="jv-decision-card"><span class="jv-decision-title">Fist / Open</span><span class="ocs__status-pill ocs__status-pill--good">DETECTED</span></div>
+      <div class="jv-decision-card"><span class="jv-decision-title">High vs. Low</span><span class="ocs__status-pill ocs__status-pill--good">DETECTED</span></div>
+      <div class="jv-decision-card"><span class="jv-decision-title">Volume</span><span class="ocs__status-pill ocs__status-pill--good">CONTROLLED</span></div>
+      <div class="jv-decision-card"><span class="jv-decision-title">Other Controls</span><span class="ocs__status-pill ocs__status-pill--neutral">NEXT</span></div>
+    </div>
   </section>
 
   <h2 class="ocs__section-title">Challenges</h2>
@@ -214,6 +268,8 @@ NEW OBJECT DETECTED: chair_6   ← should be one chair</pre>
       <li>Capture → SAM3 → monitoring pipeline runs automatically end to end.</li>
       <li>Detection works; consistent tracking of the same object across frames is the main gap.</li>
       <li>Dedup fixed overlapping boxes, but the added-chair test still registers false new objects.</li>
+      <li>Depth estimation runs on SAM3 overlays but needs a reference point; testing other models and two-camera stereo.</li>
+      <li>Hand gestures (fist, open, high/low) already control volume; more controls next.</li>
       <li>Next: stronger matching, multi-frame confirmation, and faster inference.</li>
       <li>Oct 25 checkpoint targets frontend, backend, and RFID presence integration.</li>
     </ul>
