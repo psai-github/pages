@@ -4,7 +4,7 @@ title: API Controller
 description: A short reference for Spring REST controllers and API endpoints.
 permalink: /java/spring/api/
 courses: {'csa': {'week': 4}}
-categories: ['Java Spring']
+categories: [Java, Spring]
 lesson_group: "csa1"
 ---
 

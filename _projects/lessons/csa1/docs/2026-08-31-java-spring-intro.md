@@ -4,7 +4,7 @@ title: Introduction Java Spring Framework
 description: Introduction to API, JPA, ORM, POJOs in Java Spring Framework
 permalink: /java/spring/intro/
 courses: {'csa': {'week': 3}}
-categories: [Java Spring]
+categories: [Java, Spring]
 lesson_group: "csa1"
 ---
 

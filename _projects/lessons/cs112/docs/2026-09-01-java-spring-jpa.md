@@ -4,7 +4,7 @@ title: Java Persistence API (JPA)
 description: A short reference for persisting Spring entities with JPA and SQLite.
 permalink: /java/spring/jpa/
 courses: {'csa': {'week': 4}}
-categories: ['Java Spring']
+categories: [Java, Spring]
 lesson_group: "cs112"
 articulation: {"institution":"MiraCosta College","course":"CS112"}
 ---
