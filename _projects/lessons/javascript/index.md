@@ -1,5 +1,5 @@
 ---
-layout: opencs
+layout: post
 courses: { csse: {week: 5} }
 title: JavaScript Reference
 description: Search and browse JavaScript lessons, references, and interactive examples.

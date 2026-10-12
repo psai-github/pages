@@ -4,7 +4,7 @@ title: Frontend UI
 description: A short reference for connecting a frontend to Spring Boot.
 permalink: /java/spring/ui/
 courses: {'csa': {'week': 4}}
-categories: ['Java Spring']
+categories: [Java, Spring]
 lesson_group: "cs112"
 articulation: {"institution":"MiraCosta College","course":"CS112"}
 ---
