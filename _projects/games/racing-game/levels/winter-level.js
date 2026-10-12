@@ -18,7 +18,7 @@ class GameLevelWinter {
         name: "Red Car",
         greeting: "I'm the red car!",
         src: "/images/projects/racing-game/Directions_red_car.png",
-        SCALE_FACTOR: 10,
+        SCALE_FACTOR: 15,
         STEP_FACTOR: 1100,
         INIT_POSITION: {x: 370 / 740, y: 465 / 585},
         pixels: { height: 1024, width: 1536 },
