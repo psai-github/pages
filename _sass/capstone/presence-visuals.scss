@@ -1,0 +1,280 @@
+// Flat illustrations on the Presence System Pipeline page
+// (/capstone/presence-system/pipeline/): hero scene, problem timeline,
+// roadmap strip, plan timeline, and testing tiles.
+//
+// Documented literal-color exception (see _sass/open-coding/README.md): the
+// scenes are a custom visualization drawn on their own light "stage", so they
+// use a fixed muted palette instead of the theme preference colors. Captions,
+// chevrons, and faded tiles outside the stage use the theme tokens.
+
+.rfid-presence-infograph {
+  --pv-sky: #dfe7ef;
+  --pv-floor: #cfd8e3;
+  --pv-base: #c3cedb;
+  --pv-ink: #16213b;
+  --pv-door: #425a7d;
+  --pv-light: #fcf2d4;
+  --pv-lightfloor: #f1e9d3;
+  --pv-skin: #c48a66;
+  --pv-skinshade: #a8714f;
+  --pv-hair: #16213b;
+  --pv-shirt: #e0a64f;
+  --pv-sleeve: #c98f3e;
+  --pv-legback: #111a2e;
+  --pv-legfront: #26355a;
+  --pv-shoe: #0e1526;
+  --pv-laptop: #b9c4d3;
+  --pv-laptopedge: #8392a9;
+  --pv-tag: #3b6fd4;
+  --pv-crowpi: #24324d;
+  --pv-screen: #7fc4a5;
+  --pv-pad: #e9eef5;
+  --pv-wave: #5b86d6;
+  --pv-ok: #4f9d62;
+  --pv-miss: #c8553d;
+  --pv-present: #4f78b8;
+  --pv-track: #c3cedb;
+  --pv-white: #ffffff;
+  --pv-muted: #5a677d;
+  --pv-next: #6f7f99;
+  --pv-shadow: rgba(22, 33, 59, 0.12);
+
+  // Layout
+  .pv-figure { margin: 0 0 2.5rem; }
+  .pv-stage { border-radius: 28px; overflow: hidden; }
+
+  .pv-scene {
+    display: block;
+    width: 100%;
+    height: auto;
+    font-family: inherit;
+  }
+
+  // Light panel for the Mermaid architecture diagram, matching the scenes
+  .pv-diagram {
+    padding: 1.5rem;
+    border-radius: 28px;
+    background: var(--pv-sky);
+
+    // The theme paints every <pre> with var(--panel) !important; point that
+    // variable at transparent here instead of fighting the !important.
+    pre.mermaid,
+    .mermaid {
+      --panel: transparent;
+      margin: 0;
+      background: transparent;
+      border: 0;
+    }
+  }
+
+  .pv-caption {
+    margin: 0.8rem 0 0;
+    text-align: center;
+    font-size: 1.15rem;
+    color: var(--rp-text);
+  }
+
+  // Fills
+  .pv-fill-sky { fill: var(--pv-sky); }
+  .pv-fill-floor { fill: var(--pv-floor); }
+  .pv-fill-base { fill: var(--pv-base); }
+  .pv-fill-ink { fill: var(--pv-ink); }
+  .pv-fill-door { fill: var(--pv-door); }
+  .pv-fill-light { fill: var(--pv-light); }
+  .pv-fill-lightfloor { fill: var(--pv-lightfloor); }
+  .pv-fill-skin { fill: var(--pv-skin); }
+  .pv-fill-skinshade { fill: var(--pv-skinshade); }
+  .pv-fill-hair { fill: var(--pv-hair); }
+  .pv-fill-shirt { fill: var(--pv-shirt); }
+  .pv-fill-shoe { fill: var(--pv-shoe); }
+  .pv-fill-laptop { fill: var(--pv-laptop); }
+  .pv-fill-laptopedge { fill: var(--pv-laptopedge); }
+  .pv-fill-tag { fill: var(--pv-tag); }
+  .pv-fill-crowpi { fill: var(--pv-crowpi); }
+  .pv-fill-screen { fill: var(--pv-screen); }
+  .pv-fill-pad { fill: var(--pv-pad); }
+  .pv-fill-ok { fill: var(--pv-ok); }
+  .pv-fill-present { fill: var(--pv-present); }
+  .pv-fill-track { fill: var(--pv-track); }
+  .pv-fill-white { fill: var(--pv-white); }
+  .pv-fill-step { fill: var(--pv-ink); }
+  .pv-fill-shadow { fill: var(--pv-shadow); }
+  .pv-fill-cardshade { fill: var(--pv-shadow); }
+  .pv-fill-chevron { fill: var(--rp-text-muted); }
+
+  // Strokes
+  .pv-stroke-legback,
+  .pv-stroke-legfront,
+  .pv-stroke-sleeve,
+  .pv-stroke-legsmall { stroke-linecap: round; }
+  .pv-stroke-legback { stroke: var(--pv-legback); stroke-width: 36; }
+  .pv-stroke-legfront { stroke: var(--pv-legfront); stroke-width: 36; }
+  .pv-stroke-sleeve { stroke: var(--pv-sleeve); stroke-width: 28; }
+  .pv-stroke-legsmall { stroke: var(--pv-legfront); stroke-width: 12; }
+
+  .pv-stroke-wave {
+    fill: none;
+    stroke: var(--pv-wave);
+    stroke-width: 5;
+    stroke-linecap: round;
+  }
+
+  .pv-stroke-flow {
+    stroke: var(--pv-ink);
+    stroke-width: 4;
+    stroke-dasharray: 10 8;
+  }
+
+  .pv-stroke-tick,
+  .pv-stroke-ticksmall {
+    fill: none;
+    stroke: var(--pv-white);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .pv-stroke-tick { stroke-width: 6; }
+  .pv-stroke-ticksmall { stroke-width: 4; }
+
+  .pv-stroke-gap {
+    fill: none;
+    stroke: var(--pv-miss);
+    stroke-width: 3;
+    stroke-dasharray: 8 6;
+  }
+
+  .pv-stroke-done { stroke: var(--pv-ink); stroke-width: 6; }
+  .pv-stroke-todo { stroke: var(--pv-next); stroke-width: 6; stroke-dasharray: 12 10; }
+
+  .pv-node-next {
+    fill: var(--pv-sky);
+    stroke: var(--pv-ink);
+    stroke-width: 5;
+  }
+
+  // Not built yet: dashed and faded
+  .pv-next { opacity: 0.75; }
+
+  .pv-next-line {
+    fill: none;
+    stroke: var(--pv-next);
+    stroke-width: 4;
+    stroke-dasharray: 9 7;
+  }
+
+  .pv-next-cone {
+    fill: var(--pv-next);
+    fill-opacity: 0.14;
+    stroke: var(--pv-next);
+    stroke-width: 2;
+    stroke-dasharray: 6 6;
+  }
+
+  .pv-fill-nextpill {
+    fill: none;
+    stroke: var(--pv-next);
+    stroke-width: 2.5;
+    stroke-dasharray: 7 5;
+  }
+
+  .pv-later { opacity: 0.8; }
+
+  // Text inside the scenes (sized for projection)
+  .pv-text-sign { fill: var(--pv-white); font-size: 20px; font-weight: 700; }
+  .pv-text-stepnum { fill: var(--pv-white); font-size: 24px; font-weight: 700; }
+  .pv-text-step { fill: var(--pv-ink); font-size: 26px; font-weight: 700; }
+  .pv-text-notify { fill: var(--pv-ink); font-size: 30px; font-weight: 700; }
+  .pv-text-notifysub { fill: var(--pv-muted); font-size: 22px; }
+  .pv-text-miss { fill: var(--pv-miss); font-size: 22px; font-weight: 700; }
+  .pv-text-time { fill: var(--pv-muted); font-size: 20px; }
+  .pv-text-small { fill: var(--pv-ink); font-size: 22px; font-weight: 600; }
+  .pv-text-pill { fill: var(--pv-white); font-size: 19px; font-weight: 700; }
+  .pv-text-nextpill { fill: var(--pv-next); font-size: 19px; font-weight: 700; }
+
+  // Live section: CrowPi photo next to the dashboard screenshot
+  .pv-live {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+    margin-bottom: 2.5rem;
+
+    .pv-figure { margin: 0; }
+    .pp-photo-placeholder { min-height: 280px; }
+  }
+
+  .pv-shotlink { display: block; }
+
+  .pv-photo {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 16px;
+    border: 1px solid var(--rp-card-border);
+  }
+
+  // Testing tiles
+  .pv-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .pv-tiles-todo { margin-top: 0.75rem; }
+
+  .pv-tile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    border-radius: 14px;
+    background: var(--pv-sky);
+    color: var(--pv-ink);
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .pv-tile-icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 50%;
+    background: var(--pv-ok);
+    color: var(--pv-white);
+    font-size: 1.15rem;
+    font-weight: 800;
+  }
+
+  // Live checks get a blue edge so they read apart from the pytest tiles
+  .pv-tile-live { box-shadow: inset 6px 0 0 var(--pv-tag); }
+
+  .pv-tile-todo {
+    background: transparent;
+    color: var(--rp-text-muted);
+    border: 2px dashed var(--rp-border-strong);
+
+    .pv-tile-icon {
+      background: transparent;
+      color: var(--rp-text-muted);
+      border: 2px dashed var(--rp-border-strong);
+    }
+  }
+
+  // Long content parked below the visuals
+  .pv-more {
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--rp-card-border);
+
+    > summary {
+      cursor: pointer;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--rp-text);
+    }
+  }
+}

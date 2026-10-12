@@ -63,6 +63,27 @@ Spatial presence, face-scanning system"]
   </div>
 
   <div class="ocs__card">
+    <h3 class="ocs__section-title">One Tap, Step by Step (built today)</h3>
+    <pre class="mermaid">sequenceDiagram
+    participant S as Student
+    participant C as CrowPi
+    participant F as Flask
+    participant DB as Database
+    participant D as Dashboard
+    S->>C: Taps laptop tag
+    C->>F: POST tap (card ID, time)
+    Note over F: presence-event handler
+    F->>DB: Save as ENTER in this period
+    F-->>C: accepted
+    loop every 2 seconds
+        D->>F: GET classroom status
+        F->>DB: Read this period's taps
+        F-->>D: PRESENT or TARDY
+    end
+</pre>
+  </div>
+
+  <div class="ocs__card">
     <h3 class="ocs__section-title">Presence State Model</h3>
     <p class="rfid-presence-about">For the RFID and camera pairing: two independent signals, device via RFID and student via camera, get correlated into one of these states per student per period.</p>
     <div class="ocs__diagram">
