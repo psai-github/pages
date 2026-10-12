@@ -271,6 +271,110 @@
     }
   }
 
+  // HTTP method chip, shared by the Postman flow and the API list
+  .pv-method {
+    display: inline-block;
+    min-width: 3.4rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    color: var(--pv-white);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-align: center;
+  }
+  .pv-method-post { background: var(--pv-ok); }
+  .pv-method-get { background: var(--pv-tag); }
+
+  // Postman demo: one numbered row per request, with what the dashboard shows
+  .pv-flow {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .pv-flow-step {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    grid-template-rows: auto auto;
+    align-items: center;
+    gap: 0.5rem 0.6rem;
+    padding: 0.9rem 1rem;
+    border-radius: 14px;
+    background: var(--pv-sky);
+    color: var(--pv-ink);
+
+    .rfid-presence-pill {
+      grid-column: 1 / -1;
+      justify-self: start;
+      font-size: 0.8rem;
+    }
+  }
+
+  .pv-flow-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 50%;
+    background: var(--pv-ink);
+    color: var(--pv-white);
+    font-weight: 800;
+  }
+
+  .pv-flow-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  // API endpoint list on the Technical page
+  .pv-api {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0.5rem 0 1rem;
+  }
+
+  .pv-api-row {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 3fr) 11rem minmax(0, 2fr);
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: 12px;
+    background: var(--rp-surface);
+    border: 1px solid var(--rp-card-border);
+
+    @media (max-width: 900px) {
+      grid-template-columns: 4rem minmax(0, 1fr);
+    }
+  }
+
+  .pv-api-path {
+    color: var(--rp-text);
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+    background: transparent;
+  }
+
+  .pv-api-auth {
+    justify-self: start;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--rp-border-strong);
+    color: var(--rp-text);
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .pv-api-auth-device { border-color: var(--pv-tag); color: var(--pv-tag); }
+  .pv-api-auth-teacher { border-color: var(--pv-ok); color: var(--pv-ok); }
+
+  .pv-api-what {
+    color: var(--rp-text-muted);
+    font-size: 0.9rem;
+  }
+
   // Long content parked below the visuals
   .pv-more {
     margin-top: 2.5rem;

@@ -142,6 +142,54 @@ rp_active: pipeline
   </div>
 
   <figure class="pv-figure">
+    <div class="pv-flow">
+      <div class="pv-flow-step">
+        <span class="pv-flow-num">1</span>
+        <span class="pv-method pv-method-post">POST</span>
+        <span class="pv-flow-name">Log in</span>
+        <span class="rfid-presence-pill rfid-presence-pill-neutral">teacher session</span>
+      </div>
+      <div class="pv-flow-step">
+        <span class="pv-flow-num">2</span>
+        <span class="pv-method pv-method-post">POST</span>
+        <span class="pv-flow-name">Start demo period</span>
+        <span class="rfid-presence-pill rfid-presence-pill-neutral">everyone: not yet arrived</span>
+      </div>
+      <div class="pv-flow-step">
+        <span class="pv-flow-num">3</span>
+        <span class="pv-method pv-method-post">POST</span>
+        <span class="pv-flow-name">Tap</span>
+        <span class="rfid-presence-pill rfid-presence-pill-good">Present</span>
+      </div>
+      <div class="pv-flow-step">
+        <span class="pv-flow-num">4</span>
+        <span class="pv-method pv-method-post">POST</span>
+        <span class="pv-flow-name">Tap again</span>
+        <span class="rfid-presence-pill rfid-presence-pill-warn">Stepped Out</span>
+      </div>
+      <div class="pv-flow-step">
+        <span class="pv-flow-num">5</span>
+        <span class="pv-method pv-method-post">POST</span>
+        <span class="pv-flow-name">Same tap, resent</span>
+        <span class="rfid-presence-pill rfid-presence-pill-good">not counted twice</span>
+      </div>
+      <div class="pv-flow-step">
+        <span class="pv-flow-num">6</span>
+        <span class="pv-method pv-method-post">POST</span>
+        <span class="pv-flow-name">Fake device key</span>
+        <span class="rfid-presence-pill rfid-presence-pill-bad">401 rejected</span>
+      </div>
+      <div class="pv-flow-step">
+        <span class="pv-flow-num">7</span>
+        <span class="pv-method pv-method-get">GET</span>
+        <span class="pv-flow-name">Status</span>
+        <span class="rfid-presence-pill rfid-presence-pill-neutral">same data as dashboard</span>
+      </div>
+    </div>
+    <figcaption class="pv-caption">Postman stands in for the CrowPi: same request, same server, and the dashboard updates live.</figcaption>
+  </figure>
+
+  <figure class="pv-figure">
     <div class="pv-diagram">
     <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#ffffff", "primaryTextColor": "#16213b", "primaryBorderColor": "#16213b", "lineColor": "#16213b", "edgeLabelBackground": "#dfe7ef", "fontSize": "20px"}, "flowchart": {"htmlLabels": false}}}%%
 flowchart LR
