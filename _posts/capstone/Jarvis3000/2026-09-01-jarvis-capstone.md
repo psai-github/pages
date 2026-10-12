@@ -61,22 +61,21 @@ rp_active: overview
   <!-- System architecture -->
   <h2 class="ocs__section-title">System Architecture</h2>
   <div class="ocs__card">
+    <p>Jarvis captures classroom images and sends them to a proposed VPC for AI processing and image comparison. SAM 3 and other AI models needed by the system will use a GPU system located in another part of the classroom. The VPC compares images over time and tracks changes. Results return to Jarvis for storage and updates to the room model.</p>
     <div class="ocs__diagram">
-      <pre class="mermaid" style="margin:0;">flowchart TD
-    C1["Camera 1
-Main Linux computer"] --> CAP["FFmpeg capture
-Timestamped frame"]
-    C2["Camera 2
-Second Linux computer"] --> TX["SSH / NetBird"]
-    TX --> CAP
-    CAP --> DETECT["Object detector
-Object detection"]
-    DETECT --> SAM["SAM 3
-Object segmentation"]
-    SAM --> FUSE["Multi-camera matching
-and temporal tracking"]
-    FUSE --> ROOM["Room model
-Identity + location + history"]</pre>
+      <pre class="mermaid">flowchart TD
+    CAMERA["Camera 1"] --> CAPTURE["Jarvis on local Linux device<br/>Capture timestamped images"]
+    CAPTURE -->|Send images + prompts| AI
+    subgraph VPC["VPC: Processing Environment"]
+      AI["SAM 3 + other AI models<br/>Object detection and segmentation"]
+      AI --> TRACK["Image comparison + temporal tracking<br/>Future multi-camera matching"]
+    end
+    GPU["GPU system"] -->|Provides GPU computing| AI
+    AI -->|Return detections, masks + overlays| STORE["Jarvis local storage<br/>Original images + AI results"]
+    STORE -->|Send earlier images for comparison| TRACK
+    TRACK -->|Return tracked identities, locations + changes| ROOM["Room model<br/>Identity + location + history"]
+    CAPTURE -->|Save originals| STORE
+    CAMERA2["Future Camera 2<br/>Second Linux capture device"] -.->|Additional timestamped images| CAPTURE</pre>
     </div>
   </div>
 
@@ -99,7 +98,7 @@ Identity + location + history"]</pre>
       <div class="jv-flow-node active">
         <div class="jv-flow-node-photo"><img src="/images/capstone/jarvis-bom/mac-mini.jpg" alt="Main Linux computer"></div>
         <span class="jv-flow-node-label">Main Linux Computer</span>
-        <span class="jv-flow-node-sub">Capture + Detection + SAM 3</span>
+        <span class="jv-flow-node-sub">Capture + Detection + Job Storage</span>
       </div>
       <span class="jv-flow-arrow">→</span>
       <div class="jv-flow-node">
