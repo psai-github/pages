@@ -1,6 +1,6 @@
 # course illustrations
 Title: "Agile Project Workflow"
-Description: "This sprint-based approach guides students through the process of researching, designing, building, and refining a product. Each phase builds on the previous one, combining technical development with collaboration and reflection."
+Description: "This four-phase agile workflow is informed by Design Thinking: Design & Ideate, Build, Integrate, and Test & Retrospective. Each phase generally aligns with one week of the sprint, combining user-centered design with software development, collaboration, and reflection. It is a software-delivery adaptation, not the five classic Design Thinking stages."
 
 Topics:
   - title: "Phase 1: Design & Ideate"
@@ -39,11 +39,11 @@ Topics:
       - "Collaborate on Issues"
     description: "Combine everyone’s work into a unified product. Use GitHub Issues, Pull Requests, and Burndown Charts to manage discoveries and new tasks. Teams collaborate tightly to integrate systems and prepare for final testing."
 
-  - title: "Phase 4: Test"
+  - title: "Phase 4: Test & Retrospective"
     image: "/sprints/week4_demo.png"
     link: "/sprints/week4"
-    alt: "Testing and Demo"
-    subtitle: "Polish and Present"
+    alt: "User Testing and Sprint Retrospective"
+    subtitle: "Validate and Learn"
     keyPoints:
       - "Conduct User Testing"
       - "Rubric-Based Review"
