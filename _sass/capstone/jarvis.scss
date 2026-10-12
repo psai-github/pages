@@ -181,6 +181,24 @@
   margin: 0;
 }
 
+.jv-decision-card .ocs__status-pill { margin-bottom: 0.35rem; }
+
+/* ── Terminal-style monitor output ── */
+.jv-log {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--jv-text);
+  background: var(--jv-surface);
+  border: 1px solid var(--jv-card-border);
+  border-left: 3px solid var(--jv-accent);
+  border-radius: 0.5rem;
+  padding: 0.85rem 1rem;
+  margin: 1rem 0 0;
+  overflow-x: auto;
+  white-space: pre;
+}
+
 /* ── Paper / Patent / Source Cards ── */
 .jv-paper-grid {
   display: grid;
