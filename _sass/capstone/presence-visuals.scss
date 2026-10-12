@@ -38,6 +38,17 @@
   --pv-muted: #5a677d;
   --pv-next: #6f7f99;
   --pv-shadow: rgba(22, 33, 59, 0.12);
+  // Tap Reader Build page: case, boards, and standard wire colors
+  --pv-case: #f4f6f9;
+  --pv-pcbgreen: #3f8f5e;
+  --pv-pcbblue: #2f6aa8;
+  --pv-pin: #d9b45a;
+  --pv-amber: #d99a00;
+  --pv-wire-sda: #8a6fc0;
+  --pv-wire-sck: #e0a64f;
+  --pv-wire-mosi: #4f9d62;
+  --pv-wire-miso: #3b6fd4;
+  --pv-wire-rst: #6f7f99;
 
   // Layout
   .pv-figure { margin: 0 0 2.5rem; }
@@ -373,6 +384,101 @@
   .pv-api-what {
     color: var(--rp-text-muted);
     font-size: 0.9rem;
+  }
+
+  // Tap Reader Build page (/capstone/presence-system/tap-reader/)
+  .pv-fill-case { fill: var(--pv-case); }
+  .pv-stroke-case { stroke: var(--pv-ink); stroke-width: 3; }
+  .pv-fill-pcbgreen { fill: var(--pv-pcbgreen); }
+  .pv-fill-pcbblue { fill: var(--pv-pcbblue); }
+  .pv-fill-pin { fill: var(--pv-pin); }
+  .pv-fill-warn { fill: var(--pv-miss); }
+  .pv-fill-tagsoft { fill: color-mix(in srgb, var(--pv-tag) 16%, var(--pv-white)); }
+  .pv-fill-oksoft { fill: color-mix(in srgb, var(--pv-ok) 16%, var(--pv-white)); }
+
+  .pv-stroke-coil { fill: none; stroke: rgba(255, 255, 255, 0.75); stroke-width: 3; }
+  .pv-stroke-guide { stroke: var(--pv-next); stroke-width: 2; stroke-dasharray: 6 6; }
+  .pv-stroke-leader { stroke: var(--pv-ink); stroke-width: 2; }
+  .pv-stroke-new { stroke: var(--pv-tag); stroke-width: 4; stroke-dasharray: 10 6; }
+
+  .pv-wire { fill: none; stroke-width: 7; stroke-linecap: round; }
+  .pv-wire-sda { stroke: var(--pv-wire-sda); }
+  .pv-wire-sck { stroke: var(--pv-wire-sck); }
+  .pv-wire-mosi { stroke: var(--pv-wire-mosi); }
+  .pv-wire-miso { stroke: var(--pv-wire-miso); }
+  .pv-wire-rst { stroke: var(--pv-wire-rst); }
+  .pv-wire-ground { stroke: var(--pv-ink); }
+  .pv-wire-power { stroke: var(--pv-miss); }
+  .pv-wire-none { stroke: var(--pv-next); stroke-width: 4; stroke-dasharray: 4 6; }
+
+  .pv-text-board { fill: var(--pv-white); font-size: 30px; font-weight: 800; }
+  .pv-text-pinname { fill: var(--pv-white); font-size: 21px; font-weight: 700; }
+  .pv-text-warn { fill: var(--pv-white); font-size: 22px; font-weight: 800; }
+  .pv-text-warnsub { fill: var(--pv-white); font-size: 16px; }
+  .pv-text-swap { fill: var(--pv-tag); font-size: 20px; font-weight: 800; }
+  .pv-text-keep { fill: #2f6b40; font-size: 20px; font-weight: 700; }
+  .pv-text-boxtop { fill: var(--pv-ink); font-size: 24px; font-weight: 800; }
+  .pv-text-boxsub { fill: var(--pv-muted); font-size: 18px; }
+  .pv-text-node { fill: var(--pv-ink); font-size: 20px; font-weight: 700; }
+
+  .pv-parts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .pv-part {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-radius: 14px;
+    background: var(--pv-sky);
+    color: var(--pv-ink);
+  }
+
+  .pv-part-icon { width: 64px; height: 48px; }
+  .pv-part-name { font-size: 1.05rem; font-weight: 700; }
+  .pv-parts-photo { margin-top: 0.9rem; min-height: 220px; }
+
+  .pv-why {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+
+  .pv-why-col { display: grid; gap: 0.6rem; align-content: start; }
+  .pv-why-head { font-size: 1.1rem; font-weight: 800; color: var(--rp-text); }
+  .pv-tile-caution .pv-tile-icon { background: var(--pv-amber); }
+
+  .pv-why-fix {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+    font-style: normal;
+    font-weight: 600;
+    color: #2f6b40;
+
+    &::before { content: "→ "; }
+  }
+
+  // Readable presenter notes under the visuals
+  .pv-talk {
+    font-size: 1.05rem;
+    line-height: 1.7;
+
+    h4 { margin: 1.5rem 0 0.4rem; color: var(--rp-text); }
+    p, li { color: var(--rp-text); }
+    ul, ol { padding-left: 1.3rem; margin: 0; }
+  }
+
+  .pv-sources li { font-size: 0.9rem; }
+
+  .pv-unverified {
+    margin-top: 1rem;
+    font-weight: 700;
+    color: var(--rp-warning);
   }
 
   // Long content parked below the visuals
