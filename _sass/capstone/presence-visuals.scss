@@ -1,6 +1,6 @@
 // Flat illustrations on the Presence System Pipeline page
 // (/capstone/presence-system/pipeline/): hero scene, problem timeline,
-// roadmap strip, plan timeline, and testing tiles.
+// roadmap strip, plan timeline, and the Tap Reader Build page.
 //
 // Documented literal-color exception (see _sass/open-coding/README.md): the
 // scenes are a custom visualization drawn on their own light "stage", so they
@@ -213,8 +213,6 @@
     .pp-photo-placeholder { min-height: 280px; }
   }
 
-  .pv-shotlink { display: block; }
-
   // Portrait phone photo, cropped to 4:3 around the board so it lines up
   // with the dashboard screenshot beside it.
   .pv-photo-crowpi {
@@ -231,15 +229,7 @@
     border: 1px solid var(--rp-card-border);
   }
 
-  // Testing tiles
-  .pv-tiles {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 0.75rem;
-  }
-
-  .pv-tiles-todo { margin-top: 0.75rem; }
-
+  // Check tiles (Tap Reader Build page)
   .pv-tile {
     display: flex;
     align-items: center;
@@ -265,21 +255,6 @@
     color: var(--pv-white);
     font-size: 1.15rem;
     font-weight: 800;
-  }
-
-  // Live checks get a blue edge so they read apart from the pytest tiles
-  .pv-tile-live { box-shadow: inset 6px 0 0 var(--pv-tag); }
-
-  .pv-tile-todo {
-    background: transparent;
-    color: var(--rp-text-muted);
-    border: 2px dashed var(--rp-border-strong);
-
-    .pv-tile-icon {
-      background: transparent;
-      color: var(--rp-text-muted);
-      border: 2px dashed var(--rp-border-strong);
-    }
   }
 
   // HTTP method chip, shared by the Postman flow and the API list

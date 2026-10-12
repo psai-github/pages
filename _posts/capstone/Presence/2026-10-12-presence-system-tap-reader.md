@@ -328,7 +328,7 @@ rp_active: tapreader
     <h4>How we'll test it (planned, not done yet)</h4>
     <ol>
       <li><strong>First card read:</strong> the Pi prints the card's ID. Check it matches the ID already registered for that fob.</li>
-      <li><strong>End to end:</strong> tap, then the dashboard shows Present. Same checks as the Postman demo and the 9 pytest tests.</li>
+      <li><strong>End to end:</strong> tap, then the dashboard shows Present. Same checks as the Postman demo.</li>
       <li><strong>Repeated taps:</strong> tap many times and count any missed or doubled reads.</li>
       <li><strong>Read distance:</strong> measure how far away a tag still reads, both bare and stuck on a laptop.</li>
     </ol>

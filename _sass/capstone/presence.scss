@@ -119,41 +119,6 @@
     }
   }
 
-  // Live dashboard (/capstone/presence-system/dashboard/)
-  .pd-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-    gap: 0.75rem;
-    margin: 1rem 0;
-  }
-
-  .pd-stat {
-    border: 1px solid var(--rp-card-border);
-    background: var(--rp-surface);
-    border-radius: 10px;
-    padding: 0.75rem;
-    text-align: center;
-  }
-
-  .pd-stat-count {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--rp-text);
-  }
-
-  .pd-stat-label {
-    font-size: 0.85rem;
-    color: var(--rp-text-muted);
-  }
-
-  .pd-updated {
-    font-size: 0.8rem;
-    color: var(--rp-text-muted);
-    margin-top: 0.5rem;
-  }
-
-  .rfid-presence-table td.pd-name { color: var(--rp-text); }
-
   // Pipeline page (/capstone/presence-system/pipeline/)
   .pp-progress {
     display: grid;
@@ -177,12 +142,6 @@
 
   .pp-progress-note {
     font-size: 0.85rem;
-    color: var(--rp-text-muted);
-  }
-
-  .pp-caption {
-    margin: 0.75rem 0 0;
-    font-size: 0.9rem;
     color: var(--rp-text-muted);
   }
 
@@ -222,9 +181,7 @@
     padding: 1rem;
   }
 
-  // Pipeline page: Testing
-  .rfid-presence-table td.pp-check-name { color: var(--rp-text); }
-
+  // Terminal-style block (example request on the Technical page)
   .pp-output {
     margin: 1rem 0 0;
     padding: 0.75rem 1rem;
@@ -235,20 +192,6 @@
     font-size: 0.85rem;
     white-space: pre;
     overflow-x: auto;
-  }
-
-  .pp-untested {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
-  }
-
-  .pp-untested-label {
-    font-weight: 700;
-    color: var(--rp-text);
-    margin-right: 0.25rem;
   }
 
   // Pipeline page: Plan timeline (done steps filled, upcoming steps outlined)
@@ -290,37 +233,4 @@
   .pp-step-what { color: var(--rp-text-muted); }
 
   .pp-step-done .pp-step-what { color: var(--rp-text); }
-
-  .pp-questions-heading {
-    margin: 1.5rem 0 0.5rem;
-    color: var(--rp-text);
-  }
-
-  .pp-questions {
-    margin: 0;
-    padding-left: 1.25rem;
-    color: var(--rp-text-muted);
-    line-height: 1.7;
-  }
-
-  // Teacher-only control to start a manual demo period
-  .pd-controls {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 1rem;
-  }
-
-  .pd-controls-text {
-    flex: 1 1 260px;
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--rp-text-muted);
-  }
-
-  .pd-start-feedback {
-    font-size: 0.85rem;
-    color: var(--rp-text-muted);
-  }
 }

@@ -144,7 +144,7 @@ X-API-Key: (device key)
   "source": "rfid",
   "classroom_id": 1,
   "occurred_at": "2026-10-12T15:44:07.123Z",
-  "tag_uid": "39985201610",
+  "tag_uid": "1234567890",
   "device_id": "crowpi-room1"
 }
 
