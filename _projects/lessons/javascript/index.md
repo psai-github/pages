@@ -1,6 +1,6 @@
 ---
 layout: post
-courses: { csse: {week: 5} }
+courses: { csse: {week: 9} }
 title: JavaScript Reference
 description: Search and browse JavaScript lessons, references, and interactive examples.
 search_exclude: true
