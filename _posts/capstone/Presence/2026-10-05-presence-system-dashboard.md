@@ -2,7 +2,7 @@
 toc: false
 layout: post
 title: Classroom Presence System, Live Dashboard
-description: Live attendance for the current class period, from RFID taps checked by the camera, recorded in OCS.
+description: Live attendance for the current class period from RFID taps recorded in OCS. Camera verification is next.
 permalink: /capstone/presence-system/dashboard/
 year: "2026-2027"
 rp_active: dashboard
@@ -19,6 +19,12 @@ rp_active: dashboard
   {% include presence-system-nav.html %}
 
   <div class="ocs__card" id="pd-message" hidden></div>
+
+  <div class="ocs__card pd-controls" id="pd-controls" hidden>
+    <p class="pd-controls-text">Taps only count during a class period. Outside the bell schedule or during passing time, start a demo period first.</p>
+    <button type="button" class="ocs__btn pill accent fill" id="pd-start">Start 30-minute demo period</button>
+    <span class="pd-start-feedback" id="pd-start-status"></span>
+  </div>
 
   <div id="pd-live" hidden>
     <div class="pd-summary" id="pd-summary"></div>
@@ -67,6 +73,7 @@ rp_active: dashboard
     TAP_ONLY: "Tap only",
     UNVERIFIED: "Unverified",
     PENDING: "Checking...",
+    RFID_ONLY: "RFID only",
   };
   const VERIFICATION_PILL = {
     VERIFIED: "good",
@@ -75,9 +82,11 @@ rp_active: dashboard
     TAP_ONLY: "neutral",
     UNVERIFIED: "neutral",
     PENDING: "neutral",
+    RFID_ONLY: "neutral",
   };
 
   const classroomId = Number(new URLSearchParams(location.search).get("classroom")) || 1;
+  const DEMO_PERIOD = { name: "Demo Period", duration_seconds: 30 * 60, grace_seconds: 2 * 60 };
   const el = (id) => document.getElementById(id);
   const fmtTime = (iso) => new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
@@ -163,27 +172,48 @@ rp_active: dashboard
     el("pd-live").hidden = false;
   }
 
-  async function poll() {
-    if (!document.hidden) {
-      try {
-        const res = await fetch(`${pythonURI}/api/presence/classrooms/${classroomId}/status`, fetchOptions);
-        if (res.status === 401) {
-          showMessage("Sign in with your OCS account to see live attendance.", "Log in", `${baseurl}/login`);
-        } else if (res.status === 403) {
-          showMessage("Live attendance is only visible to teachers and admins.");
-        } else if (res.status === 404) {
-          showMessage(`Classroom ${classroomId} does not exist.`);
-        } else if (!res.ok) {
-          showMessage(`The attendance backend returned an error (${res.status}).`);
-        } else {
-          render(await res.json());
-        }
-      } catch (err) {
-        showMessage(`Could not reach the attendance backend at ${pythonURI}.`);
+  async function refresh() {
+    try {
+      const res = await fetch(`${pythonURI}/api/presence/classrooms/${classroomId}/status`, fetchOptions);
+      // The status endpoint is teacher/admin only, so a 200 means this viewer can start a period.
+      el("pd-controls").hidden = !res.ok;
+      if (res.status === 401) {
+        showMessage("Sign in with your OCS account to see live attendance.", "Log in", `${baseurl}/login`);
+      } else if (res.status === 403) {
+        showMessage("Live attendance is only visible to teachers and admins.");
+      } else if (res.status === 404) {
+        showMessage(`Classroom ${classroomId} does not exist.`);
+      } else if (!res.ok) {
+        showMessage(`The attendance backend returned an error (${res.status}).`);
+      } else {
+        render(await res.json());
       }
+    } catch (err) {
+      el("pd-controls").hidden = true;
+      showMessage(`Could not reach the attendance backend at ${pythonURI}.`);
     }
+  }
+
+  async function poll() {
+    if (!document.hidden) await refresh();
     setTimeout(poll, POLL_MS);
   }
+
+  el("pd-start").addEventListener("click", async () => {
+    const status = el("pd-start-status");
+    status.textContent = "Starting...";
+    try {
+      const res = await fetch(`${pythonURI}/api/presence/periods/start`, {
+        ...fetchOptions,
+        method: "POST",
+        body: JSON.stringify(DEMO_PERIOD),
+      });
+      status.textContent = res.ok ? `Demo period started at ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : `Could not start (${res.status})`;
+    } catch (err) {
+      status.textContent = "Could not reach the backend";
+    }
+    await refresh();
+  });
 
   poll();
 </script>

@@ -12,7 +12,11 @@
   --rp-surface-strong: color-mix(in srgb, var(--rp-text) 12%, var(--rp-bg));
   --rp-border-strong: color-mix(in srgb, var(--rp-text) 18%, transparent);
   --rp-success: var(--rp-accent);
-  --rp-warning: var(--rp-accent);
+  // Documented literal-color exception: amber/red carry status meaning
+  // (tardy, mismatch, absent) that the single theme accent can't express.
+  // Mixed with the text color so they stay readable in light and dark themes.
+  --rp-warning: color-mix(in srgb, #d99a00 80%, var(--rp-text));
+  --rp-danger: color-mix(in srgb, #e5484d 85%, var(--rp-text));
 
   .rfid-presence-question {
     font-size: 1.05rem;
@@ -76,12 +80,22 @@
     color: var(--rp-text);
   }
 
-  .rfid-presence-pill-good,
-  .rfid-presence-pill-warn,
+  .rfid-presence-pill-good {
+    border-color: var(--rp-success);
+    background: var(--rp-success);
+    color: var(--rp-bg);
+  }
+
+  .rfid-presence-pill-warn {
+    border-color: var(--rp-warning);
+    background: color-mix(in srgb, var(--rp-warning) 15%, transparent);
+    color: var(--rp-warning);
+  }
+
   .rfid-presence-pill-bad {
-    border-color: var(--rp-accent);
-    background: var(--rp-accent-soft);
-    color: var(--rp-accent);
+    border-color: var(--rp-danger);
+    background: color-mix(in srgb, var(--rp-danger) 15%, transparent);
+    color: var(--rp-danger);
   }
 
   .rfid-presence-pill-neutral {
@@ -139,4 +153,93 @@
   }
 
   .rfid-presence-table td.pd-name { color: var(--rp-text); }
+
+  // Pipeline page (/capstone/presence-system/pipeline/)
+  .pp-progress {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .pp-progress-item {
+    border: 1px solid var(--rp-card-border);
+    background: var(--rp-surface);
+    border-radius: 10px;
+    padding: 1rem;
+  }
+
+  .pp-progress-name {
+    margin-top: 0.6rem;
+    font-weight: 700;
+    color: var(--rp-text);
+  }
+
+  .pp-progress-note {
+    font-size: 0.85rem;
+    color: var(--rp-text-muted);
+  }
+
+  .pp-caption {
+    margin: 0.75rem 0 0;
+    font-size: 0.9rem;
+    color: var(--rp-text-muted);
+  }
+
+  .pp-shots {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .pp-shot {
+    margin: 0;
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--rp-card-border);
+      border-radius: 8px;
+    }
+
+    figcaption {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--rp-text-muted);
+    }
+  }
+
+  .pp-photo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    border: 2px dashed var(--rp-border-strong);
+    border-radius: 10px;
+    color: var(--rp-text-muted);
+    text-align: center;
+    padding: 1rem;
+  }
+
+  // Teacher-only control to start a manual demo period
+  .pd-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .pd-controls-text {
+    flex: 1 1 260px;
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--rp-text-muted);
+  }
+
+  .pd-start-feedback {
+    font-size: 0.85rem;
+    color: var(--rp-text-muted);
+  }
 }
