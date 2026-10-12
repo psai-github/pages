@@ -130,10 +130,8 @@ rp_active: pipeline
 
   <div class="pv-live">
     <figure class="pv-figure">
-      <!-- Replace this placeholder with:
-           <img class="pv-photo" src="{{ site.baseurl }}/images/presence-system/crowpi.jpg" alt="CrowPi tap station"> -->
-      <div class="pp-photo-placeholder">Photo of the CrowPi tap station goes here</div>
-      <figcaption class="pv-caption">The tap station: CrowPi RFID reader.</figcaption>
+      <img class="pv-photo pv-photo-crowpi" src="{{ site.baseurl }}/images/presence-system/crowpi.jpg" alt="The CrowPi tap station: a Raspberry Pi board in a case with a screen, RFID pad at the bottom left, and a keyboard">
+      <figcaption class="pv-caption">Tap station: RFID pad at bottom left.</figcaption>
     </figure>
     <figure class="pv-figure">
       <a class="pv-shotlink" href="/capstone/presence-system/dashboard/">

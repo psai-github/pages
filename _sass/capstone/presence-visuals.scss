@@ -204,6 +204,14 @@
 
   .pv-shotlink { display: block; }
 
+  // Portrait phone photo, cropped to 4:3 around the board so it lines up
+  // with the dashboard screenshot beside it.
+  .pv-photo-crowpi {
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    object-position: 50% 55%;
+  }
+
   .pv-photo {
     display: block;
     width: 100%;
