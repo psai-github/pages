@@ -85,58 +85,23 @@ Spatial presence, face-scanning system"]
 
   <div class="ocs__card">
     <h3 class="ocs__section-title">API Endpoints (built today)</h3>
-    <div class="pv-api">
-      <div class="pv-api-row">
-        <span class="pv-method pv-method-post">POST</span>
-        <code class="pv-api-path">/api/presence/event</code>
-        <span class="pv-api-auth pv-api-auth-device">Device key</span>
-        <span class="pv-api-what">Record a tap (source rfid) or a camera result (source camera)</span>
-      </div>
-      <div class="pv-api-row">
-        <span class="pv-method pv-method-post">POST</span>
-        <code class="pv-api-path">/api/rfid/scan</code>
-        <span class="pv-api-auth pv-api-auth-device">Device key</span>
-        <span class="pv-api-what">Route the CrowPi uses today; forwards to /api/presence/event</span>
-      </div>
-      <div class="pv-api-row">
-        <span class="pv-method pv-method-get">GET</span>
-        <code class="pv-api-path">/api/presence/classrooms/{id}/taps/pending</code>
-        <span class="pv-api-auth pv-api-auth-device">Device key</span>
-        <span class="pv-api-what">Camera asks for taps from the last 15 seconds</span>
-      </div>
-      <div class="pv-api-row">
-        <span class="pv-method pv-method-get">GET</span>
-        <code class="pv-api-path">/api/presence/classrooms/{id}/status</code>
-        <span class="pv-api-auth pv-api-auth-teacher">Teacher / Admin</span>
-        <span class="pv-api-what">Each student's state now (the dashboard polls this every 2 s)</span>
-      </div>
-      <div class="pv-api-row">
-        <span class="pv-method pv-method-post">POST</span>
-        <code class="pv-api-path">/api/presence/periods/start</code>
-        <span class="pv-api-auth pv-api-auth-teacher">Teacher / Admin</span>
-        <span class="pv-api-what">Start a demo period (overrides the bell schedule)</span>
-      </div>
-      <div class="pv-api-row">
-        <span class="pv-method pv-method-post">POST</span>
-        <code class="pv-api-path">/api/rfid/register</code>
-        <span class="pv-api-auth pv-api-auth-teacher">Teacher / Admin</span>
-        <span class="pv-api-what">Link a tag to a student</span>
-      </div>
-      <div class="pv-api-row">
-        <span class="pv-method pv-method-get">GET</span>
-        <code class="pv-api-path">/api/rfid/classrooms/{id}/events</code>
-        <span class="pv-api-auth pv-api-auth-login">Logged in, same school</span>
-        <span class="pv-api-what">Latest 200 taps for a classroom</span>
-      </div>
-      <div class="pv-api-row">
-        <span class="pv-method pv-method-post">POST</span>
-        <code class="pv-api-path">/api/authenticate</code>
-        <span class="pv-api-auth pv-api-auth-login">Password</span>
-        <span class="pv-api-what">OCS login; sets the session cookie</span>
-      </div>
+    <div class="ocs__table-wrap">
+      <table class="ocs__table">
+        <thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>POST</code></td><td><code>/api/presence/event</code></td><td>Device key</td><td>Record a tap (source rfid) or a camera result (source camera)</td></tr>
+          <tr><td><code>POST</code></td><td><code>/api/rfid/scan</code></td><td>Device key</td><td>Route the CrowPi uses today; forwards to /api/presence/event</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/presence/classrooms/{id}/taps/pending</code></td><td>Device key</td><td>Camera asks for taps from the last 15 seconds</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/presence/classrooms/{id}/status</code></td><td>Teacher / Admin</td><td>Each student's state now (the dashboard polls this every 2 s)</td></tr>
+          <tr><td><code>POST</code></td><td><code>/api/presence/periods/start</code></td><td>Teacher / Admin</td><td>Start a demo period (overrides the bell schedule)</td></tr>
+          <tr><td><code>POST</code></td><td><code>/api/rfid/register</code></td><td>Teacher / Admin</td><td>Link a tag to a student</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/rfid/classrooms/{id}/events</code></td><td>Logged in, same school</td><td>Latest 200 taps for a classroom</td></tr>
+          <tr><td><code>POST</code></td><td><code>/api/authenticate</code></td><td>Password</td><td>OCS login; sets the session cookie</td></tr>
+        </tbody>
+      </table>
     </div>
     <p class="rfid-presence-about">Device key = the <code>X-API-Key</code> header the CrowPi (and later the camera) sends. Teacher / Admin = a normal OCS login. Example tap, the request the CrowPi sends and what Flask returns:</p>
-    <pre class="pp-output">POST /api/presence/event
+    <pre>POST /api/presence/event
 X-API-Key: (device key)
 
 {
@@ -216,7 +181,7 @@ issue RFID Tag"]
     C -->|Student unenrolled/graduated| G["Tag: RETIRED
 Computer unlinked"]</pre>
     </div>
-    <h3 class="ocs__section-title" style="margin-top:1.5rem;">Data the system needs to persist</h3>
+    <h3 class="ocs__section-title">Data the system needs to persist</h3>
     <p class="rfid-presence-about">No code yet for the full model. This is the entity list, not a schema.</p>
     <ul class="ocs__entity-list">
       <li><strong>Students</strong>: id, name, enrolled periods</li>
