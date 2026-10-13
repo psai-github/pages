@@ -63,6 +63,73 @@ Spatial presence, face-scanning system"]
   </div>
 
   <div class="ocs__card">
+    <h3 class="ocs__section-title">One Tap, Step by Step (built today)</h3>
+    <pre class="mermaid">sequenceDiagram
+    participant S as Student
+    participant C as CrowPi
+    participant F as Flask
+    participant DB as Database
+    participant D as Dashboard
+    S->>C: Taps laptop tag
+    C->>F: POST tap (card ID, time)
+    Note over F: presence-event handler
+    F->>DB: Save as ENTER in this period
+    F-->>C: accepted
+    loop every 2 seconds
+        D->>F: GET classroom status
+        F->>DB: Read this period's taps
+        F-->>D: PRESENT or TARDY
+    end
+</pre>
+  </div>
+
+  <div class="ocs__card">
+    <h3 class="ocs__section-title">API Endpoints (built today)</h3>
+    <div class="ocs__table-wrap">
+      <table class="ocs__table">
+        <thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>POST</code></td><td><code>/api/presence/event</code></td><td>Device key</td><td>Record a tap (source rfid) or a camera result (source camera)</td></tr>
+          <tr><td><code>POST</code></td><td><code>/api/rfid/scan</code></td><td>Device key</td><td>Route the CrowPi uses today; forwards to /api/presence/event</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/presence/classrooms/{id}/taps/pending</code></td><td>Device key</td><td>Camera asks for taps from the last 15 seconds</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/presence/classrooms/{id}/status</code></td><td>Teacher / Admin</td><td>Each student's state now (the dashboard polls this every 2 s)</td></tr>
+          <tr><td><code>POST</code></td><td><code>/api/presence/periods/start</code></td><td>Teacher / Admin</td><td>Start a demo period (overrides the bell schedule)</td></tr>
+          <tr><td><code>POST</code></td><td><code>/api/rfid/register</code></td><td>Teacher / Admin</td><td>Link a tag to a student</td></tr>
+          <tr><td><code>GET</code></td><td><code>/api/rfid/classrooms/{id}/events</code></td><td>Logged in, same school</td><td>Latest 200 taps for a classroom</td></tr>
+          <tr><td><code>POST</code></td><td><code>/api/authenticate</code></td><td>Password</td><td>OCS login; sets the session cookie</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="rfid-presence-about">Device key = the <code>X-API-Key</code> header the CrowPi (and later the camera) sends. Teacher / Admin = a normal OCS login. Example tap, the request the CrowPi sends and what Flask returns:</p>
+    <pre>POST /api/presence/event
+X-API-Key: (device key)
+
+{
+  "event_id": "3f2b8c1e-6a1d-4f7e-9b0a-2d5c7e9f1a44",
+  "source": "rfid",
+  "classroom_id": 1,
+  "occurred_at": "2026-10-12T15:44:07.123Z",
+  "tag_uid": "1234567890",
+  "device_id": "crowpi-room1"
+}
+
+200 OK (trimmed)
+{
+  "status": "accepted",
+  "duplicate": false,
+  "event": {
+    "uid": "vibham",
+    "user_name": "Vibha Mandayam",
+    "type": "enter",
+    "period": "Demo Period",
+    "occurred_at": "2026-10-12T15:44:07.123Z",
+    "received_at": "2026-10-12T15:44:07.410Z"
+  }
+}</pre>
+    <p class="rfid-presence-about">Errors: 401 bad or missing device key, 404 unregistered tag (<code>"status": "unregistered"</code>), 400 missing fields or a timestamp without a timezone. A resent <code>event_id</code> returns the original record with <code>"duplicate": true</code>.</p>
+  </div>
+
+  <div class="ocs__card">
     <h3 class="ocs__section-title">Presence State Model</h3>
     <p class="rfid-presence-about">For the RFID and camera pairing: two independent signals, device via RFID and student via camera, get correlated into one of these states per student per period.</p>
     <div class="ocs__diagram">
@@ -114,7 +181,7 @@ issue RFID Tag"]
     C -->|Student unenrolled/graduated| G["Tag: RETIRED
 Computer unlinked"]</pre>
     </div>
-    <h3 class="ocs__section-title" style="margin-top:1.5rem;">Data the system needs to persist</h3>
+    <h3 class="ocs__section-title">Data the system needs to persist</h3>
     <p class="rfid-presence-about">No code yet for the full model. This is the entity list, not a schema.</p>
     <ul class="ocs__entity-list">
       <li><strong>Students</strong>: id, name, enrolled periods</li>
