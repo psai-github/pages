@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { selectedDocuments, readState, writeState, groupedMatches, highlightedParts } from '../js/model.js';
+import { selectedDocuments, readState, writeState, groupedMatches, highlightedParts, resultDetails } from '../js/model.js';
 
 const require = createRequire(import.meta.url);
 const lunr = require('../../../../assets/js/vendor/lunr.min.js');
@@ -70,4 +70,16 @@ test('excerpts center on matches and merge overlapping ranges without losing tex
   assert.ok(parts.map((part) => part.text).join('').length < text.length);
   assert.equal(highlightedParts('<img src=x onerror=alert(1)>', [[0, 4]]).map((part) => part.text).join(''),
     '<img src=x onerror=alert(1)>');
+});
+
+test('text results name the source file and list primary subjects first', () => {
+  const details = resultDetails({
+    url: '/csa/io/', path: '_posts/csa/2025-10-01-text-files.md', labels: ['Files', 'Java'], categories: ['files', 'java'],
+  }, ['java', 'sass']);
+  assert.equal(details.file, '2025-10-01-text-files.md');
+  assert.equal(details.path, '_posts/csa/2025-10-01-text-files.md');
+  assert.deepEqual(details.subjects, [{ label: 'Java', primary: true }, { label: 'Files', primary: false }]);
+  assert.equal(resultDetails({ url: '/x/', categories: ['java'] }).file, '/x/');
+  assert.equal(resultDetails({ url: '/n/', path: '_posts/2025-09-21-files_IPYNB_2_.md', categories: [] }).file,
+    '2025-09-21-files.ipynb');
 });

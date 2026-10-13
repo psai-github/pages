@@ -67,3 +67,14 @@ export function highlightedParts(text, positions, excerpt = false) {
   if (end < text.length) parts.push({ text: '…', highlighted: false });
   return parts;
 }
+
+export function resultDetails(document, primary = []) {
+  const path = document.path || '';
+  const labels = document.labels || document.categories;
+  return {
+    file: (path.split('/').pop() || document.url).replace(/_IPYNB_2_\.md$/, '.ipynb'),
+    path,
+    subjects: labels.map((label) => ({ label, primary: primary.includes(label.toLowerCase()) }))
+      .sort((a, b) => Number(b.primary) - Number(a.primary)),
+  };
+}

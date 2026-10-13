@@ -55,6 +55,8 @@ module Topics
           "title" => document.data["title"].to_s,
           "description" => document.data["description"].to_s,
           "categories" => names.map(&:downcase),
+          "labels" => names,
+          "path" => document.relative_path,
           "url" => document.url,
           "viewUrl" => Topics.view_url(document.url),
           "content" => searchable_content(document.content),

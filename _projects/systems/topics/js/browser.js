@@ -1,4 +1,4 @@
-import { selectedDocuments, readState, writeState, groupedMatches, highlightedParts } from './model.js';
+import { selectedDocuments, readState, writeState, groupedMatches, highlightedParts, resultDetails } from './model.js';
 
 const root = document.querySelector('[data-topics-browser]');
 if (root) {
@@ -14,6 +14,7 @@ if (root) {
   const searchClear = root.querySelector('[data-topics-search-clear]');
   const filterClear = root.querySelector('[data-topics-clear]');
   const cardByUrl = new Map(cards.map((card) => [card.dataset.topicUrl, card]));
+  const primaryTopics = [...root.querySelectorAll('[data-topics-primary] input')].map((input) => input.value);
   let state = readState(location.search);
   if (!state.categories.length && root.dataset.initialCategory) {
     state.categories = [root.dataset.initialCategory];
@@ -68,17 +69,33 @@ if (root) {
     filterClear.disabled = !state.categories.length;
     bodyResults.replaceChildren();
     for (const match of groups.body) {
-      const item = document.createElement('li');
+      const details = resultDetails(match.document, primaryTopics);
       const link = document.createElement('a');
+      link.className = 'ocs__nav-card';
       link.href = contextLink(match.document);
-      const excerpt = document.createElement('p');
-      highlight(excerpt, match.document[match.field], match.positions, true);
-      const title = document.createElement('p');
-      title.className = 'topics-browser__text-title';
+      const file = document.createElement('span');
+      file.className = 'ocs__nav-card-kicker';
+      file.textContent = details.file;
+      file.title = details.path;
+      const title = document.createElement('span');
+      title.className = 'ocs__nav-card-title';
       title.textContent = match.document.title;
-      link.append(excerpt, title);
-      item.append(link);
-      bodyResults.append(item);
+      const excerpt = document.createElement('span');
+      excerpt.className = 'ocs__text';
+      highlight(excerpt, match.document[match.field], match.positions, true);
+      const subjects = document.createElement('span');
+      const pills = [
+        ...details.subjects.map(({ label, primary }) => [label, primary ? 'good' : 'neutral']),
+        ...(root.dataset.courseContext === 'true' ? (match.document.weeks || []).map((week) => [week, 'neutral']) : []),
+      ];
+      pills.forEach(([label, variant]) => {
+        const pill = document.createElement('span');
+        pill.className = `ocs__status-pill ocs__status-pill--${variant}`;
+        pill.textContent = label;
+        subjects.append(pill, ' ');
+      });
+      link.append(file, title, excerpt, subjects);
+      bodyResults.append(link);
     }
     const count = selected.length + (searching ? groups.body.length : 0);
     status.textContent = count ? `${count} documents` :
