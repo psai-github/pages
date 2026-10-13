@@ -216,6 +216,25 @@ body:has(.lesson-player) {
   color: $text;
 }
 
+/* A week's lessons and chat sit one level in from its intro, with a guide
+   line under the intro's icon, so the sidebar reads as a tree. The gap and
+   padding are trimmed so lesson titles keep almost the same width: one more
+   pixel of indent breaks "Methodologies" mid-word in the 250px sidebar. */
+.lesson-branch {
+  margin: 0 0 8px 18px;
+  border-left: 1px solid color-mix(in srgb, var(--pref-accent-color) 40%, transparent);
+}
+
+.lesson-branch .lesson-item {
+  gap: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.lesson-branch .ocs__links {
+  padding-left: 8px;
+}
+
 .lesson-status-icon {
   width: 16px;
   height: 16px;
