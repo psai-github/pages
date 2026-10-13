@@ -28,7 +28,7 @@ rp_active: overview
   </div>
 
   <figure class="jv-figure">
-    <img src="{{ '/images/jarvis3000-overview-image.png' | relative_url }}" alt="How Jarvis3000 works: classroom cameras observe the room, Jarvis detects objects, and the system reports objects that moved" width="1774" height="887">
+    <img src="{{ '/images/jarvis/jarvis3000-overview-image.png' | relative_url }}" alt="How Jarvis3000 works: classroom cameras observe the room, Jarvis detects objects, and the system reports objects that moved" width="1774" height="887">
     <figcaption>Jarvis3000 observes classroom objects over time and highlights changes in their location.</figcaption>
   </figure>
 
