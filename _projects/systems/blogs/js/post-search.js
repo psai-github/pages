@@ -30,11 +30,13 @@ export function writeQuery(search, query) {
   return text ? `?${text}` : '';
 }
 
-// "3 documents", "1 of 3 documents", or why nothing is showing.
+// "3 documents", "1 of 3 documents" or "No matches". Kept short so it fits
+// beside Clear Search: if it wrapped, the split would stretch the field to
+// the taller row. The query itself is already in the field.
 export function statusText(shown, total, query) {
   const documents = count => `${count} ${count === 1 ? 'document' : 'documents'}`;
   if (!query.trim()) return documents(total);
-  if (!shown) return `No documents match "${query.trim()}".`;
+  if (!shown) return 'No matches';
   return `${shown} of ${documents(total)}`;
 }
 
