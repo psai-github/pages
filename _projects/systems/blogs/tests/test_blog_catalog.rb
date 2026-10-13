@@ -80,4 +80,39 @@ empty = render.call({ "post_filter" => "game_docs" }, [post("unrelated", "2026-0
 assert(empty.include?("No documentation is available yet."), "Empty filtered catalog must explain its state")
 assert(!empty.include?('class="post-link"'), "Empty filtered catalog must not show unrelated posts")
 
-puts "PASS: blog catalog filtering, ordering, cards, deduplication, baseurl and empty state"
+# post_search: true adds a search bar over the same cards, built from OCS components.
+assert(!filtered.include?("post-search") && !unfiltered.include?("post-search"),
+       "Catalogs without post_search must not change")
+assert(filtered.scan("<li>").size == 4, "Cards without post_search must stay plain list items")
+
+search_page = { "post_filter" => "game_docs", "post_search" => true, "title" => "GameBuilder Docs" }
+quoted = post("quoted-doc", "2026-02-10", "game_docs" => true,
+              "title" => %(Say "hi"), "description" => "<em>Sprites</em> & sounds")
+searchable = render.call(search_page, posts + [quoted])
+bar = searchable[%r{<p [^>]*data-post-search>.*?</p>}m]
+assert(bar, "post_search must draw a search bar")
+assert(bar.include?('<p class="ocs__split" role="search" aria-label="Search GameBuilder Docs"'),
+       "The bar must be an OCS split and a labelled search landmark")
+assert(bar.include?('<input class="ocs__input" type="search" size="1" placeholder="Search titles &amp; descriptions"'),
+       "The field must be an OCS search input whose width comes from the split, not its size")
+assert(bar.include?('aria-label="Search titles and descriptions"'), "The field must have an accessible name")
+assert(bar.include?('<button class="ocs__btn medium accent" type="button"') && bar.include?("Clear Search"),
+       "Clear Search must be an OCS button as tall as the field")
+assert(bar.scan(" disabled").size == 2, "The field and button must stay disabled until the script runs")
+assert(bar[%r{<span class="ocs__links">\s*<button .*?</button>\s*<span role="status" aria-live="polite" data-post-search-status></span>\s*</span>}m],
+       "Clear Search and the announced result count must share one OCS links row")
+assert(!searchable.include?("style="), "The search bar must not add inline styles")
+texts = searchable.scan(/<li data-post-search-card data-post-search-text="([^"]*)">/).flatten
+assert(texts.size == 5, "Every card must carry its search text; got #{texts.size}")
+assert(texts.include?("newer-doc Description for newer-doc"), "Search text must be the title and description")
+assert(texts.include?("Say &quot;hi&quot; Sprites &amp; sounds"), "Search text must be plain and escaped; got #{texts.inspect}")
+assert(searchable.scan(/class="post-link" href="([^"]+)"/).flatten == links + ["/preview/quoted-doc/"],
+       "Searching must keep the catalog's cards and order")
+assert(searchable.include?(%(from "/preview/assets/js/blogs/post-search.js";)),
+       "The search script must load under baseurl, encoded with jsonify")
+
+empty_search = render.call(search_page, [post("unrelated", "2026-02-19")])
+assert(!empty_search.include?("post-search"), "An empty catalog must not show a search bar")
+assert(empty_search.include?("No documentation is available yet."), "An empty catalog keeps its message")
+
+puts "PASS: blog catalog filtering, ordering, cards, deduplication, baseurl, empty state and search bar"
