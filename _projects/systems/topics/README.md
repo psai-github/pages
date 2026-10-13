@@ -16,8 +16,9 @@ categories: [Java, Algorithms]
 ```
 
 Categories are independent facets, not ordered parent/child declarations.
-Select Java or Algorithms to browse either collection; select both to see their
-intersection. No new topic attribute or YAML topic inventory is required.
+Boxes in the same filter add to each other: Java plus Python shows every Java
+document and every Python document. The Topic Filter and Categories Filter narrow
+each other: Java plus Algorithms shows only documents tagged with both. No new topic attribute or YAML topic inventory is required.
 Document membership is discovered at build time from posts/pages.
 Hidden, draft and search-excluded documents are omitted.
 
@@ -32,7 +33,7 @@ above the output with an accessible, visually hidden View label.
 Clear Filters clears only topic/category selections; Clear Search clears only
 the query. Each clear button is dimmed and disabled when its corresponding
 selection is empty. Each search result heading shows its own count beside the heading.
-Both boxes use the same category intersection rules; YAML controls prominence,
+Both boxes follow those rules; YAML controls prominence,
 not document membership. Primary topics remain visible even when they have no
 published documents. No `topics:` attribute is required.
 

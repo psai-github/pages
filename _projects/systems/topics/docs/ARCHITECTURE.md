@@ -62,10 +62,12 @@ The content model uses existing frontmatter:
 categories: [Java, Algorithms]
 ```
 
-Categories are independent facets, not an ordered parent/child path. Selecting
-Java finds its collection; selecting Java and Algorithms finds their
-intersection. Both filter groups support multiple selections, and all selected
-categories must match a document.
+Categories are independent facets, not an ordered parent/child path. Both filter
+groups support multiple selections. Checked boxes in the same group are
+alternatives: Java and Python finds every document in either collection. The two
+groups narrow each other: Java (Topic Filter) and Algorithms (Categories Filter)
+finds documents in both. In set terms, each group is a union and the groups are
+intersected.
 
 The [primary topics configuration](../data/topics_primary.yml) orders prominent
 categories: SASS, Python, Java, JavaScript, Flask, Spring, CS111, CS112 and CS113.
@@ -118,7 +120,7 @@ from the static catalog. Title, description and content participate in search,
 with title matches boosted. User input is tokenized as terms rather than
 interpreted as Lunr query syntax.
 
-Browsing and search use the same category intersection:
+Browsing and search use the same category filter:
 
 | Mode | Output |
 | --- | --- |
@@ -132,7 +134,7 @@ otherwise content or description supplies the excerpt. Each group preserves
 search relevance ordering and displays its count beside its heading. Search
 uses title cards regardless of the browsing view selection.
 
-The [model helpers](../js/model.js) implement category intersection, URL state,
+The [model helpers](../js/model.js) implement the category filter, URL state,
 match grouping and excerpt construction. Highlights are created with text nodes
 and `mark` elements, not injected document HTML. Search results remain within
 the selected collection rather than replacing it with a global search overlay.
@@ -215,7 +217,7 @@ build does not require a separate npm installation.
 - `bundle exec ruby scripts/test_topics.rb`: catalog and primary configuration,
   original versus Topics rendering, source-relative includes, submission
   identity and browser markup.
-- `node --test tests/topics.test.mjs`: category intersections, scoped search,
+- `node --test tests/topics.test.mjs`: category filters, scoped search,
   URL state, grouped matches and highlighted excerpts.
 - Jekyll builds through the repository workflow: generated routes, Liquid
   rendering and Ruby Sass compatibility.
