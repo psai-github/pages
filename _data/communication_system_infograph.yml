@@ -32,9 +32,9 @@ Topics:
       - "Verified end to end against a real Spring instance, not a mock"
     status: "Shipped"
     team:
-      - "Samarth"
-      - "Akshajh"
-      - "Tarun"
+      - "Akhil"
+      - "Skandan"
+      - "Sathwik"
 
   - title: "Per-Week Chat"
     image: "csa-chat/week-chat.png"
@@ -65,9 +65,9 @@ Topics:
       - "Works today with no backend, so the UI can be reviewed and polished in parallel with the deploy"
     status: "Shipped"
     team:
-      - "Samarth"
-      - "Akshajh"
-      - "Tarun"
+      - "Akhil"
+      - "Skandan"
+      - "Sathwik"
 
   - title: "Assignment Threads"
     phase: "Next Up"
