@@ -3,17 +3,29 @@ require "jekyll"
 ROOT = File.expand_path("../../../..", __dir__)
 PROJECT = File.expand_path("..", __dir__)
 
-# Renders {% include name.html %} from _includes/, as Jekyll does: the layout
-# includes blog-catalog.html, which includes post_list_image_card.html.
+# Renders {% include name.html key=value %} from _includes/, as Jekyll does: the
+# layout includes blog-catalog.html, which includes post_list_image_card.html.
+# A value is a quoted string, true, false, or a variable, the forms used here.
 class CatalogInclude < Liquid::Tag
   def initialize(tag_name, markup, tokens)
     super
-    @file = markup.strip
+    @file, *pairs = markup.strip.split(/\s+/)
+    @params = pairs.map { |pair| pair.split("=", 2) }
   end
 
   def render(context)
-    Liquid::Template.parse(File.read(File.join(PROJECT, "_includes", @file)))
-      .render!(context)
+    params = @params.to_h do |key, value|
+      [key, case value
+            when /\A["'](.*)["']\z/ then Regexp.last_match(1)
+            when "true" then true
+            when "false" then false
+            else context[value]
+            end]
+    end
+    context.stack do
+      context["include"] = params
+      Liquid::Template.parse(File.read(File.join(PROJECT, "_includes", @file))).render!(context)
+    end
   end
 end
 
@@ -99,8 +111,10 @@ assert(bar.include?('aria-label="Search titles and descriptions"'), "The field m
 assert(bar.include?('<button class="ocs__btn medium accent" type="button"') && bar.include?("Clear Search"),
        "Clear Search must be an OCS button as tall as the field")
 assert(bar.scan(" disabled").size == 2, "The field and button must stay disabled until the script runs")
-assert(bar[%r{<span class="ocs__links">\s*<button .*?</button>\s*<span role="status" aria-live="polite" data-post-search-status></span>\s*</span>}m],
-       "Clear Search and the announced result count must share one OCS links row")
+assert(bar[%r{<span class="ocs__links">\s*<button [^>]*>Clear Search</button>\s*</span>}m],
+       "Clear Search must sit alone in an OCS links row, so the field never stretches")
+assert(searchable.match?(%r{data-post-search>.*?</p>\s*<p role="status" aria-live="polite" data-post-search-status></p>}m),
+       "The announced result count must be its own line under the bar")
 assert(!searchable.include?("style="), "The search bar must not add inline styles")
 texts = searchable.scan(/<li data-post-search-card data-post-search-text="([^"]*)">/).flatten
 assert(texts.size == 5, "Every card must carry its search text; got #{texts.size}")
@@ -115,4 +129,36 @@ empty_search = render.call(search_page, [post("unrelated", "2026-02-19")])
 assert(!empty_search.include?("post-search"), "An empty catalog must not show a search bar")
 assert(empty_search.include?("No documentation is available yet."), "An empty catalog keeps its message")
 
-puts "PASS: blog catalog filtering, ordering, cards, deduplication, baseurl, empty state and search bar"
+# course= (passed by a course's Blogs page) keeps the posts that name only that
+# course, the rule the course player uses for its own lessons. A post for several
+# courses is listed through its one-course copies from split_multi_course_files.py.
+hosted = lambda do |markup, entries|
+  Liquid::Template.parse(markup).render!(
+    { "site" => { "posts" => entries }, "page" => { "title" => "Blogs" }, "current_course" => "csa" },
+    registers: { site: site }
+  )
+end
+course_posts = [
+  post("csa-lesson", "2026-03-03", "courses" => { "csa" => { "week" => 2 } }),
+  post("csp-lesson", "2026-03-04", "courses" => { "csp" => { "week" => 2 } }),
+  post("shared-lesson", "2026-03-05", "courses" => { "csa" => { "week" => 3 }, "csp" => { "week" => 3 } }),
+  post("shared-lesson-csa", "2026-03-05", "courses" => { "csa" => { "week" => 3 } }),
+  post("capstone", "2026-03-06", "sticky_rank" => 1),
+  post("hidden-csa", "2026-03-07", "courses" => { "csa" => { "week" => 4 } }, "hide" => true)
+]
+csa = hosted.call("{% include blog-catalog.html course=current_course %}", course_posts)
+csa_links = csa.scan(/class="post-link" href="([^"]+)"/).flatten
+assert(csa_links == %w[/preview/shared-lesson-csa/ /preview/csa-lesson/],
+       "A course's catalog lists only that course's own posts, newest first; got #{csa_links.inspect}")
+assert(!csa.include?("post-search"), "course= alone must not add a search bar")
+none = hosted.call('{% include blog-catalog.html course="csh" %}', course_posts)
+assert(none.include?("No posts for this class yet.") && !none.include?('class="post-link"'),
+       "A course with no posts of its own must say so")
+course_search = hosted.call("{% include blog-catalog.html course=current_course search=true %}", course_posts)
+assert(course_search.include?("data-post-search>") && course_search.scan("<li data-post-search-card").size == 2,
+       "search=true must put the bar over the course's own cards")
+everything = hosted.call("{% include blog-catalog.html %}", course_posts)
+assert(everything.scan('class="post-link"').size == 5,
+       "Without course= the catalog must still list every visible post")
+
+puts "PASS: blog catalog filtering, ordering, cards, deduplication, baseurl, empty state, search bar and course filter"

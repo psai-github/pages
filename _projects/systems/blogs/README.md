@@ -32,6 +32,8 @@ It has no local npm manifest or custom Makefile.
   catalog keeps its order, and the query stays in `?q=` so it can be shared.
 - `layout: blog-reader`: optional standalone catalog with embedded reading.
 - `{% include blog-reader.html %}`: the same reader hosted by a course page.
+  `course=<course>` lists only posts whose `courses` names that course alone,
+  and `search=true` adds the search bar; a course's Blogs page passes both.
 - `layout: notebook`, `lessonbase`, `lessonbasecapture`: existing viewer variants.
 
 The reader preserves `?post=` history, list/reader switching, relative links and

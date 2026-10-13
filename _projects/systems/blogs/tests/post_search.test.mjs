@@ -35,7 +35,7 @@ test('the status line counts the cards that are showing', () => {
   assert.equal(statusText(3, 3, ''), '3 documents');
   assert.equal(statusText(1, 1, '  '), '1 document');
   assert.equal(statusText(1, 3, 'npc'), '1 of 3 documents');
-  assert.equal(statusText(0, 3, ' xyz '), 'No matches');
+  assert.equal(statusText(0, 3, ' xyz '), 'No documents match "xyz".');
 });
 
 // Plain objects standing in for the field, button, status line, cards and window.
@@ -98,7 +98,7 @@ test('typing hides the cards that do not match and keeps the query in the addres
 
   page.type('dragons');
   assert.equal(shown(page.cards), 0);
-  assert.equal(page.status.textContent, 'No matches');
+  assert.equal(page.status.textContent, 'No documents match "dragons".');
 });
 
 test('Clear Search shows every card again, drops ?q= and returns focus to the field', () => {
