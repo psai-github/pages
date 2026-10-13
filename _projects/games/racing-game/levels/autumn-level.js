@@ -51,7 +51,7 @@ class GameLevelAutumn {
         left:      { row: 3, start: 2, columns: 1 },
         upLeft:    { row: 2, start: 0, columns: 1, rotate: Math.PI },
         hitbox: { widthPercentage: 0.5, heightPercentage: 0.5 },
-        keypress: { up: 38, left: 37, down: 40, right: 39 } // W, A, S, D
+        keypress: { up: 38, left: 37, down: 40, right: 39 } // Arrow keys
     }
     const barrierData1 = {
       id: "barrier-1",

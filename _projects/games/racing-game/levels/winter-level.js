@@ -1,8 +1,23 @@
 import GameEnvBackground from '@assets/js/GameEnginev1.1/essentials/GameEnvBackground.js';
 import Player from '@assets/js/GameEnginev1.1/essentials/Player.js';
 import SplineBarrier from '@assets/js/GameEnginev1.1/essentials/SplineBarrier.js';
+import Npc from '@assets/js/GameEnginev1.1/essentials/Npc.js';
 import TimeLapScreen from './TimeLapScreen.js';
 
+
+// Npc only talks while a player is touching it; the yeti talks whenever E is pressed.
+class Yeti extends Npc {
+  handleKeyInteract() {
+    if (this.gameEnv.gameControl && this.gameEnv.gameControl.isPaused) {
+      return;
+    }
+    if (this.dialogueSystem.isDialogueOpen()) {
+      this.dialogueSystem.closeDialogue();
+      return;
+    }
+    this.showRandomDialogue();
+  }
+}
 
 class GameLevelWinter {
   constructor(gameEnv) {
@@ -43,6 +58,17 @@ class GameLevelWinter {
         touchOptions: { interactLabel: "e", position: "right" },
         keypress: { up: 38, left: 37, down: 40, right: 39 } // Arrow keys
     }
+    const yeti_data = {
+        id: "Yeti",
+        src: "/images/projects/racing-game/yeti.png",
+        SCALE_FACTOR: 8,
+        INIT_POSITION: { x: 0.45, y: 0.02 }, // above the track so it doesn't block the racing line
+        pixels: { height: 256, width: 256 },
+        orientation: { rows: 1, columns: 1 },
+        down: { row: 0, start: 0, columns: 1 },
+        hitbox: { widthPercentage: 0.1, heightPercentage: 0.1 },
+        dialogues: ["Welcome to the Winter Level"]
+    }
  
     const barrierData1 = {
       id: "barrier-2",
@@ -66,6 +92,7 @@ class GameLevelWinter {
       { class: GameEnvBackground, data: background_data },
       { class: Player, data: player_data },
       { class: Player, data: player2_data },
+      { class: Yeti, data: yeti_data },
       { class: SplineBarrier, data: barrierData1 },
       { class: SplineBarrier, data: barrierData2 },
       { class: TimeLapScreen, data: { currentLap: 1, totalLaps: 3 } }
