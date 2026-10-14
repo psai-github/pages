@@ -46,10 +46,13 @@ Topics does not infer a language or college course from `lesson_language`,
 
 One filtered collection powers browsing and Lunr full-text search. Without a
 query, documents appear as cards or a list. With a query, highlighted title
-matches appear as primary cards, followed by Text matches as `ocs__nav-card` links: the source file name, the
-document title, a highlighted body/description excerpt and its categories as
-`ocs__status-pill`s (primary topics first). A title match is not duplicated
-in the text list. Both sections respect all selected categories; no global search
+matches appear as primary cards, followed by Text matches as `ocs__nav-card` links:
+the source file name, the document title, a highlighted body/description excerpt
+and its categories as `ocs__status` chips (primary topics first). Converted
+notebooks and Word documents show their original `.ipynb`/`.docx` name. Long
+words (URLs, file names) get `<wbr>` break points so a card never outgrows a
+phone screen; `ocs__status` wraps where `ocs__status-pill` cannot. A title
+match is not duplicated in the text list. Both sections respect all selected categories; no global search
 overlay replaces the collection. Highlights use Lunr match positions and plain
 text DOM nodes rather than inserting document HTML.
 Category combinations, query and browsing view are shareable through URL parameters.

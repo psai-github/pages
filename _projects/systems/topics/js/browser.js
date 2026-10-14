@@ -1,4 +1,4 @@
-import { selectedDocuments, readState, writeState, groupedMatches, highlightedParts, resultDetails } from './model.js';
+import { selectedDocuments, readState, writeState, groupedMatches, highlightedParts, resultDetails, wrappableParts } from './model.js';
 
 const root = document.querySelector('[data-topics-browser]');
 if (root) {
@@ -22,11 +22,22 @@ if (root) {
   let documents = [];
   let index;
 
+  function wrappable(text) {
+    const fragment = document.createDocumentFragment();
+    wrappableParts(text).forEach((part, index) => {
+      if (index) fragment.append(document.createElement('wbr'));
+      fragment.append(part);
+    });
+    return fragment;
+  }
+
+  // Excerpts are document text, so long URLs get <wbr> break points.
   function highlight(element, text, positions, excerpt = false) {
+    const content = (value) => (excerpt ? wrappable(value) : document.createTextNode(value));
     element.replaceChildren(...highlightedParts(text, positions, excerpt).map((part) => {
-      if (!part.highlighted) return document.createTextNode(part.text);
+      if (!part.highlighted) return content(part.text);
       const mark = document.createElement('mark');
-      mark.textContent = part.text;
+      mark.append(content(part.text));
       return mark;
     }));
   }
@@ -75,24 +86,26 @@ if (root) {
       link.href = contextLink(match.document);
       const file = document.createElement('span');
       file.className = 'ocs__nav-card-kicker';
-      file.textContent = details.file;
+      file.append(wrappable(details.file));
       file.title = details.path;
       const title = document.createElement('span');
       title.className = 'ocs__nav-card-title';
-      title.textContent = match.document.title;
+      title.append(wrappable(match.document.title));
       const excerpt = document.createElement('span');
       excerpt.className = 'ocs__text';
       highlight(excerpt, match.document[match.field], match.positions, true);
+      // ocs__status, not ocs__status-pill: pills never wrap, and a long
+      // category like Algorithms-with-Selection-and-Repetition outgrows a phone.
       const subjects = document.createElement('span');
-      const pills = [
-        ...details.subjects.map(({ label, primary }) => [label, primary ? 'good' : 'neutral']),
-        ...(root.dataset.courseContext === 'true' ? (match.document.weeks || []).map((week) => [week, 'neutral']) : []),
+      const labels = [
+        ...details.subjects,
+        ...(root.dataset.courseContext === 'true' ? match.document.weeks || [] : []),
       ];
-      pills.forEach(([label, variant]) => {
-        const pill = document.createElement('span');
-        pill.className = `ocs__status-pill ocs__status-pill--${variant}`;
-        pill.textContent = label;
-        subjects.append(pill, ' ');
+      labels.forEach((label) => {
+        const chip = document.createElement('span');
+        chip.className = 'ocs__status';
+        chip.textContent = label;
+        subjects.append(chip, ' ');
       });
       link.append(file, title, excerpt, subjects);
       bodyResults.append(link);
