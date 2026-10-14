@@ -421,7 +421,9 @@
   function restoreSidebarNavigation() {
     const sidebar = document.getElementById('lesson-sidebar');
     const sections = [
-      ...Array.from(sidebar.querySelectorAll('.lesson-list'), element => ({
+      // Only a sprint's own list is a sprint panel. A week's lessons reuse
+      // .lesson-list just for its indent (see lesson-sidebar-nav.html).
+      ...Array.from(sidebar.querySelectorAll('.sprint-section > .lesson-list'), element => ({
         id: element.id, element,
         isOpen: () => element.style.display !== 'none',
         setOpen: open => setSprintOpen(element, open)

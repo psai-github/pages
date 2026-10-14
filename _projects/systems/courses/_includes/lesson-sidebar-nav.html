@@ -25,6 +25,8 @@
 
   Contracts used by the sidebar script in _layouts/post.html:
     - #sprint-{i}-lessons and #chevron-{i}  -> toggleSprint()
+    - .sprint-section > .lesson-list        -> a sprint's panel, for restoring
+                                               which sprints are open
     - .lesson-item                          -> a step for Prev / Next and the pager
     - .lesson-item[data-lesson-id]          -> a lesson, for completion tracking
     - .lesson-status-icon                   -> per-lesson complete/incomplete
@@ -104,10 +106,13 @@
               Its summary reuses the sprint row's classes, so a week reads like
               a sprint one level down: chevron, title, then its W and count
               pills. The week's intro lines up with the chevron, and its lessons
-              and chat sit one level in (.lesson-branch, with a guide line), so
-              the list reads as a tree. The lesson's own week starts open, and
-              the script in _layouts/post.html turns the chevron when a week
-              opens or closes.
+              and chat sit one level in, so the list reads as a tree. The indent
+              reuses the sprint's .lesson-list class, so it needs no new CSS.
+              Lessons use the narrow fa-file-code icon (12px, the same as an
+              assignment's fa-file-alt), so the indent does not squeeze long
+              words like "Methodologies" into a mid-word break. The lesson's own
+              week starts open, and the script in _layouts/post.html turns the
+              chevron when a week opens or closes.
             {%- endcomment -%}
             <details data-week-group data-week="{{ week }}"{% if week == current_week %} open{% endif %}>
               <summary class="sprint-toggle">
@@ -129,7 +134,7 @@
                 <span class="lesson-title">Week {{ week }} intro</span>
               </a>
 
-              <div class="lesson-branch">
+              <div class="lesson-list">
                 {%- assign assignmentCount = 0 -%}
                 {%- for post in weekPosts -%}
                   {%- if post.assignment == true -%}
@@ -142,7 +147,7 @@
                   {%- if post.assignment == true -%}
                   <i class="fas fa-file-alt" aria-hidden="true"></i>
                   {%- else -%}
-                  <i class="fas fa-code" aria-hidden="true"></i>
+                  <i class="fas fa-file-code" aria-hidden="true"></i>
                   {%- endif -%}
                   <span class="lesson-title">{{ post.title }}</span>
                 </a>
