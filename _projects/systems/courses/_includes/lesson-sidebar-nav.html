@@ -108,7 +108,9 @@
               _sass/open-coding/elements/trees), which indents them one level
               and draws a guide line under the intro's icon. Each lesson's title
               stays on one line (ocs__truncate) and ends with "…" when it doesn't
-              fit; the row's title attribute shows the whole title on hover.
+              fit; the row's title attribute shows the whole title on hover. On a
+              touch screen, which can't hover, the title wraps instead
+              (ocs__truncate--hover).
               Lessons use the narrow fa-file-code icon (12px, the same as an
               assignment's fa-file-alt), which leaves room for one more letter.
               The lesson's own week starts open, and the script in
@@ -150,7 +152,7 @@
                   {%- else -%}
                   <i class="fas fa-file-code" aria-hidden="true"></i>
                   {%- endif -%}
-                  <span class="lesson-title ocs__truncate">{{ post.title }}</span>
+                  <span class="lesson-title ocs__truncate ocs__truncate--hover">{{ post.title }}</span>
                 </a>
                 {%- endfor -%}
 

@@ -8,3 +8,13 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+// A touch screen can't hover to show the title, so --hover lets the text wrap
+// there instead of hiding the end of it.
+@media (hover: none) {
+  .ocs__truncate--hover {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+}

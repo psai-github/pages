@@ -224,7 +224,7 @@ week's lessons and chat this way.
 ```html
 <a class="ocs__keypoint" href="/example/lesson" title="Agile Methodologies Practitioner">
   <i class="fas fa-code"></i>
-  <span class="ocs__truncate">Agile Methodologies Practitioner</span>
+  <span class="ocs__truncate ocs__truncate--hover">Agile Methodologies Practitioner</span>
 </a>
 ```
 
@@ -232,9 +232,12 @@ week's lessons and chat this way.
   fit. Put the full text in a `title` attribute on it or on its link, so
   hovering shows it. Use it on a block element or a flex item, like the text
   beside an icon.
+- `ocs__truncate--hover`: cuts the text only on devices that can hover (a
+  mouse or trackpad). A phone or tablet can't show the title, so there the
+  text wraps instead and stays readable.
 
 See [`elements/typography`](elements/typography). The course sidebar's lesson
-rows use it.
+rows and the phone menu use both classes.
 
 ### Capstone document elements
 
