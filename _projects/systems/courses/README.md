@@ -37,7 +37,9 @@ added there and their generated paths ignored in the root `.gitignore`.
 
 Blogs owns `layouts/post.html`. Its course branch delegates to the Courses-owned
 player include; conventional documents render without that adapter. Courses'
-Blogs page delegates to Blogs' reusable reader. Both systems preserve the
+Blogs page delegates to Blogs' reusable reader with `course=` and `search=true`,
+so it lists only posts whose `courses` names that course alone (the rule the
+player uses for its own lessons) under a search bar. Both systems preserve the
 existing runtime paths and are always-on `:dev` projects.
 
 ## Build and development
