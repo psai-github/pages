@@ -72,7 +72,7 @@ export function resultDetails(document, primary = []) {
   const path = document.path || '';
   const labels = document.labels || document.categories;
   return {
-    file: (path.split('/').pop() || document.url).replace(/_IPYNB_2_\.md$/, '.ipynb'),
+    file: document.source || (path.split('/').pop() || document.url).replace(/_IPYNB_2_\.md$/, '.ipynb'),
     path,
     subjects: labels.map((label) => ({ label, primary: primary.includes(label.toLowerCase()) }))
       .sort((a, b) => Number(b.primary) - Number(a.primary)),

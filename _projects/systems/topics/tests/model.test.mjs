@@ -82,4 +82,7 @@ test('text results name the source file and list primary subjects first', () => 
   assert.equal(resultDetails({ url: '/x/', categories: ['java'] }).file, '/x/');
   assert.equal(resultDetails({ url: '/n/', path: '_posts/2025-09-21-files_IPYNB_2_.md', categories: [] }).file,
     '2025-09-21-files.ipynb');
+  assert.equal(resultDetails({
+    url: '/q/', path: '_posts/2026-10-13-Quests_Outline_DOCX_.md', source: 'Outline.docx', categories: [],
+  }).file, 'Outline.docx');
 });
