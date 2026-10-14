@@ -30,15 +30,15 @@ class GameLevelWinter {
     const background_data = {
       name: "Winter Course",
       greeting: "Welcome to the Winter Level!",
-      src: "/images/projects/racing-game/Winter_Track.png",
+      src: path + '/images/projects/racing-game/Winter_Track.png',
       pixels: { height: 360, width: 643 } //this is the old version im testing new sizes.
       
     };
     const player_data = {
         name: "Red Car",
         greeting: "I'm the red car!",
-        src: "/images/projects/racing-game/Directions_red_car.png",
-        SCALE_FACTOR: 15,
+        src: path + '/images/projects/racing-game/Directions_red_car.png',
+        SCALE_FACTOR: 10,
         STEP_FACTOR: 1100,
         INIT_POSITION: {x: 370 / 740, y: 465 / 585},
         pixels: { height: 1024, width: 1536 },
@@ -54,32 +54,25 @@ class GameLevelWinter {
         hitbox: { widthPercentage: 0.5, heightPercentage: 0.5 },
         keypress: { up: 87, left: 65, down: 83, right: 68 } // W, A, S, D
     }
-    const player2_data = {
-        ...player_data,
+    const other_data = {
         name: "Blue Car",
         greeting: "I'm the blue car!",
-        src: "/images/projects/racing-game/Directions_blue_car.png",
-        INIT_POSITION: { x: player_data.INIT_POSITION.x - 0.08, y: player_data.INIT_POSITION.y }, // start behind the red car so they don't overlap
-        touchOptions: { interactLabel: "e", position: "right" },
+        src: path + '/images/projects/racing-game/Directions_blue_car.png',
+        SCALE_FACTOR: 10,
+        STEP_FACTOR: 1100,
+        INIT_POSITION: {x: 340 / 740, y: 500 / 585},
+        pixels: { height: 1024, width: 1536 },
+        orientation: { rows: 4, columns: 4 },
+        up:        { row: 3, start: 0, columns: 1 },
+        upRight:   { row: 0, start: 2, columns: 1, rotate: Math.PI },
+        right:     { row: 3, start: 2, columns: 1, rotate: Math.PI },
+        downRight: { row: 2, start: 0, columns: 1 },
+        down:      { row: 0, start: 0, columns: 1 },
+        downLeft:  { row: 0, start: 2, columns: 1 },
+        left:      { row: 3, start: 2, columns: 1 },
+        upLeft:    { row: 2, start: 0, columns: 1, rotate: Math.PI },
+        hitbox: { widthPercentage: 0.5, heightPercentage: 0.5 },
         keypress: { up: 73, left: 74, down: 75, right: 76 } // I, J, K, L
-    }
-    const yeti_data = {
-        id: "Yeti",
-        src: "/images/projects/racing-game/yeti.png",
-        SCALE_FACTOR: 8,
-        INIT_POSITION: { x: 0.25, y: 0.33 }, // in the snowy trees inside the track, clear of the stands and the racing line
-        pixels: { height: 256, width: 256 },
-        orientation: { rows: 1, columns: 1 },
-        down: { row: 0, start: 0, columns: 1 },
-        hitbox: { widthPercentage: 0.1, heightPercentage: 0.1 },
-        dialogues: [
-            "Welcome to the Winter Level",
-            "Red drives with W, A, S, D. Blue drives with I, J, K, L.",
-            "Race to the right from the start line. Driving the wrong way won't count!",
-            "Three laps around my mountain. First car to finish wins!",
-            "Careful on the corners, the snowbanks don't move for anyone.",
-            "I've lived up here for 300 years and I've never seen a car this fast."
-        ]
     }
  
     const barrierData1 = {
@@ -111,7 +104,6 @@ class GameLevelWinter {
       { class: GameEnvBackground, data: background_data },
       { class: Player, data: player_data },
       { class: Player, data: player2_data },
-      { class: Yeti, data: yeti_data },
       { class: SplineBarrier, data: barrierData1 },
       { class: SplineBarrier, data: barrierData2 },
       { class: TimeLapScreen, data: lap_data }

@@ -9,16 +9,16 @@ class GameLevelSpring {
     const background_data = {
       name: "Spring Course",
       greeting: "Welcome to the spring level!",
-      src: "/images/projects/racing-game/Spring_track.jpg",
+      src: path + '/images/projects/racing-game/Spring_track.jpg',
       pixels: { height: 360, width: 643 }
     };
     const player_data = {
         name: "Red Car",
         greeting: "I'm the red car!",
-        src: "/images/projects/racing-game/Directions_red_car.png",
+        src: path + '/images/projects/racing-game/Directions_red_car.png',
+        INIT_POSITION: { x: 340 / 740, y: 450 / 585},
         SCALE_FACTOR: 20,
         STEP_FACTOR: 1200,
-        INIT_POSITION: { x: 340 / 740, y: 450 / 585},
         pixels: { height: 1024, width: 1536 },
         orientation: { rows: 4, columns: 4 },
         up:        { row: 3, start: 0, columns: 1 },
@@ -32,13 +32,24 @@ class GameLevelSpring {
         hitbox: { widthPercentage: 0.5, heightPercentage: 0.5 },
         keypress: { up: 87, left: 65, down: 83, right: 68 }
     }
-    const player2_data = {
-        ...player_data,
+    const other_data = {
         name: "Blue Car",
         greeting: "I'm the blue car!",
-        src: "/images/projects/racing-game/Directions_blue_car.png",
-        INIT_POSITION: { x: player_data.INIT_POSITION.x - 0.08, y: player_data.INIT_POSITION.y }, // start behind the red car so they don't overlap
-        touchOptions: { interactLabel: "e", position: "right" },
+        src: path + '/images/projects/racing-game/Directions_blue_car.png',
+        SCALE_FACTOR: 10,
+        STEP_FACTOR: 1100,
+        INIT_POSITION: {x: 340 / 740, y: 500 / 585},
+        pixels: { height: 1024, width: 1536 },
+        orientation: { rows: 4, columns: 4 },
+        up:        { row: 3, start: 0, columns: 1 },
+        upRight:   { row: 0, start: 2, columns: 1, rotate: Math.PI },
+        right:     { row: 3, start: 2, columns: 1, rotate: Math.PI },
+        downRight: { row: 2, start: 0, columns: 1 },
+        down:      { row: 0, start: 0, columns: 1 },
+        downLeft:  { row: 0, start: 2, columns: 1 },
+        left:      { row: 3, start: 2, columns: 1 },
+        upLeft:    { row: 2, start: 0, columns: 1, rotate: Math.PI },
+        hitbox: { widthPercentage: 0.5, heightPercentage: 0.5 },
         keypress: { up: 73, left: 74, down: 75, right: 76 } // I, J, K, L
     }
     const barrierData1 = {
@@ -57,13 +68,15 @@ class GameLevelSpring {
       hitbox: { widthPercentage: 0.0, heightPercentage: 0.0 },
       fromOverlay: true,
     };
-    // Finish line on the painted start/finish line; HUD on the cliffs in the bottom-left corner,
-    // because the track runs through the top-left.
-    const lap_data = {
-      totalLaps: 3,
-      finishLine: { x: 0.456, top: 0.717, bottom: 1 },
-      hudPosition: { x: 0.01, y: 0.85 }
-    };
+    const player2_data = {
+        ...player_data,
+        name: "Blue Car",
+        greeting: "I'm the blue car!",
+        src: path + '/images/projects/racing-game/Directions_blue_car.png',
+        INIT_POSITION: { x: 0, y: 0.1 }, // start below the red car so they don't overlap
+        touchOptions: { interactLabel: "e", position: "right" },
+        keypress: { up: 38, left: 37, down: 40, right: 39 } // Arrow keys
+    }
     this.classes = [
         {class: GameEnvBackground, data: background_data},
         {class: Player, data: player_data},
@@ -74,6 +87,8 @@ class GameLevelSpring {
     ]
   }
 }
+
+
 
 export default GameLevelSpring;
 
