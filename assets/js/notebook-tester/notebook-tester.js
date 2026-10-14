@@ -18,8 +18,9 @@ const elements = {
 
 function setServerStatus(online, message) {
   elements.status.textContent = message;
-  elements.status.classList.toggle('is-online', online);
-  elements.status.classList.toggle('is-offline', !online);
+  elements.status.classList.remove('ocs__status-pill--neutral');
+  elements.status.classList.toggle('ocs__status-pill--good', online);
+  elements.status.classList.toggle('ocs__status-pill--bad', !online);
   elements.submit.disabled = !online;
 }
 
