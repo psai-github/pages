@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if(hidden){
       const both = currentType !== 'all' && currentYear;
       const other = both ? 'other courses or years' : currentYear ? 'other years' : 'other courses';
-      const pick = both ? 'pick All and All years' : currentYear ? 'pick All years' : 'pick All';
+      const pick = currentType === 'all' ? 'pick All years' : 'pick All';
       text += ` ${hidden} ${count ? 'more' : hidden === 1 ? 'match' : 'matches'} in ${other}: ${pick}.`;
     }
     status.textContent = text;
@@ -245,7 +245,12 @@ document.addEventListener('DOMContentLoaded', function(){
     updateTypeButtons();
     applyFilters();
   }
-  document.getElementById('show-all')?.addEventListener('click', ()=> setTypeFilter('all'));
+  // All shows every project: it clears the year too, not just the course.
+  document.getElementById('show-all')?.addEventListener('click', ()=>{
+    if(yearSelect) yearSelect.value = '';
+    currentYear = '';
+    setTypeFilter('all');
+  });
   document.getElementById('show-csa')?.addEventListener('click', ()=> setTypeFilter('CSA'));
   document.getElementById('show-csp')?.addEventListener('click', ()=> setTypeFilter('CSP'));
   document.getElementById('show-csh')?.addEventListener('click', ()=> setTypeFilter('CSH'));
