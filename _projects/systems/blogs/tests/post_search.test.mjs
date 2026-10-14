@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { matchesQuery, readQuery, writeQuery, statusText, createPostSearch } from '../js/post-search.js';
+import { matchesQuery, matchRanges, rangesByNode, readQuery, writeQuery, statusText, createPostSearch } from '../js/post-search.js';
 
 const characters = 'Characters - Players and NPCs Learn object literals, constructors, inheritance, and animation';
 
@@ -20,6 +20,43 @@ test('a blank query matches every card', () => {
 test('accents are ignored on both sides', () => {
   assert.equal(matchesQuery('Pokémon sprites', 'pokemon'), true);
   assert.equal(matchesQuery('Pokemon sprites', 'POKÉMON'), true);
+});
+
+test('matchRanges finds each word of the query wherever it appears, as [start, end) spans', () => {
+  assert.deepEqual(matchRanges('Students will practice LxD', 'de'), [[3, 5]]);
+  assert.deepEqual(matchRanges('Production-Fidelity', 'DE'), [[13, 15]]);
+  assert.deepEqual(matchRanges('Teaching using LxD', 'lxd teach'), [[0, 5], [15, 18]]);
+  assert.deepEqual(matchRanges('de and de', 'de'), [[0, 2], [7, 9]]);
+});
+
+test('matchRanges merges overlapping and touching spans', () => {
+  assert.deepEqual(matchRanges('aaaa', 'aa'), [[0, 4]]);
+  assert.deepEqual(matchRanges('banana', 'ana'), [[1, 6]]);
+  assert.deepEqual(matchRanges('ArrayList', 'array list'), [[0, 9]]);
+});
+
+test('matchRanges finds nothing for a blank query or a missing word', () => {
+  assert.deepEqual(matchRanges('Backgrounds', ''), []);
+  assert.deepEqual(matchRanges('Backgrounds', '   '), []);
+  assert.deepEqual(matchRanges('Backgrounds', 'parallax'), []);
+});
+
+test('matchRanges ignores accents and maps spans back to the original letters', () => {
+  assert.deepEqual(matchRanges('Pokémon sprites', 'pokemon'), [[0, 7]]);
+  assert.deepEqual(matchRanges('Pokemon sprites', 'POKÉMON'), [[0, 7]]);
+  // An accent typed as its own combining mark stays inside the highlight.
+  assert.deepEqual(matchRanges('Poke\u0301mon', 'pokemon'), [[0, 8]]);
+  assert.deepEqual(matchRanges('Poke\u0301mon', 'poke'), [[0, 5]]);
+  assert.deepEqual(matchRanges('café', 'caf'), [[0, 3]]);
+  assert.deepEqual(matchRanges('İstanbul', 'ist'), [[0, 3]]);
+});
+
+test('rangesByNode splits spans over a field\'s text nodes, so markup can split a word', () => {
+  // "Java<strong>Script</strong>": one match over two text nodes becomes one mark in each.
+  assert.deepEqual(rangesByNode([4, 6], [[0, 10]]), [[[0, 4]], [[0, 6]]]);
+  assert.deepEqual(rangesByNode([5, 5], [[1, 3], [7, 9]]), [[[1, 3]], [[2, 4]]]);
+  assert.deepEqual(rangesByNode([3, 0, 3], [[2, 4]]), [[[2, 3]], [], [[0, 1]]]);
+  assert.deepEqual(rangesByNode([3], []), [[]]);
 });
 
 test('the query round trips through ?q= and keeps the page\'s other parameters', () => {
@@ -50,6 +87,7 @@ function element(fields = {}) {
     listeners: {},
     addEventListener(name, handler) { this.listeners[name] = handler; },
     focus() { this.focused = true; },
+    querySelectorAll() { return []; }, // no highlight fields here; the browser checks cover <mark>
     ...fields,
   };
 }

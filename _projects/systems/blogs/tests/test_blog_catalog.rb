@@ -120,6 +120,10 @@ texts = searchable.scan(/<li data-post-search-card data-post-search-text="([^"]*
 assert(texts.size == 5, "Every card must carry its search text; got #{texts.size}")
 assert(texts.include?("newer-doc Description for newer-doc"), "Search text must be the title and description")
 assert(texts.include?("Say &quot;hi&quot; Sprites &amp; sounds"), "Search text must be plain and escaped; got #{texts.inspect}")
+card = searchable[%r{<li data-post-search-card data-post-search-text="newer-doc Description for newer-doc">.*?</li>}m]
+assert(card && card.include?('<a class="post-link" href="/preview/newer-doc/" data-post-search-field>') &&
+       card.include?('<p class="post-meta-description" data-post-search-field>Description for newer-doc</p>'),
+       "Each card's title link and description must be marked for highlighting")
 assert(searchable.scan(/class="post-link" href="([^"]+)"/).flatten == links + ["/preview/quoted-doc/"],
        "Searching must keep the catalog's cards and order")
 assert(searchable.include?(%(from "/preview/assets/js/blogs/post-search.js";)),

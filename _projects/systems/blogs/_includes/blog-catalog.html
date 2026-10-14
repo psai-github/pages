@@ -65,7 +65,9 @@
     look like a bar overflows a 320px phone in Safari. The count gets its own
     line: text that wrapped beside the button would make the split stretch
     the field to the taller row. The field and button stay disabled until
-    assets/js/blogs/post-search.js runs.
+    assets/js/blogs/post-search.js runs. It highlights matches with <mark> in
+    each card's title link and description, the elements post_list_image_card.html
+    marks data-post-search-field while catalog_search is on.
   {%- endcomment %}
   <p class="ocs__split" role="search" aria-label="Search {{ page.title | escape }}" data-post-search>
     <input class="ocs__input" type="search" size="1" placeholder="Search titles &amp; descriptions" aria-label="Search titles and descriptions" autocomplete="off" disabled data-post-search-input>
