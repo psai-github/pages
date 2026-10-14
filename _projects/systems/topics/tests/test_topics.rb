@@ -115,6 +115,12 @@ class TopicsTest < Minitest::Test
       assert_match(/<details[^>]*data-topics-primary[^>]*\bopen\b/, browser)
       assert_match(/<details[^>]*data-topics-secondary/, browser)
       refute_match(/<details[^>]*data-topics-secondary[^>]*\bopen\b/, browser)
+      match = browser.split('data-topics-match', 2).last.split('</p>', 2).first
+      assert_match(/<button[^>]*class="ocs__btn small accent fill"[^>]*value="or"[^>]*aria-pressed="true"[^>]*disabled/, match)
+      assert_match(/<button[^>]*class="ocs__btn small accent"[^>]*value="and"[^>]*aria-pressed="false"[^>]*disabled/, match)
+      assert_operator browser.index('data-topics-primary'), :<, browser.index('data-topics-match')
+      assert_operator browser.index('data-topics-match'), :<, browser.index('<legend class="topics-browser__accessible-label">Topic Filter</legend>')
+      refute_includes primary, 'data-topics-match'
       refute_includes browser, "Explore reference material by category."
       assert_includes browser, '<h2><label for="topics-query">Search</label></h2>'
       assert_includes browser, '<select class="ocs__input" id="topics-view">'
@@ -143,6 +149,7 @@ class TopicsTest < Minitest::Test
       assert_includes reference, 'id="course-player"'
       assert_includes reference, 'data-course-context="true"'
       assert_includes reference, 'data-initial-category="javascript"'
+      assert_includes reference, 'data-topics-match'
       assert_includes reference, 'href="/preview/java/algorithms/"'
       refute_includes reference, 'href="/preview/topics/view/java/algorithms/"'
     end

@@ -8,6 +8,10 @@
     <div class="topics-browser__filters" id="topics-filters" role="group" aria-label="Topic and category filters">
       <details class="topics-browser__category-disclosure" data-topics-primary open>
         <summary><h3>Topic Filter</h3></summary>
+        <p class="ocs__links" role="group" aria-label="Combine checked topics" data-topics-match>
+          <button type="button" class="ocs__btn small accent fill" value="or" aria-pressed="true" disabled>OR: any checked topic</button>
+          <button type="button" class="ocs__btn small accent" value="and" aria-pressed="false" disabled>AND: every checked topic</button>
+        </p>
         <fieldset class="topics-browser__categories topics-browser__primary">
           <legend class="topics-browser__accessible-label">Topic Filter</legend>
           {% for category in site.data.topics_primary_categories %}

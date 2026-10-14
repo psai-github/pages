@@ -17,8 +17,12 @@ categories: [Java, Algorithms]
 
 Categories are independent facets, not ordered parent/child declarations.
 Boxes in the same filter add to each other: Java plus Python shows every Java
-document and every Python document. The Topic Filter and Categories Filter narrow
-each other: Java plus Algorithms shows only documents tagged with both. No new topic attribute or YAML topic inventory is required.
+document and every Python document. In the Topic Filter, the AND button makes
+every checked topic required instead: Java AND Spring shows only documents tagged
+with both, and OR, the default, adds them again. Categories Filter boxes always
+add to each other. The Topic Filter and Categories Filter narrow each other: Java
+plus Algorithms shows only documents tagged with both. No new topic attribute or
+YAML topic inventory is required.
 Document membership is discovered at build time from posts/pages.
 Hidden, draft and search-excluded documents are omitted.
 
@@ -30,10 +34,11 @@ Search follows the grouped filters and uses the same heading typography as
 Title matches and Text matches. Topics uses a semantic `h2`; filter titles use
 `h3` headings kept inline with their disclosure markers. Clear Filters sits inside the filter box; the Cards/List selector sits
 above the output with an accessible, visually hidden View label.
-Clear Filters clears only topic/category selections; Clear Search clears only
-the query. Each clear button is dimmed and disabled when its corresponding
-selection is empty. Each search result heading shows its own count beside the heading.
-Both boxes follow those rules; YAML controls prominence,
+Clear Filters clears only topic/category selections, not the OR/AND choice;
+Clear Search clears only the query. Each clear button is dimmed and disabled when
+its corresponding selection is empty. Each search result heading shows its own
+count beside the heading.
+Both boxes filter `categories`; YAML controls prominence,
 not document membership. Primary topics remain visible even when they have no
 published documents. No `topics:` attribute is required.
 
@@ -56,7 +61,8 @@ phone screen; `ocs__status` wraps where `ocs__status-pill` cannot. A title
 match is not duplicated in the text list. Both sections respect all selected categories; no global search
 overlay replaces the collection. Highlights use Lunr match positions and plain
 text DOM nodes rather than inserting document HTML.
-Category combinations, query and browsing view are shareable through URL parameters.
+Category combinations, the AND choice (`match=and`), query and browsing view are
+shareable through URL parameters.
 
 Topics document routes under `/topics/view/` retain full interactive content,
 Runners and Submissions without activating the course player. Assignment identity

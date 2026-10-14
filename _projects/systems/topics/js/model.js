@@ -1,14 +1,16 @@
 // Checked boxes in the same filter are alternatives (Java or Python); the Topic and
 // Categories filters narrow each other (Java and Algorithms). `primary` lists the
 // Topic Filter values; every other checked value belongs to the Categories Filter.
-export function filterGroups(categories, primary = []) {
+// With `match: 'and'`, every checked Topic Filter box is required (Java and Spring).
+export function filterGroups(categories, { primary = [], match = 'or' } = {}) {
   const topics = categories.filter((category) => primary.includes(category));
   const others = categories.filter((category) => !primary.includes(category));
-  return [topics, others].filter((group) => group.length);
+  const topicGroups = match === 'and' ? topics.map((topic) => [topic]) : [topics];
+  return [...topicGroups, others].filter((group) => group.length);
 }
 
-export function selectedDocuments(documents, categories, rankedIds = null, primary = []) {
-  const groups = filterGroups(categories, primary);
+export function selectedDocuments(documents, categories, rankedIds = null, rule = {}) {
+  const groups = filterGroups(categories, rule);
   const selected = documents.filter((document) =>
     groups.every((group) => group.some((category) => document.categories.includes(category))));
   if (rankedIds === null) return selected;
@@ -20,6 +22,7 @@ export function readState(search) {
   const params = new URLSearchParams(search);
   return {
     categories: [...new Set(params.getAll('category').map((value) => value.toLowerCase()))],
+    match: params.get('match') === 'and' ? 'and' : 'or',
     query: params.get('q') || '',
     view: params.get('view') === 'list' ? 'list' : 'cards',
   };
@@ -28,6 +31,7 @@ export function readState(search) {
 export function writeState(state) {
   const params = new URLSearchParams();
   state.categories.forEach((category) => params.append('category', category));
+  if (state.match === 'and') params.set('match', 'and');
   if (state.query) params.set('q', state.query);
   if (state.view === 'list') params.set('view', 'list');
   return params.toString();
@@ -38,8 +42,8 @@ export function matchPositions(result, field) {
   return Object.values(metadata).flatMap((fields) => fields[field]?.position || []);
 }
 
-export function groupedMatches(documents, categories, results, primary = []) {
-  const selected = new Map(selectedDocuments(documents, categories, null, primary).map((document) => [document.url, document]));
+export function groupedMatches(documents, categories, results, rule = {}) {
+  const selected = new Map(selectedDocuments(documents, categories, null, rule).map((document) => [document.url, document]));
   const title = [];
   const body = [];
   for (const result of results) {

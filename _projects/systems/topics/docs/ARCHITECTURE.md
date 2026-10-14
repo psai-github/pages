@@ -38,7 +38,7 @@ Conversion and Jekyll posts/pages
     |                      │   ├── Cards / List browsing
     |                      │   └── Scoped full-text Search
     |                      │       ├── Title matches - highlighted cards
-    |                      │       └── Text matches - highlighted excerpts
+    |                      │       └── Text matches - file name, excerpt and category cards
     |                      └── Topics document view
     |                          ├── Full authored content
     |                          ├── Runners and Submissions
@@ -69,6 +69,12 @@ groups narrow each other: Java (Topic Filter) and Algorithms (Categories Filter)
 finds documents in both. In set terms, each group is a union and the groups are
 intersected.
 
+The Topic Filter has OR and AND buttons. OR, the default, is the rule above. AND
+requires every checked Topic Filter box: Java and Spring finds only documents in
+both collections. Categories Filter boxes remain alternatives in both modes, and
+the two groups still narrow each other. In set terms, AND makes the Topic group an
+intersection instead of a union.
+
 The [primary topics configuration](../data/topics_primary.yml) orders prominent
 categories: SASS, Python, Java, JavaScript, Flask, Spring, CS111, CS112 and CS113.
 This YAML controls visibility and order, not membership. Primary categories
@@ -89,8 +95,10 @@ sorted by title for ordinary browsing.
 
 The generator creates:
 
-- A catalog with title, description, category keys, original URL, Topics view
-  URL, searchable content and optional course/week display metadata.
+- A catalog with title, description, category keys and display labels, source
+  path (and the original `.docx` name of a converted Word document), original
+  URL, Topics view URL, searchable content and optional course/week display
+  metadata.
 - Primary and secondary category collections for the browser.
 - A JSON search catalog at `/assets/js/topics/data.json`.
 - Full-document routes under `/topics/view/`.
@@ -107,7 +115,10 @@ loaded through relative includes is not expanded into the search text.
 
 The [browser include](../_includes/topics-browser.html) presents two disclosures
 inside a filter box. Topic Filter defaults open; Categories Filter defaults
-closed. Clear Filters belongs to that box and clears only category selections.
+closed. Topic Filter starts with its OR/AND pair: `ocs__btn` buttons in an
+`ocs__links` group, the current choice filled and `aria-pressed`, disabled until
+the controller loads. Clear Filters belongs to that box and clears only category
+selections.
 Search has its own clear control. Each clear button is dimmed and disabled when
 its corresponding state is empty.
 
@@ -125,7 +136,7 @@ Browsing and search use the same category filter:
 | Mode | Output |
 | --- | --- |
 | No query | Selected documents in Cards or List view |
-| Search query | Title-match cards, followed by text-match excerpts |
+| Search query | Title-match cards, followed by text-match cards with excerpts |
 | No matching documents | Explicit empty-result status |
 | Index unavailable | Error status with ordinary document links still available |
 
@@ -162,11 +173,12 @@ URL parameters carry browser state:
 
 - Repeated `category` values identify selected facets.
 - `q` carries the search text.
+- `match=and` requires every checked Topic Filter box; OR is the default.
 - `view=list` selects list browsing; cards are the default.
 
 State is shareable and restored during browser history navigation. Clearing
-filters preserves the query and view; clearing Search preserves filters and
-view.
+filters preserves the query, view and OR/AND choice; clearing Search preserves
+filters and view.
 
 ## Integration boundaries
 

@@ -5,7 +5,9 @@ if (root) {
   const query = root.querySelector('#topics-query');
   const view = root.querySelector('#topics-view');
   const filters = [...root.querySelectorAll('input[type="checkbox"]')];
+  // Topic Filter values; every other checked box belongs to the Categories Filter.
   const primary = [...root.querySelectorAll('[data-topics-primary] input[type="checkbox"]')].map((filter) => filter.value);
+  const matchButtons = [...root.querySelectorAll('[data-topics-match] button')];
   const status = root.querySelector('[data-topics-status]');
   const cards = [...root.querySelectorAll('[data-topic-url]')];
   const results = root.querySelector('[data-topics-results]');
@@ -15,7 +17,6 @@ if (root) {
   const searchClear = root.querySelector('[data-topics-search-clear]');
   const filterClear = root.querySelector('[data-topics-clear]');
   const cardByUrl = new Map(cards.map((card) => [card.dataset.topicUrl, card]));
-  const primaryTopics = [...root.querySelectorAll('[data-topics-primary] input')].map((input) => input.value);
   let state = readState(location.search);
   if (!state.categories.length && root.dataset.initialCategory) {
     state.categories = [root.dataset.initialCategory];
@@ -54,15 +55,22 @@ if (root) {
     query.value = state.query;
     view.value = state.view;
     filters.forEach((filter) => { filter.checked = state.categories.includes(filter.value); });
+    // Like the capstone menu, the current choice is the filled, pressed button.
+    matchButtons.forEach((button) => {
+      const pressed = button.value === state.match;
+      button.setAttribute('aria-pressed', String(pressed));
+      button.classList.toggle('fill', pressed);
+    });
+    const rule = { primary, match: state.match };
     const searching = Boolean(state.query.trim());
     const matches = searching && index ? index.query((search) => {
       const tokens = window.lunr.tokenizer(state.query);
       search.term(tokens, { boost: 10 });
       search.term(tokens, { wildcard: window.lunr.Query.wildcard.TRAILING });
     }) : [];
-    const groups = groupedMatches(documents, state.categories, matches, primary);
+    const groups = groupedMatches(documents, state.categories, matches, rule);
     const selected = searching ? groups.title.map((match) => match.document) :
-      selectedDocuments(documents, state.categories, null, primary);
+      selectedDocuments(documents, state.categories, null, rule);
     const visible = new Set(selected.map((document) => document.url));
     cards.forEach((card) => { card.hidden = !visible.has(card.dataset.topicUrl); });
     const titlePositions = new Map(groups.title.map((match) => [match.document.url, match.positions]));
@@ -81,7 +89,7 @@ if (root) {
     filterClear.disabled = !state.categories.length;
     bodyResults.replaceChildren();
     for (const match of groups.body) {
-      const details = resultDetails(match.document, primaryTopics);
+      const details = resultDetails(match.document, primary);
       const link = document.createElement('a');
       link.className = 'ocs__nav-card';
       link.href = contextLink(match.document);
@@ -119,6 +127,7 @@ if (root) {
   function update() {
     state = {
       categories: filters.filter((filter) => filter.checked).map((filter) => filter.value),
+      match: state.match,
       query: query.value,
       view: view.value,
     };
@@ -145,6 +154,13 @@ if (root) {
       render();
       query.addEventListener('input', update);
       filters.forEach((filter) => filter.addEventListener('change', update));
+      matchButtons.forEach((button) => {
+        button.disabled = false;
+        button.addEventListener('click', () => {
+          state.match = button.value;
+          update();
+        });
+      });
       view.addEventListener('change', update);
       filterClear.addEventListener('click', () => {
         filters.forEach((filter) => { filter.checked = false; });
