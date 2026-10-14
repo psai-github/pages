@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { selectedDocuments, readState, writeState, groupedMatches, highlightedParts } from '../js/model.js';
+import { selectedDocuments, readState, writeState, groupedMatches, highlightedParts, resultDetails, wrappableParts } from '../js/model.js';
 
 const require = createRequire(import.meta.url);
 const lunr = require('../../../../assets/js/vendor/lunr.min.js');
@@ -84,4 +84,33 @@ test('excerpts center on matches and merge overlapping ranges without losing tex
   assert.ok(parts.map((part) => part.text).join('').length < text.length);
   assert.equal(highlightedParts('<img src=x onerror=alert(1)>', [[0, 4]]).map((part) => part.text).join(''),
     '<img src=x onerror=alert(1)>');
+});
+
+test('text results name the source file and list primary subjects first', () => {
+  const details = resultDetails({
+    url: '/csa/io/', path: '_posts/csa/2025-10-01-text-files.md', labels: ['Files', 'Java'], categories: ['files', 'java'],
+  }, ['java', 'sass']);
+  assert.equal(details.file, '2025-10-01-text-files.md');
+  assert.equal(details.path, '_posts/csa/2025-10-01-text-files.md');
+  assert.deepEqual(details.subjects, ['Java', 'Files']);
+  assert.equal(resultDetails({ url: '/x/', categories: ['java'] }).file, '/x/');
+  assert.equal(resultDetails({ url: '/n/', path: '_posts/2025-09-21-files_IPYNB_2_.md', categories: [] }).file,
+    '2025-09-21-files.ipynb');
+  assert.equal(resultDetails({
+    url: '/q/', path: '_posts/2026-10-13-Quests_Outline_DOCX_.md', source: 'Outline.docx', categories: [],
+  }).file, 'Outline.docx');
+});
+
+test('long words get break points so a phone-width card never outgrows the screen', () => {
+  assert.deepEqual(wrappableParts('Check for another token, then consume it.'), ['Check for another token, then consume it.']);
+  for (const text of [
+    'see https://apcentral.collegeboard.org/media/pdf/ap-computer-science-a-course-and-exam-description.pdf for details',
+    '2025-10-09-developing_procedures_remakers_lesson.ipynb',
+    'form 1FAIpQLSepOCmW6KeE7jw4f80JzWq2nVbL9xT3uHcRyDkMgPoA',
+  ]) {
+    const parts = wrappableParts(text);
+    assert.equal(parts.join(''), text);
+    assert.ok(parts.length > 1);
+    assert.ok(parts.every((part) => part.split(/\s+/).every((word) => word.length <= 20)));
+  }
 });

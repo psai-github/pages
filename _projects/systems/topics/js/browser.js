@@ -1,4 +1,4 @@
-import { selectedDocuments, readState, writeState, groupedMatches, highlightedParts } from './model.js';
+import { selectedDocuments, readState, writeState, groupedMatches, highlightedParts, resultDetails, wrappableParts } from './model.js';
 
 const root = document.querySelector('[data-topics-browser]');
 if (root) {
@@ -15,6 +15,7 @@ if (root) {
   const searchClear = root.querySelector('[data-topics-search-clear]');
   const filterClear = root.querySelector('[data-topics-clear]');
   const cardByUrl = new Map(cards.map((card) => [card.dataset.topicUrl, card]));
+  const primaryTopics = [...root.querySelectorAll('[data-topics-primary] input')].map((input) => input.value);
   let state = readState(location.search);
   if (!state.categories.length && root.dataset.initialCategory) {
     state.categories = [root.dataset.initialCategory];
@@ -22,11 +23,22 @@ if (root) {
   let documents = [];
   let index;
 
+  function wrappable(text) {
+    const fragment = document.createDocumentFragment();
+    wrappableParts(text).forEach((part, index) => {
+      if (index) fragment.append(document.createElement('wbr'));
+      fragment.append(part);
+    });
+    return fragment;
+  }
+
+  // Excerpts are document text, so long URLs get <wbr> break points.
   function highlight(element, text, positions, excerpt = false) {
+    const content = (value) => (excerpt ? wrappable(value) : document.createTextNode(value));
     element.replaceChildren(...highlightedParts(text, positions, excerpt).map((part) => {
-      if (!part.highlighted) return document.createTextNode(part.text);
+      if (!part.highlighted) return content(part.text);
       const mark = document.createElement('mark');
-      mark.textContent = part.text;
+      mark.append(content(part.text));
       return mark;
     }));
   }
@@ -69,17 +81,35 @@ if (root) {
     filterClear.disabled = !state.categories.length;
     bodyResults.replaceChildren();
     for (const match of groups.body) {
-      const item = document.createElement('li');
+      const details = resultDetails(match.document, primaryTopics);
       const link = document.createElement('a');
+      link.className = 'ocs__nav-card';
       link.href = contextLink(match.document);
-      const excerpt = document.createElement('p');
+      const file = document.createElement('span');
+      file.className = 'ocs__nav-card-kicker';
+      file.append(wrappable(details.file));
+      file.title = details.path;
+      const title = document.createElement('span');
+      title.className = 'ocs__nav-card-title';
+      title.append(wrappable(match.document.title));
+      const excerpt = document.createElement('span');
+      excerpt.className = 'ocs__text';
       highlight(excerpt, match.document[match.field], match.positions, true);
-      const title = document.createElement('p');
-      title.className = 'topics-browser__text-title';
-      title.textContent = match.document.title;
-      link.append(excerpt, title);
-      item.append(link);
-      bodyResults.append(item);
+      // ocs__status, not ocs__status-pill: pills never wrap, and a long
+      // category like Algorithms-with-Selection-and-Repetition outgrows a phone.
+      const subjects = document.createElement('span');
+      const labels = [
+        ...details.subjects,
+        ...(root.dataset.courseContext === 'true' ? match.document.weeks || [] : []),
+      ];
+      labels.forEach((label) => {
+        const chip = document.createElement('span');
+        chip.className = 'ocs__status';
+        chip.textContent = label;
+        subjects.append(chip, ' ');
+      });
+      link.append(file, title, excerpt, subjects);
+      bodyResults.append(link);
     }
     const count = selected.length + (searching ? groups.body.length : 0);
     status.textContent = count ? `${count} documents` :

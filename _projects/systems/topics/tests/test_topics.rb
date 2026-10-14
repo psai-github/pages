@@ -49,6 +49,16 @@ class TopicsTest < Minitest::Test
         ---
         <a href="/preview/java/algorithms/">Supporting lesson</a>
       DOC
+      File.write(File.join(source, "converted.md"), <<~DOC)
+        ---
+        layout: opencs
+        title: Converted Quest
+        categories: [Java]
+        permalink: /converted-quest/
+        ---
+        <!-- Converted from: Quest-Outline.docx -->
+        Quest outline.
+      DOC
       File.write(File.join(source, "course-browser.md"), <<~DOC)
         ---
         layout: opencs
@@ -72,9 +82,14 @@ class TopicsTest < Minitest::Test
       ))
       site.process
       index = JSON.parse(File.read(File.join(source, "_site/assets/js/topics/data.json")))
-      assert_equal 2, index.size
+      assert_equal 3, index.size
       lesson = index.find { |entry| entry["url"] == "/java/algorithms/" }
       assert_equal %w[java algorithms], lesson["categories"]
+      assert_equal %w[Java Algorithms], lesson["labels"]
+      assert_equal "lesson.md", lesson["path"]
+      refute lesson.key?("source")
+      converted = index.find { |entry| entry["url"] == "/converted-quest/" }
+      assert_equal "Quest-Outline.docx", converted["source"]
       assert_equal ["CSA week 14"], lesson["weeks"]
       assert_includes lesson["content"], "Algorithm evidence."
       original = File.read(File.join(source, "_site/java/algorithms/index.html"))

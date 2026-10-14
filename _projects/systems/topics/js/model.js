@@ -77,3 +77,32 @@ export function highlightedParts(text, positions, excerpt = false) {
   if (end < text.length) parts.push({ text: '…', highlighted: false });
   return parts;
 }
+
+export function resultDetails(document, primary = []) {
+  const path = document.path || '';
+  const labels = document.labels || document.categories;
+  return {
+    file: document.source || (path.split('/').pop() || document.url).replace(/_IPYNB_2_\.md$/, '.ipynb'),
+    path,
+    subjects: [...labels].sort((a, b) =>
+      Number(primary.includes(b.toLowerCase())) - Number(primary.includes(a.toLowerCase()))),
+  };
+}
+
+// A URL or file name has nowhere to wrap, so on a phone it would push its card
+// wider than the screen. Split long words after / . _ = & ? # - and at least
+// every `longest` characters; the browser may break at a <wbr> between parts.
+export function wrappableParts(text, longest = 20) {
+  const parts = [''];
+  for (const word of text.split(/(\s+)/)) {
+    if (word.length <= longest) {
+      parts[parts.length - 1] += word;
+      continue;
+    }
+    const pieces = word.match(/[^/._=&?#-]*[/._=&?#-]*/g).filter(Boolean)
+      .flatMap((piece) => piece.match(new RegExp(`.{1,${longest}}`, 'gs')));
+    parts[parts.length - 1] += pieces[0];
+    parts.push(...pieces.slice(1));
+  }
+  return parts;
+}
