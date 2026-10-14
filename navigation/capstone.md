@@ -341,6 +341,15 @@ document.addEventListener('DOMContentLoaded', function(){
   });
   updateTypeButtons();
   applyFilters();
+  // After Back, a browser can refill the search box and year menu once this script has run.
+  window.addEventListener('pageshow', ()=>{
+    const query = normalize(searchInput.value);
+    const year = yearSelect ? yearSelect.value : '';
+    if(query === currentQuery && year === currentYear) return;
+    currentQuery = query;
+    currentYear = year;
+    applyFilters();
+  });
 });
 </script>
 
