@@ -119,7 +119,8 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   };
 
-  function normalize(text){ return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
+  function fold(text){ return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+  function normalize(text){ return fold(text).trim(); }
   // Read each card's text once, before the links button and pop-up are added to it.
   const cardText = new Map(cards.map(card=>[card, normalize(card.textContent)]));
   function matchesType(card){ return currentType === 'all' || card.classList.contains(currentType); }
@@ -127,6 +128,61 @@ document.addEventListener('DOMContentLoaded', function(){
   function matchesSearch(card){
     // Every word has to be in the card, in any order: "veterans chatbot" finds Poway Veterans.
     return currentQuery.split(/\s+/).every(word=>cardText.get(card).includes(word));
+  }
+  // Highlight each search word in the card's own text with <mark>, like the Topics page.
+  const markSkip = '.capstone-links-button, .capstone-popup, .capstone-card-placeholder';
+  function clearMarks(card){
+    card.querySelectorAll('mark[data-search-mark]').forEach(mark=>{
+      const parent = mark.parentNode;
+      mark.replaceWith(mark.textContent);
+      parent.normalize();
+    });
+  }
+  function markWords(card, words){
+    const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while(walker.nextNode()){
+      if(!walker.currentNode.parentElement.closest(markSkip)) nodes.push(walker.currentNode);
+    }
+    nodes.forEach(node=>{
+      const text = node.data;
+      // Fold one character at a time and remember where each folded character came from.
+      let folded = '';
+      const from = [];
+      for(let i = 0; i < text.length; i++){
+        const piece = fold(text[i]);
+        folded += piece;
+        for(let k = 0; k < piece.length; k++) from.push(i);
+      }
+      const ranges = [];
+      words.forEach(word=>{
+        for(let at = folded.indexOf(word); at !== -1; at = folded.indexOf(word, at + 1)){
+          let end = from[at + word.length - 1] + 1;
+          while(end < text.length && !fold(text[end])) end++;
+          ranges.push([from[at], end]);
+        }
+      });
+      if(!ranges.length) return;
+      ranges.sort((a, b)=>a[0] - b[0]);
+      const merged = [];
+      ranges.forEach(([start, end])=>{
+        const last = merged[merged.length - 1];
+        if(last && start <= last[1]) last[1] = Math.max(last[1], end);
+        else merged.push([start, end]);
+      });
+      const pieces = [];
+      let cursor = 0;
+      merged.forEach(([start, end])=>{
+        if(start > cursor) pieces.push(text.slice(cursor, start));
+        const mark = document.createElement('mark');
+        mark.dataset.searchMark = '';
+        mark.textContent = text.slice(start, end);
+        pieces.push(mark);
+        cursor = end;
+      });
+      if(cursor < text.length) pieces.push(text.slice(cursor));
+      node.replaceWith(...pieces);
+    });
   }
   
   function plural(count, word){ return `${count} ${word}${count === 1 ? '' : 's'}`; }
@@ -165,9 +221,12 @@ document.addEventListener('DOMContentLoaded', function(){
 }
   function applyFilters(){
     let count = 0;
+    const words = currentQuery.split(/\s+/).filter(Boolean);
     cards.forEach(card=>{
       const visible = matchesType(card) && matchesSearch(card) && matchesYear(card);
       card.style.display = visible ? '' : 'none';
+      clearMarks(card);
+      if(visible && words.length) markWords(card, words);
       if(visible) count++;
     });
     updateStatus(count);
