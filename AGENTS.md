@@ -98,6 +98,7 @@ while preserving all critical instructions. The agent must still communicate wit
 ### 后端边界
 
 * 后端服务位于 [node_backend/README.md](node_backend/README.md)，与站点构建流程分离；改动前先阅读该文档。
+* 代码提交不能因 Gist 失败而中断：`exportToGist` 抛错时，课程播放器和 Blogs 代码表单通过 [assets/js/notebook-link-fallback.js](assets/js/notebook-link-fallback.js) 显示 `[data-notebook-fallback]` 输入框，提交 GitHub `.ipynb` 链接为 `{type: 'code', url, fallbackFrom: 'gist'}`。Spring 后端的 `code` 接受 Gist 或 GitHub 文件链接，把发往 `code`/`github_issue` 作业的 `link` 归一为作业类型，并按 URL 形态而非声明类型评分。测试：`node --test tests/notebook_link_fallback.test.mjs`。
 
 ## 编码标准
 

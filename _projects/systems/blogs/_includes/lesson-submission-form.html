@@ -107,6 +107,11 @@
       <p class="form-hint">This submits the code from this lesson's code runner(s) below as a Gist for automatic review. Save each runner with its 💾 button before submitting.</p>
       <ul class="code-runner-summary" id="code-runner-summary"></ul>
     </div>
+    <div class="form-group notebook-fallback" data-notebook-fallback hidden>
+      <p class="notebook-fallback__notice" role="alert" data-notebook-fallback-notice></p>
+      <label for="code-notebook-url">GitHub notebook link (.ipynb)</label>
+      <input type="url" id="code-notebook-url" data-notebook-fallback-url placeholder="https://github.com/user/repo/blob/main/lesson.ipynb">
+    </div>
     <div class="form-group">
       <label for="code-notes">Notes (Optional)</label>
       <textarea id="code-notes" placeholder="Add any additional comments..."></textarea>
