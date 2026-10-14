@@ -25,6 +25,7 @@ show_reading_time: false
       <select id="year-select" class="nc-select" aria-label="Filter projects by school year" style="max-width: 14rem;">
         <option value="2026-2027" selected>2026/2027</option>
         <option value="2025-2026">2025/2026</option>
+        <option value="">All years</option>
       </select>
     </div>
   </div>
@@ -33,7 +34,7 @@ show_reading_time: false
 <div class="ocs__grid">
   <div class="ocs__grid-cell">
     <input id="project-search" type="search" placeholder="Search projects, descriptions, or team members" class="nc-input" />
-    <p id="search-status" class="text-xs text-gray-500" style="margin: 0.25rem 0 0;">Showing all projects.</p>
+    <p id="search-status" role="status" class="text-xs text-gray-500" style="margin: 0.25rem 0 0;">Showing all projects.</p>
   </div>
 </div>
 
@@ -118,25 +119,47 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   };
 
-  function normalize(text){ return text.toLowerCase().trim(); }
+  function normalize(text){ return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
+  // Read each card's text once, before the links button and pop-up are added to it.
+  const cardText = new Map(cards.map(card=>[card, normalize(card.textContent)]));
   function matchesType(card){ return currentType === 'all' || card.classList.contains(currentType); }
   function matchesYear(card){ return !currentYear || (card.dataset.year || '2025-2026') === currentYear; }
   function matchesSearch(card){
-    const text = normalize(card.textContent);
-    return !currentQuery || text.includes(currentQuery);
+    // Every word has to be in the card, in any order: "veterans chatbot" finds Poway Veterans.
+    return currentQuery.split(/\s+/).every(word=>cardText.get(card).includes(word));
   }
   
-  function updateStatus(count){
-  const total = getTotalProjects();
-
-  if(currentQuery){
-    status.textContent = count
-      ? `${count} of ${total} project${total === 1 ? '' : 's'} found for "${currentQuery}".`
-      : `No projects match "${currentQuery}".`;
-  } else {
-    status.textContent = `${total} total project${total === 1 ? '' : 's'}.`;
+  function plural(count, word){ return `${count} ${word}${count === 1 ? '' : 's'}`; }
+  function filterLabel(){
+    const parts = [];
+    if(currentType !== 'all') parts.push(currentType);
+    if(currentYear) parts.push(yearSelect.selectedOptions[0].textContent);
+    return parts.join(', ');
   }
-}
+  function updateStatus(count){
+    const total = getTotalProjects();
+    const label = filterLabel();
+    if(!currentQuery){
+      if(!label) status.textContent = `${plural(total, 'project')}.`;
+      else if(count) status.textContent = `Showing ${count} of ${plural(total, 'project')} (${label}).`;
+      else status.textContent = `No projects in ${label}.`;
+      return;
+    }
+    const query = searchInput.value.trim().replace(/\s+/g, ' ');
+    const where = label ? ` in ${label}` : '';
+    let text = count
+      ? `${plural(count, 'project')} ${count === 1 ? 'matches' : 'match'} "${query}"${where}.`
+      : `No projects match "${query}"${where}.`;
+    // Say when the course or year choice hides matches, so a project never looks missing.
+    const hidden = cards.filter(matchesSearch).length - count;
+    if(hidden){
+      const both = currentType !== 'all' && currentYear;
+      const other = both ? 'other courses or years' : currentYear ? 'other years' : 'other courses';
+      const pick = both ? 'pick All and All years' : currentYear ? 'pick All years' : 'pick All';
+      text += ` ${hidden} ${count ? 'more' : hidden === 1 ? 'match' : 'matches'} in ${other}: ${pick}.`;
+    }
+    status.textContent = text;
+  }
   function getTotalProjects(){
   return cards.length;
 }
