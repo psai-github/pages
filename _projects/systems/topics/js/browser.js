@@ -23,6 +23,8 @@ if (root) {
   }
   let documents = [];
   let index;
+  // A shared ?match=and link shows AND while the index loads (the buttons stay disabled).
+  showMatch();
 
   function wrappable(text) {
     const fragment = document.createDocumentFragment();
@@ -51,16 +53,20 @@ if (root) {
     return url.href;
   }
 
-  function render() {
-    query.value = state.query;
-    view.value = state.view;
-    filters.forEach((filter) => { filter.checked = state.categories.includes(filter.value); });
-    // Like the capstone menu, the current choice is the filled, pressed button.
+  // The current choice is the filled button with aria-pressed="true".
+  function showMatch() {
     matchButtons.forEach((button) => {
       const pressed = button.value === state.match;
       button.setAttribute('aria-pressed', String(pressed));
       button.classList.toggle('fill', pressed);
     });
+  }
+
+  function render() {
+    query.value = state.query;
+    view.value = state.view;
+    filters.forEach((filter) => { filter.checked = state.categories.includes(filter.value); });
+    showMatch();
     const rule = { primary, match: state.match };
     const searching = Boolean(state.query.trim());
     const matches = searching && index ? index.query((search) => {

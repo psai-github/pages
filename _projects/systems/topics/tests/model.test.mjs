@@ -77,6 +77,7 @@ test('AND is shareable in the URL and OR, the default, is left out', () => {
   assert.equal(writeState(and), 'category=java&category=python&match=and');
   assert.deepEqual(readState(`?${writeState(and)}`), and);
   assert.equal(readState('?category=java').match, 'or');
+  assert.equal(readState('?match=AND').match, 'and');
   assert.equal(readState('?match=all').match, 'or');
   assert.equal(writeState(readState('?category=java&match=or')), 'category=java');
 });

@@ -117,7 +117,7 @@ The [browser include](../_includes/topics-browser.html) presents two disclosures
 inside a filter box. Topic Filter defaults open; Categories Filter defaults
 closed. Topic Filter starts with its OR/AND pair: `ocs__btn` buttons in an
 `ocs__links` group, the current choice filled and `aria-pressed`, disabled until
-the controller loads. Clear Filters belongs to that box and clears only category
+the search index loads. Clear Filters belongs to that box and clears only category
 selections.
 Search has its own clear control. Each clear button is dimmed and disabled when
 its corresponding state is empty.

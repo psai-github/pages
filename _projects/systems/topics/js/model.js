@@ -22,7 +22,7 @@ export function readState(search) {
   const params = new URLSearchParams(search);
   return {
     categories: [...new Set(params.getAll('category').map((value) => value.toLowerCase()))],
-    match: params.get('match') === 'and' ? 'and' : 'or',
+    match: params.get('match')?.toLowerCase() === 'and' ? 'and' : 'or',
     query: params.get('q') || '',
     view: params.get('view') === 'list' ? 'list' : 'cards',
   };
