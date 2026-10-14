@@ -25,8 +25,6 @@
 
   Contracts used by the sidebar script in _layouts/post.html:
     - #sprint-{i}-lessons and #chevron-{i}  -> toggleSprint()
-    - .sprint-section > .lesson-list        -> a sprint's panel, for restoring
-                                               which sprints are open
     - .lesson-item                          -> a step for Prev / Next and the pager
     - .lesson-item[data-lesson-id]          -> a lesson, for completion tracking
     - .lesson-status-icon                   -> per-lesson complete/incomplete
@@ -106,12 +104,13 @@
               Its summary reuses the sprint row's classes, so a week reads like
               a sprint one level down: chevron, title, then its W and count
               pills. The week's intro lines up with the chevron, and its lessons
-              and chat sit one level in, so the list reads as a tree. The indent
-              reuses the sprint's .lesson-list class, so it needs no new CSS.
-              Lessons use the narrow fa-file-code icon (12px, the same as an
-              assignment's fa-file-alt), so the indent does not squeeze long
-              words like "Methodologies" into a mid-word break. The lesson's own
-              week starts open, and the script in _layouts/post.html turns the
+              and chat sit in an ocs__tree (the OCS tree grammar, in
+              _sass/open-coding/elements/trees), which indents them one level
+              and draws a guide line under the intro's icon. Lessons use the
+              narrow fa-file-code icon (12px, the same as an assignment's
+              fa-file-alt), so the indent does not squeeze long words like
+              "Methodologies" into a mid-word break. The lesson's own week
+              starts open, and the script in _layouts/post.html turns the
               chevron when a week opens or closes.
             {%- endcomment -%}
             <details data-week-group data-week="{{ week }}"{% if week == current_week %} open{% endif %}>
@@ -134,7 +133,7 @@
                 <span class="lesson-title">Week {{ week }} intro</span>
               </a>
 
-              <div class="lesson-list">
+              <div class="ocs__tree">
                 {%- assign assignmentCount = 0 -%}
                 {%- for post in weekPosts -%}
                   {%- if post.assignment == true -%}
@@ -162,7 +161,7 @@
                   {%- assign currentWeekUrl = weekUrl -%}
                   {%- assign currentWeekChatUrl = chatUrl -%}
                 {%- endif -%}
-                <div class="ocs__links">
+                <div class="ocs__links ocs__tree-item">
                   {%- if assignmentCount > 0 -%}
                   <span class="ocs__status-pill ocs__status-pill--warn">
                     <i class="fas fa-calendar"></i> {{ assignmentCount }} assignment{% if assignmentCount > 1 %}s{% endif %} due

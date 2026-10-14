@@ -194,6 +194,31 @@ headers, borders, alternating rows, and hover states.
 
 See [`elements/tables`](elements/tables).
 
+### Trees
+
+```html
+<div class="ocs__tree-item">Week 1</div>
+<div class="ocs__tree">
+  <div class="ocs__tree-item"><a href="/example/lesson-1">Lesson 1</a></div>
+  <div class="ocs__tree-item"><a href="/example/lesson-2">Lesson 2</a></div>
+  <div class="ocs__tree">
+    <div class="ocs__tree-item"><a href="/example/lesson-2/part-a">Part A</a></div>
+  </div>
+</div>
+```
+
+Common tree classes:
+
+- `ocs__tree`: indents its children one level and draws an accent guide line
+  down the left, under the row above. Put one inside another for each deeper level.
+- `ocs__tree-item`: spaces a plain child (text, a link, or an `ocs__links`
+  group) off the guide line. Rows that already have padding, like the course
+  sidebar's `lesson-item` rows, go straight inside `ocs__tree`.
+
+See [`elements/trees`](elements/trees). The course sidebar
+(`_projects/systems/courses/_includes/lesson-sidebar-nav.html`) nests each
+week's lessons and chat this way.
+
 ### Capstone document elements
 
 These shared classes are used by the RFID and Jarvis capstone documents:
