@@ -219,6 +219,23 @@ See [`elements/trees`](elements/trees). The course sidebar
 (`_projects/systems/courses/_includes/lesson-sidebar-nav.html`) nests each
 week's lessons and chat this way.
 
+### One-line text
+
+```html
+<a class="ocs__keypoint" href="/example/lesson" title="Agile Methodologies Practitioner">
+  <i class="fas fa-code"></i>
+  <span class="ocs__truncate">Agile Methodologies Practitioner</span>
+</a>
+```
+
+- `ocs__truncate`: keeps text on one line and ends it with "…" when it doesn't
+  fit. Put the full text in a `title` attribute on it or on its link, so
+  hovering shows it. Use it on a block element or a flex item, like the text
+  beside an icon.
+
+See [`elements/typography`](elements/typography). The course sidebar's lesson
+rows use it.
+
 ### Capstone document elements
 
 These shared classes are used by the RFID and Jarvis capstone documents:

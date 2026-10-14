@@ -106,12 +106,13 @@
               pills. The week's intro lines up with the chevron, and its lessons
               and chat sit in an ocs__tree (the OCS tree grammar, in
               _sass/open-coding/elements/trees), which indents them one level
-              and draws a guide line under the intro's icon. Lessons use the
-              narrow fa-file-code icon (12px, the same as an assignment's
-              fa-file-alt), so the indent does not squeeze long words like
-              "Methodologies" into a mid-word break. The lesson's own week
-              starts open, and the script in _layouts/post.html turns the
-              chevron when a week opens or closes.
+              and draws a guide line under the intro's icon. Each lesson's title
+              stays on one line (ocs__truncate) and ends with "…" when it doesn't
+              fit; the row's title attribute shows the whole title on hover.
+              Lessons use the narrow fa-file-code icon (12px, the same as an
+              assignment's fa-file-alt), which leaves room for one more letter.
+              The lesson's own week starts open, and the script in
+              _layouts/post.html turns the chevron when a week opens or closes.
             {%- endcomment -%}
             <details data-week-group data-week="{{ week }}"{% if week == current_week %} open{% endif %}>
               <summary class="sprint-toggle">
@@ -141,14 +142,15 @@
                   {%- endif -%}
                 <a href="{{ site.baseurl }}{{ post.url }}"
                    class="lesson-item {% if page.url == post.url %}active{% endif %}"
-                   data-lesson-id="{{ post.url }}">
+                   data-lesson-id="{{ post.url }}"
+                   title="{{ post.title | escape }}">
                   <i class="fas fa-circle lesson-status-icon incomplete"></i>
                   {%- if post.assignment == true -%}
                   <i class="fas fa-file-alt" aria-hidden="true"></i>
                   {%- else -%}
                   <i class="fas fa-file-code" aria-hidden="true"></i>
                   {%- endif -%}
-                  <span class="lesson-title">{{ post.title }}</span>
+                  <span class="lesson-title ocs__truncate">{{ post.title }}</span>
                 </a>
                 {%- endfor -%}
 
