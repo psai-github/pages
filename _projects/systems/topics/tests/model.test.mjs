@@ -11,11 +11,25 @@ const documents = [
   { url: '/objects/', title: 'Objects', content: 'Inheritance', categories: ['java'] },
 ];
 
-test('categories are independent facets and combined filters use intersection', () => {
-  assert.equal(selectedDocuments(documents, ['algorithms']).length, 2);
-  assert.deepEqual(selectedDocuments(documents, ['java', 'algorithms']).map((doc) => doc.url), ['/java/']);
-  assert.equal(selectedDocuments(documents, ['java', 'python']).length, 0);
-  assert.equal(selectedDocuments(documents, []).length, 3);
+const topics = ['java', 'python'];
+
+test('boxes in one filter widen the results and the two filters narrow each other', () => {
+  assert.equal(selectedDocuments(documents, ['algorithms'], null, topics).length, 2);
+  assert.deepEqual(selectedDocuments(documents, ['java', 'python'], null, topics).map((doc) => doc.url),
+    ['/java/', '/python/', '/objects/']);
+  assert.deepEqual(selectedDocuments(documents, ['java', 'algorithms'], null, topics).map((doc) => doc.url), ['/java/']);
+  assert.deepEqual(selectedDocuments(documents, ['java', 'python', 'algorithms'], null, topics).map((doc) => doc.url),
+    ['/java/', '/python/']);
+  assert.equal(selectedDocuments(documents, [], null, topics).length, 3);
+});
+
+test('two Categories Filter boxes are alternatives too', () => {
+  const docs = [
+    { url: '/a/', categories: ['java', 'arrays'] },
+    { url: '/b/', categories: ['java', 'loops'] },
+    { url: '/c/', categories: ['java', 'classes'] },
+  ];
+  assert.deepEqual(selectedDocuments(docs, ['arrays', 'loops'], null, topics).map((doc) => doc.url), ['/a/', '/b/']);
 });
 
 test('full-text matches cannot escape the selected categories', () => {
@@ -27,7 +41,7 @@ test('full-text matches cannot escape the selected categories', () => {
   });
   const ids = index.search('binary').map((result) => result.ref);
   assert.equal(ids.length, 2);
-  assert.deepEqual(selectedDocuments(documents, ['java'], ids).map((doc) => doc.url), ['/java/']);
+  assert.deepEqual(selectedDocuments(documents, ['java'], ids, topics).map((doc) => doc.url), ['/java/']);
   assert.equal(selectedDocuments(documents, ['java'], index.search('missing').map((result) => result.ref)).length, 0);
 });
 
@@ -51,7 +65,7 @@ test('title cards precede body matches and both respect all category filters', (
     this.metadataWhitelist = ['position'];
     docs.forEach((doc) => this.add(doc));
   });
-  const groups = groupedMatches(docs, ['java', 'algorithms'], index.search('algorithm'));
+  const groups = groupedMatches(docs, ['java', 'algorithms'], index.search('algorithm'), topics);
   assert.deepEqual(groups.title.map((match) => match.document.url), ['/title/']);
   assert.deepEqual(groups.body.map((match) => match.document.url), ['/body/']);
   assert.deepEqual(highlightedParts(groups.title[0].document.title, groups.title[0].positions)

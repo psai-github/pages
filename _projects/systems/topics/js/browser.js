@@ -5,6 +5,7 @@ if (root) {
   const query = root.querySelector('#topics-query');
   const view = root.querySelector('#topics-view');
   const filters = [...root.querySelectorAll('input[type="checkbox"]')];
+  const primary = [...root.querySelectorAll('[data-topics-primary] input[type="checkbox"]')].map((filter) => filter.value);
   const status = root.querySelector('[data-topics-status]');
   const cards = [...root.querySelectorAll('[data-topic-url]')];
   const results = root.querySelector('[data-topics-results]');
@@ -47,9 +48,9 @@ if (root) {
       search.term(tokens, { boost: 10 });
       search.term(tokens, { wildcard: window.lunr.Query.wildcard.TRAILING });
     }) : [];
-    const groups = groupedMatches(documents, state.categories, matches);
+    const groups = groupedMatches(documents, state.categories, matches, primary);
     const selected = searching ? groups.title.map((match) => match.document) :
-      selectedDocuments(documents, state.categories);
+      selectedDocuments(documents, state.categories, null, primary);
     const visible = new Set(selected.map((document) => document.url));
     cards.forEach((card) => { card.hidden = !visible.has(card.dataset.topicUrl); });
     const titlePositions = new Map(groups.title.map((match) => [match.document.url, match.positions]));

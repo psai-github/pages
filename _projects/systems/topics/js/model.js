@@ -1,6 +1,16 @@
-export function selectedDocuments(documents, categories, rankedIds = null) {
+// Checked boxes in the same filter are alternatives (Java or Python); the Topic and
+// Categories filters narrow each other (Java and Algorithms). `primary` lists the
+// Topic Filter values; every other checked value belongs to the Categories Filter.
+export function filterGroups(categories, primary = []) {
+  const topics = categories.filter((category) => primary.includes(category));
+  const others = categories.filter((category) => !primary.includes(category));
+  return [topics, others].filter((group) => group.length);
+}
+
+export function selectedDocuments(documents, categories, rankedIds = null, primary = []) {
+  const groups = filterGroups(categories, primary);
   const selected = documents.filter((document) =>
-    categories.every((category) => document.categories.includes(category)));
+    groups.every((group) => group.some((category) => document.categories.includes(category))));
   if (rankedIds === null) return selected;
   const byUrl = new Map(selected.map((document) => [document.url, document]));
   return rankedIds.filter((url) => byUrl.has(url)).map((url) => byUrl.get(url));
@@ -28,8 +38,8 @@ export function matchPositions(result, field) {
   return Object.values(metadata).flatMap((fields) => fields[field]?.position || []);
 }
 
-export function groupedMatches(documents, categories, results) {
-  const selected = new Map(selectedDocuments(documents, categories).map((document) => [document.url, document]));
+export function groupedMatches(documents, categories, results, primary = []) {
+  const selected = new Map(selectedDocuments(documents, categories, null, primary).map((document) => [document.url, document]));
   const title = [];
   const body = [];
   for (const result of results) {
