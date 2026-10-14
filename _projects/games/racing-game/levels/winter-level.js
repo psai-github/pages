@@ -6,16 +6,21 @@ import TimeLapScreen from './TimeLapScreen.js';
 
 
 // Npc only talks while a player is touching it; the yeti talks whenever E is pressed.
+// Each press shows the next line, and the press after the last line closes the dialogue.
 class Yeti extends Npc {
   handleKeyInteract() {
     if (this.gameEnv.gameControl && this.gameEnv.gameControl.isPaused) {
       return;
     }
-    if (this.dialogueSystem.isDialogueOpen()) {
+    const lines = this.spriteData.dialogues;
+    // A closed dialogue (including one closed with Escape) always restarts from the first line.
+    const nextIndex = this.dialogueSystem.isDialogueOpen() ? this.lineIndex + 1 : 0;
+    if (nextIndex >= lines.length) {
       this.dialogueSystem.closeDialogue();
       return;
     }
-    this.showRandomDialogue();
+    this.lineIndex = nextIndex;
+    this.dialogueSystem.showDialogue(lines[nextIndex], this.spriteData.id, this.spriteData.src, this.spriteData);
   }
 }
 
@@ -56,18 +61,25 @@ class GameLevelWinter {
         src: "/images/projects/racing-game/Directions_blue_car.png",
         INIT_POSITION: { x: player_data.INIT_POSITION.x - 0.08, y: player_data.INIT_POSITION.y }, // start behind the red car so they don't overlap
         touchOptions: { interactLabel: "e", position: "right" },
-        keypress: { up: 38, left: 37, down: 40, right: 39 } // Arrow keys
+        keypress: { up: 73, left: 74, down: 75, right: 76 } // I, J, K, L
     }
     const yeti_data = {
         id: "Yeti",
         src: "/images/projects/racing-game/yeti.png",
         SCALE_FACTOR: 8,
-        INIT_POSITION: { x: 0.45, y: 0.02 }, // above the track so it doesn't block the racing line
+        INIT_POSITION: { x: 0.25, y: 0.33 }, // in the snowy trees inside the track, clear of the stands and the racing line
         pixels: { height: 256, width: 256 },
         orientation: { rows: 1, columns: 1 },
         down: { row: 0, start: 0, columns: 1 },
         hitbox: { widthPercentage: 0.1, heightPercentage: 0.1 },
-        dialogues: ["Welcome to the Winter Level"]
+        dialogues: [
+            "Welcome to the Winter Level",
+            "Red drives with W, A, S, D. Blue drives with I, J, K, L.",
+            "Race to the right from the start line. Driving the wrong way won't count!",
+            "Three laps around my mountain. First car to finish wins!",
+            "Careful on the corners, the snowbanks don't move for anyone.",
+            "I've lived up here for 300 years and I've never seen a car this fast."
+        ]
     }
  
     const barrierData1 = {
@@ -88,6 +100,13 @@ class GameLevelWinter {
     };
 
 
+    // Finish line on the painted start/finish line; HUD in the trees above the top-left corner.
+    const lap_data = {
+      totalLaps: 3,
+      finishLine: { x: 0.5, top: 0.764, bottom: 0.864 },
+      hudPosition: { x: 0.01, y: 0.02 }
+    };
+
     this.classes = [
       { class: GameEnvBackground, data: background_data },
       { class: Player, data: player_data },
@@ -95,7 +114,7 @@ class GameLevelWinter {
       { class: Yeti, data: yeti_data },
       { class: SplineBarrier, data: barrierData1 },
       { class: SplineBarrier, data: barrierData2 },
-      { class: TimeLapScreen, data: { currentLap: 1, totalLaps: 3 } }
+      { class: TimeLapScreen, data: lap_data }
     ];
   }
 }

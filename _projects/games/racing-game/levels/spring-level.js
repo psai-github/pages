@@ -39,7 +39,7 @@ class GameLevelSpring {
         src: "/images/projects/racing-game/Directions_blue_car.png",
         INIT_POSITION: { x: player_data.INIT_POSITION.x - 0.08, y: player_data.INIT_POSITION.y }, // start behind the red car so they don't overlap
         touchOptions: { interactLabel: "e", position: "right" },
-        keypress: { up: 38, left: 37, down: 40, right: 39 } // Arrow keys
+        keypress: { up: 73, left: 74, down: 75, right: 76 } // I, J, K, L
     }
     const barrierData1 = {
       id: "barrier-1",
@@ -57,13 +57,20 @@ class GameLevelSpring {
       hitbox: { widthPercentage: 0.0, heightPercentage: 0.0 },
       fromOverlay: true,
     };
+    // Finish line on the painted start/finish line; HUD on the cliffs in the bottom-left corner,
+    // because the track runs through the top-left.
+    const lap_data = {
+      totalLaps: 3,
+      finishLine: { x: 0.456, top: 0.717, bottom: 1 },
+      hudPosition: { x: 0.01, y: 0.85 }
+    };
     this.classes = [
         {class: GameEnvBackground, data: background_data},
         {class: Player, data: player_data},
         {class: Player, data: player2_data},
         {class: SplineBarrier, data: barrierData1},
         {class: SplineBarrier, data: barrierData2},
-        {class: TimeLapScreen, data: { currentLap: 1, totalLaps: 3 }}
+        {class: TimeLapScreen, data: lap_data}
     ]
   }
 }

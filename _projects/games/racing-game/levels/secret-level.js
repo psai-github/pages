@@ -37,9 +37,9 @@ class GameLevelSecret {
         name: "Blue Car",
         greeting: "I'm the blue car!",
         src: "/images/projects/racing-game/Directions_blue_car.png",
-        INIT_POSITION: { x: player_data.INIT_POSITION.x - 0.08, y: player_data.INIT_POSITION.y }, // start behind the red car so they don't overlap
+        INIT_POSITION: { x: player_data.INIT_POSITION.x - 0.108, y: player_data.INIT_POSITION.y - 0.037 }, // on the bottom straight, left of the red car's start gap
         touchOptions: { interactLabel: "e", position: "right" },
-        keypress: { up: 38, left: 37, down: 40, right: 39 } // Arrow keys
+        keypress: { up: 73, left: 74, down: 75, right: 76 } // I, J, K, L
     }
     const barrierData1 = {
       id: "barrier-2",
@@ -73,6 +73,14 @@ class GameLevelSecret {
       hitbox: { widthPercentage: 0.0, heightPercentage: 0.0 },
       fromOverlay: true,
     };
+    // The painted START/FINISH gates sit across side roads, so laps use a drawn line on the bottom
+    // straight instead. The HUD sits over the lava below the castle, since the track circles every corner.
+    const lap_data = {
+      totalLaps: 3,
+      finishLine: { x: 0.568, top: 0.841, bottom: 0.939 },
+      drawFinishLine: true,
+      hudPosition: { x: 0.42, y: 0.63 }
+    };
     this.classes = [
         {class: GameEnvBackground, data: background_data},
         {class: Player, data: player_data},
@@ -81,7 +89,7 @@ class GameLevelSecret {
         { class: SplineBarrier, data: barrierData2 },
         { class: SplineBarrier, data: barrierData3 },
         { class: SplineBarrier, data: barrierData4 },
-        { class: TimeLapScreen, data: { currentLap: 1, totalLaps: 3 } },
+        { class: TimeLapScreen, data: lap_data },
     ]
   }
 }
