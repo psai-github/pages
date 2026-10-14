@@ -1,9 +1,19 @@
 /**
- * Student-facing output checks for Toolchain Trail. The browser can inspect
- * pasted output, but only a future trusted service can confirm it ran locally.
+ * Station verification for Toolchain Trail.
+ *
+ * Main path (one-time device pairing): the page asks the backend to start the
+ * station, shows a single-use pairing code, and polls the session while the
+ * student's local agent (scripts/toolchain_agent.py) runs the real commands and
+ * reports them. The backend decides pass/fail.
+ *
+ * Fallback: when the backend cannot start a session (signed out, offline), the
+ * student can paste output for practice feedback checked in the browser.
  */
 
 import { verifyStationOutput, PASTE_PROMPTS } from '@assets/js/projects/cs-pathway/model/stationVerifiers.js';
+import { startToolchainSession, getToolchainSession, agentCommands } from '../services/ToolchainApi.js';
+
+const POLL_INTERVAL_MS = 3000;
 export default class StationVerificationTrial {
   /**
    * @param {Object} opts
@@ -26,6 +36,9 @@ export default class StationVerificationTrial {
     this.onClose = onClose || (() => {});
     this.overlay = null;
     this.verified = false;
+    this.session = null;
+    this.pollTimer = null;
+    this.countdownTimer = null;
   }
 
   start() {
@@ -292,6 +305,47 @@ export default class StationVerificationTrial {
           white-space: pre;
         }
 
+        .svt-code {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          margin: 8px 0;
+        }
+        .svt-code input {
+          flex: 1;
+          min-width: 0;
+          background: #000;
+          border: 1px solid #22d3ee;
+          border-radius: 8px;
+          color: #fbbf24;
+          font-family: inherit;
+          font-size: 13px;
+          padding: 8px;
+        }
+        .svt-cmd {
+          margin: 6px 0;
+          font-size: 12px;
+          color: #cbd5e1;
+        }
+        .svt-cmd code {
+          display: block;
+          margin-top: 3px;
+          color: #fbbf24;
+          background: #000;
+          border: 1px solid rgba(34, 211, 238, 0.4);
+          border-radius: 6px;
+          padding: 6px 8px;
+          white-space: pre-wrap;
+          word-break: break-all;
+        }
+        .svt-agent-steps {
+          margin: 6px 0 0;
+          padding-left: 18px;
+          font-size: 12px;
+          line-height: 1.6;
+        }
+        .svt-hidden { display: none !important; }
+
         @media (max-width: 860px) {
           .svt-body { grid-template-columns: 1fr; }
         }
@@ -328,11 +382,35 @@ export default class StationVerificationTrial {
             <ol class="svt-steps">
               ${instructions.map((step) => `<li>${this._escape(step)}</li>`).join('')}
             </ol>
-                        <div class="svt-verify"><strong>FINAL STEP, VERIFY:</strong> ${this._escape(PASTE_PROMPTS[this.station.id] || 'Run the command and paste its output.')}</div>
+            <div class="svt-verify"><strong>FINAL STEP, VERIFY:</strong> get a pairing code here, then run the Toolchain agent on your computer. It runs the real commands and reports them to the server.</div>
           </div>
 
-          <div class="svt-panel">
-            <h4>VERIFY YOUR OUTPUT</h4>
+          <div class="svt-panel" id="svt-agent-panel">
+            <h4>VERIFY WITH THE TOOLCHAIN AGENT</h4>
+            <div id="svt-agent-start">
+              <div class="svt-prompt">Get a one-time pairing code, then paste it into the agent on your computer.</div>
+              <button class="svt-btn primary" id="svt-get-code">Get pairing code</button>
+            </div>
+            <div id="svt-agent-pairing" class="svt-hidden">
+              <ol class="svt-agent-steps">
+                <li>Open your terminal and <code>cd</code> into your pages repository.</li>
+                <li>Run the agent:
+                  ${agentCommands(this.os).map((item) => `<div class="svt-cmd">${this._escape(item.label)}<code>${this._escape(item.command)}</code></div>`).join('')}
+                </li>
+                <li>Paste this code when it asks (it stays hidden while you type):</li>
+              </ol>
+              <div class="svt-code">
+                <input id="svt-code" type="text" readonly spellcheck="false" aria-label="Pairing code">
+                <button class="svt-btn" id="svt-copy-code">Copy</button>
+              </div>
+              <div class="svt-hint" id="svt-code-expiry"></div>
+            </div>
+            <div class="svt-status" id="svt-agent-status"></div>
+            <div class="svt-checks" id="svt-agent-checks"></div>
+          </div>
+
+          <div class="svt-panel svt-hidden" id="svt-paste-panel">
+            <h4>PRACTICE CHECK (OFFLINE)</h4>
             <div class="svt-prompt">${this._escape(PASTE_PROMPTS[this.station.id] || 'Run the command and paste its output.')}</div>
             <div class="svt-terminal">
               <textarea class="svt-paste" id="svt-input" spellcheck="false" placeholder="Paste your terminal output here..."></textarea>
@@ -347,7 +425,7 @@ export default class StationVerificationTrial {
 
         <div class="svt-actions">
           <button class="svt-btn" id="svt-cancel">Not Now</button>
-          <button class="svt-btn primary" id="svt-run" disabled>Verify Output</button>
+          <button class="svt-btn primary svt-hidden" id="svt-run" disabled>Verify Output</button>
         </div>
       </div>
     `;
@@ -367,9 +445,144 @@ export default class StationVerificationTrial {
     this.inputEl.addEventListener('input', () => {
       this.runBtn.disabled = this.inputEl.value.trim().length === 0;
     });
-  
 
-    this.inputEl.focus();
+    this.agentStatusEl = this.overlay.querySelector('#svt-agent-status');
+    this.agentChecksEl = this.overlay.querySelector('#svt-agent-checks');
+    this.getCodeBtn = this.overlay.querySelector('#svt-get-code');
+    this.getCodeBtn.onclick = () => this._startAgentSession();
+    this.overlay.querySelector('#svt-copy-code').onclick = () => this._copyCode();
+  }
+
+  /** Asks the backend for a single-use pairing code bound to this student and station. */
+  async _startAgentSession() {
+    this._stopPolling();
+    this.getCodeBtn.disabled = true;
+    this._setAgentStatus('pending', 'Getting a pairing code...');
+    this._renderChecks([], this.agentChecksEl);
+    let session;
+    try {
+      session = await startToolchainSession(this.station.id);
+    } catch (error) {
+      if (!this.overlay) return;
+      console.warn('[StationVerificationTrial] could not start an agent session:', error);
+      this.getCodeBtn.disabled = false;
+      this._setAgentStatus('err', `${error.message}. Sign in and try again, or use the practice check below.`);
+      this._showPasteFallback();
+      return;
+    }
+    if (!this.overlay) return; // closed while waiting
+
+    this.session = session;
+    this.overlay.querySelector('#svt-agent-start').classList.add('svt-hidden');
+    this.overlay.querySelector('#svt-agent-pairing').classList.remove('svt-hidden');
+    const codeEl = this.overlay.querySelector('#svt-code');
+    codeEl.value = session.pairingCode;
+    codeEl.select();
+    this._startCountdown(new Date(session.expiresAt).getTime());
+    this._setAgentStatus('pending', 'Waiting for the agent to pair...');
+    this.pollTimer = setInterval(() => this._pollSession(), POLL_INTERVAL_MS);
+  }
+
+  async _pollSession() {
+    const session = this.session;
+    if (!session || !this.overlay) return;
+    let view;
+    try {
+      view = await getToolchainSession(session.sessionId);
+    } catch (error) {
+      // Keep polling: one failed check (Wi-Fi blip, server restart) should not end the wait.
+      console.warn('[StationVerificationTrial] could not check the station:', error);
+      return;
+    }
+    if (this.session !== session || !this.overlay) return;
+
+    switch (view.status) {
+      case 'WAITING_FOR_AGENT':
+        break;
+      case 'PAIRED':
+        this._stopCountdown('Code used. The agent is paired.');
+        this._setAgentStatus('pending', 'Agent paired. Waiting for check results...');
+        break;
+      case 'FAILED': {
+        this._stopCountdown('Code used. The agent is paired.');
+        const checks = view.checks || [];
+        const passed = checks.filter((c) => c.passed).length;
+        this._renderChecks(checks, this.agentChecksEl);
+        this._setAgentStatus('err', `${passed}/${checks.length} checks passed. Fix the ✗ items, then press Enter in the agent to check again.`);
+        break;
+      }
+      case 'VERIFIED':
+        this._stopPolling();
+        this._renderChecks(view.checks || [], this.agentChecksEl);
+        this._succeed(this.agentStatusEl);
+        break;
+      case 'EXPIRED':
+        this._stopPolling();
+        this.overlay.querySelector('#svt-agent-pairing').classList.add('svt-hidden');
+        this.overlay.querySelector('#svt-agent-start').classList.remove('svt-hidden');
+        this.getCodeBtn.disabled = false;
+        this.getCodeBtn.textContent = 'Get a new code';
+        this._setAgentStatus('err', 'The pairing code expired before the agent used it. Get a new code.');
+        break;
+      default:
+        break;
+    }
+  }
+
+  _startCountdown(expiresAtMs) {
+    const expiryEl = this.overlay.querySelector('#svt-code-expiry');
+    const tick = () => {
+      const seconds = Math.max(0, Math.round((expiresAtMs - Date.now()) / 1000));
+      expiryEl.textContent = seconds > 0
+        ? `Works once. Expires in ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}.`
+        : 'Expired.';
+    };
+    tick();
+    this.countdownTimer = setInterval(tick, 1000);
+  }
+
+  _stopCountdown(message) {
+    clearInterval(this.countdownTimer);
+    this.countdownTimer = null;
+    const expiryEl = this.overlay?.querySelector('#svt-code-expiry');
+    if (expiryEl && message) expiryEl.textContent = message;
+  }
+
+  _stopPolling() {
+    clearInterval(this.pollTimer);
+    this.pollTimer = null;
+    this._stopCountdown();
+  }
+
+  async _copyCode() {
+    const codeEl = this.overlay?.querySelector('#svt-code');
+    if (!codeEl?.value) return;
+    try {
+      await navigator.clipboard.writeText(codeEl.value);
+      this.overlay.querySelector('#svt-copy-code').textContent = 'Copied';
+    } catch (_) {
+      codeEl.select(); // clipboard blocked; leave it selected for Ctrl/Cmd+C
+    }
+  }
+
+  _showPasteFallback() {
+    this.overlay?.querySelector('#svt-paste-panel').classList.remove('svt-hidden');
+    this.runBtn?.classList.remove('svt-hidden');
+  }
+
+  _setAgentStatus(kind, text) {
+    this._setStatus(kind, text, this.agentStatusEl);
+  }
+
+  /** Shared success path for the agent and the practice check. */
+  _succeed(statusEl) {
+    if (this.verified) return;
+    this._setStatus('ok', '✓ Verified! Unlocking next station...', statusEl);
+    this.verified = true;
+    setTimeout(() => {
+      this.onComplete({ stationId: this.station.id });
+      this._close(false);
+    }, 1200);
   }
 
   async _attemptVerify() {
@@ -385,12 +598,7 @@ export default class StationVerificationTrial {
     this._renderChecks(result.checks);
 
     if (result.ok) {
-      this._setStatus('ok', '✓ Verified! Unlocking next station...');
-      this.verified = true;
-      setTimeout(() => {
-        this.onComplete({ stationId: this.station.id });
-        this._close(false);
-      }, 1200);
+      this._succeed(this.statusEl);
     } else {
       const passed = result.checks.filter((c) => c.passed).length;
       const total = result.checks.length;
@@ -404,9 +612,9 @@ export default class StationVerificationTrial {
       this.inputEl.focus();
     }
   }
-    _renderChecks(checks = []) {
-    if (!this.checksEl) return;
-    this.checksEl.innerHTML = checks.map((c) => `
+  _renderChecks(checks = [], target = this.checksEl) {
+    if (!target) return;
+    target.innerHTML = checks.map((c) => `
       <div class="svt-check ${c.passed ? 'pass' : 'fail'}">
         ${c.passed ? '✓' : '✗'} ${this._escape(c.label)}
         ${!c.passed && c.detail ? `<span class="svt-check-detail">${this._escape(c.detail)}</span>` : ''}
@@ -420,13 +628,15 @@ export default class StationVerificationTrial {
     this.logEl.scrollTop = this.logEl.scrollHeight;
   }
 
-  _setStatus(kind, text) {
-    if (!this.statusEl) return;
-    this.statusEl.className = `svt-status ${kind}`;
-    this.statusEl.textContent = text;
+  _setStatus(kind, text, target = this.statusEl) {
+    if (!target) return;
+    target.className = `svt-status ${kind}`;
+    target.textContent = text;
   }
 
   _close(callCallback = true) {
+    this._stopPolling();
+    this.session = null;
     this.overlay?.remove();
     this.overlay = null;
     if (callCallback && !this.verified) {
