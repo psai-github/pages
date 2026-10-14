@@ -1,0 +1,4 @@
+# Notebooks ./make_test converts on startup, one path per line.
+# This is your local copy (gitignored); the shared default is make_test_notebooks.template.txt.
+# Example:
+# _notebooks/CSA/2024-10-29-sprint2_plan.ipynb

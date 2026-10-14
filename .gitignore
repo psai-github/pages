@@ -120,6 +120,9 @@ _projects/*/*/Makefile
 !_projects/_template/Makefile
 # Existing versioned overrides remain tracked; force-add any new intentional override.
 
+# Personal make_test notebook list (copied from make_test_notebooks.template.txt)
+make_test_notebooks.txt
+
 # Project pages (deployed from _projects/ at build time to _posts/)
 _posts/projects/
 
