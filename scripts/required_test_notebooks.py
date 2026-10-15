@@ -61,12 +61,32 @@ def find_required_categories(repo_root=REPO_ROOT):
     return categories
 
 
+def is_project_notebook_source(path):
+    """Match the project locations convert_notebooks.py publishes."""
+    return path.name == "index.ipynb" or path.parent.name in ("notebooks", "navigation")
+
+
+def list_source_notebooks(repo_root=REPO_ROOT):
+    """Return every convertible notebook in _notebooks/ and _projects/, sorted by path."""
+    repo_root = Path(repo_root)
+    legacy = list((repo_root / "_notebooks").rglob("*.ipynb"))
+    projects = [
+        path for path in (repo_root / "_projects").rglob("*.ipynb")
+        if is_project_notebook_source(path) and "_template" not in path.parts
+    ]
+    return sorted(
+        path for path in legacy + projects
+        if ".ipynb_checkpoints" not in path.parts
+    )
+
+
 def find_required_notebooks(repo_root=REPO_ROOT):
     """Pick the first notebook (sorted by path) for each required category."""
     repo_root = Path(repo_root)
     remaining = find_required_categories(repo_root)
     selected = []
-    for notebook in sorted((repo_root / "_notebooks").rglob("*.ipynb")):
+    # Lesson projects now publish straight from _projects/, so search both roots.
+    for notebook in list_source_notebooks(repo_root):
         if not remaining:
             break
         provided = notebook_categories(read_notebook_front_matter(notebook)) & remaining

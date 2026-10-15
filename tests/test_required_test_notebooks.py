@@ -38,6 +38,15 @@ class RequiredTestNotebooksTests(unittest.TestCase):
         write_notebook(self.repo / "_notebooks/x.ipynb", "categories: Java Basics")
         self.assertEqual(find_required_notebooks(self.repo), ["_notebooks/x.ipynb"])
 
+    def test_finds_categories_in_project_notebooks(self):
+        write_notebook(self.repo / "_projects/lessons/java/notebooks/a.ipynb", "categories: [Java]")
+        self.assertEqual(find_required_notebooks(self.repo), ["_projects/lessons/java/notebooks/a.ipynb"])
+
+    def test_skips_project_files_the_converter_does_not_publish(self):
+        write_notebook(self.repo / "_projects/lessons/java/scratch/a.ipynb", "categories: [Java]")
+        write_notebook(self.repo / "_projects/_template/notebooks/a.ipynb", "categories: [Java]")
+        self.assertEqual(find_required_notebooks(self.repo), [])
+
 
 if __name__ == "__main__":
     unittest.main()

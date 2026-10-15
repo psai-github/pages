@@ -20,7 +20,7 @@ test_server_port: 4600
       <label for="notebook-tester-path">Notebook path</label>
       <div class="notebook-tester__row">
         <input id="notebook-tester-path" list="notebook-tester-options" autocomplete="off"
-               placeholder="_notebooks/CSA/unit_01/2025-08-20-example.ipynb" required>
+               placeholder="_projects/lessons/csa1/notebooks/2024-10-29-sprint2_plan.ipynb" required>
         <button type="submit" class="ocs__btn accent fill" id="notebook-tester-submit">Compile</button>
       </div>
       <datalist id="notebook-tester-options"></datalist>

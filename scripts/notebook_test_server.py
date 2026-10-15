@@ -10,11 +10,12 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 if __name__ == "__main__":
-    from required_test_notebooks import read_notebook_front_matter
+    from required_test_notebooks import list_source_notebooks, read_notebook_front_matter
 else:
-    from scripts.required_test_notebooks import read_notebook_front_matter
+    from scripts.required_test_notebooks import list_source_notebooks, read_notebook_front_matter
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+NOTEBOOK_ROOTS = ("_notebooks/", "_projects/")
 LOG_TAIL_CHARS = 6000
 STEP_TIMEOUT_SECONDS = 900
 
@@ -25,22 +26,22 @@ class NotebookPathError(ValueError):
 
 def resolve_notebook_path(raw_path, repo_root=REPO_ROOT):
     """Return the notebook path relative to the repo root, or raise NotebookPathError."""
-    # Path comes from a browser, so block anything escaping _notebooks/.
+    # Path comes from a browser, so block anything escaping the notebook roots.
     if not isinstance(raw_path, str) or not raw_path.strip():
         raise NotebookPathError("Notebook path is empty.")
 
     cleaned = raw_path.strip().lstrip("/").replace("\\", "/")
     if not cleaned.endswith(".ipynb"):
         raise NotebookPathError(f"Not a notebook (must end in .ipynb): {cleaned}")
-    if not cleaned.startswith("_notebooks/"):
+    if not cleaned.startswith(NOTEBOOK_ROOTS):
         cleaned = f"_notebooks/{cleaned}"
 
     repo_root = Path(repo_root).resolve()
-    notebook_root = (repo_root / "_notebooks").resolve()
     candidate = (repo_root / cleaned).resolve()
+    allowed_roots = [(repo_root / root).resolve() for root in NOTEBOOK_ROOTS]
 
-    if notebook_root not in candidate.parents:
-        raise NotebookPathError(f"Path must stay inside _notebooks/: {raw_path}")
+    if not any(root in candidate.parents for root in allowed_roots):
+        raise NotebookPathError(f"Path must stay inside _notebooks/ or _projects/: {raw_path}")
     if not candidate.is_file():
         raise NotebookPathError(f"Notebook not found: {cleaned}")
 
@@ -54,13 +55,9 @@ def read_notebook_permalink(notebook_file):
 
 
 def list_notebooks(repo_root=REPO_ROOT):
-    """Return every notebook path under _notebooks/, relative to the repo root."""
+    """Return every convertible notebook path, relative to the repo root."""
     repo_root = Path(repo_root)
-    return sorted(
-        path.relative_to(repo_root).as_posix()
-        for path in (repo_root / "_notebooks").rglob("*.ipynb")
-        if ".ipynb_checkpoints" not in path.parts
-    )
+    return [path.relative_to(repo_root).as_posix() for path in list_source_notebooks(repo_root)]
 
 
 def run_step(label, command):
@@ -82,13 +79,14 @@ def run_step(label, command):
     return result.returncode == 0, log
 
 
-def compile_notebook(relative_path):
+def compile_notebook(relative_path, jekyll_config):
     """Convert one notebook and rebuild Jekyll so the running server serves it."""
     # Same order as the main Makefile: convert -> split courses -> jekyll.
     steps = [
         ("convert notebook", [sys.executable, "scripts/convert_notebooks.py", relative_path]),
         ("split multi-course files", [sys.executable, "scripts/split_multi_course_files.py"]),
-        ("jekyll build --incremental", ["bundle", "exec", "jekyll", "build", "--incremental"]),
+        ("jekyll build --incremental",
+         ["bundle", "exec", "jekyll", "build", "--incremental", "--config", jekyll_config]),
     ]
     logs = []
     for label, command in steps:
@@ -103,6 +101,7 @@ class NotebookTestHandler(BaseHTTPRequestHandler):
     # Jekyll rebuilds share _site, so only one compile may run at a time.
     compile_lock = threading.Lock()
     allowed_origins = set()
+    jekyll_config = "_config.yml"
 
     def _send_json(self, status, payload):
         body = json.dumps(payload).encode("utf-8")
@@ -153,7 +152,7 @@ class NotebookTestHandler(BaseHTTPRequestHandler):
             return
         try:
             print(f"Compiling {relative_path}", flush=True)
-            succeeded, failed_step, log = compile_notebook(relative_path)
+            succeeded, failed_step, log = compile_notebook(relative_path, self.jekyll_config)
         finally:
             self.compile_lock.release()
 
@@ -172,12 +171,15 @@ def main():
     parser = argparse.ArgumentParser(description="On-demand notebook compiler for make_test.")
     parser.add_argument("--port", type=int, default=4600, help="Port for this compile server.")
     parser.add_argument("--site-port", type=int, default=4500, help="Port Jekyll serves on (CORS origin).")
+    parser.add_argument("--jekyll-config", default="_config.yml",
+                        help="Comma-separated Jekyll configs, matching the running server.")
     args = parser.parse_args()
 
     NotebookTestHandler.allowed_origins = {
         f"http://localhost:{args.site_port}",
         f"http://127.0.0.1:{args.site_port}",
     }
+    NotebookTestHandler.jekyll_config = args.jekyll_config
     server = ThreadingHTTPServer(("127.0.0.1", args.port), NotebookTestHandler)
     print(f"Notebook test server on http://127.0.0.1:{args.port} (site port {args.site_port})", flush=True)
     server.serve_forever()

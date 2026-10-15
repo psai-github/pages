@@ -25,6 +25,7 @@ class NotebookTestServerTests(unittest.TestCase):
         self.repo = Path(self.temp_dir.name)
         write_notebook(self.repo / "_notebooks/CSA/lesson.ipynb",
                        "---\ntitle: Lesson\npermalink: /csa/lesson\n---")
+        write_notebook(self.repo / "_projects/lessons/csa1/notebooks/lesson.ipynb", "---\ntitle: Project lesson\n---")
         (self.repo / "secret.ipynb").write_text("{}", encoding="utf-8")
 
     def tearDown(self):
@@ -37,6 +38,10 @@ class NotebookTestServerTests(unittest.TestCase):
     def test_accepts_path_without_notebooks_prefix(self):
         self.assertEqual(resolve_notebook_path("CSA/lesson.ipynb", self.repo),
                          "_notebooks/CSA/lesson.ipynb")
+
+    def test_accepts_project_notebook_paths(self):
+        self.assertEqual(resolve_notebook_path("_projects/lessons/csa1/notebooks/lesson.ipynb", self.repo),
+                         "_projects/lessons/csa1/notebooks/lesson.ipynb")
 
     def test_rejects_traversal_outside_notebooks(self):
         with self.assertRaisesRegex(NotebookPathError, "inside _notebooks"):
@@ -60,8 +65,9 @@ class NotebookTestServerTests(unittest.TestCase):
         write_notebook(notebook, "just text")
         self.assertIsNone(read_notebook_permalink(notebook))
 
-    def test_lists_only_notebooks_under_notebooks_dir(self):
-        self.assertEqual(list_notebooks(self.repo), ["_notebooks/CSA/lesson.ipynb"])
+    def test_lists_notebooks_from_both_roots(self):
+        self.assertEqual(list_notebooks(self.repo),
+                         ["_notebooks/CSA/lesson.ipynb", "_projects/lessons/csa1/notebooks/lesson.ipynb"])
 
 
 if __name__ == "__main__":

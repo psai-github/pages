@@ -6,8 +6,12 @@ PORT ?= 4500
 TEST_SERVER_PORT ?= 4600
 NOTEBOOK_LIST := make_test_notebooks.txt
 NOTEBOOK_TEMPLATE := make_test_notebooks.template.txt
+# Second config only make_test loads (adds _make_test/plugins); see that file.
+JEKYLL_CONFIG := _config.yml,_make_test/jekyll_config.yml
 TEST_SERVER_LOG = /tmp/notebook_test_server$(TEST_SERVER_PORT).log
 PYTHON := venv/bin/python3
+# One batched, parallel conversion call instead of a make + Python start per notebook.
+CONVERT_JOBS ?= 4
 
 SHELL = /bin/bash -c
 .SHELLFLAGS = -e
@@ -19,7 +23,7 @@ PROJECT_FILE := _projects/.makeprojects
 ALL_PROJECTS := $(shell grep -v '^\#' $(PROJECT_FILE) 2>/dev/null | grep -v '^$$' | cut -d: -f1)
 
 .DEFAULT_GOAL := make_test
-.PHONY: make_test stop test-build-project-assets test-convert-required-notebooks test-notebook-list test-convert-listed-notebooks test-server test-stop-server
+.PHONY: make_test stop test-build-project-assets test-convert-required-notebooks test-notebook-list test-convert-listed-notebooks test-jekyll-serve test-server test-stop-server
 
 make_test: stop
 	@$(MAIN_MAKE) clean
@@ -28,7 +32,7 @@ make_test: stop
 	@$(MAIN_MAKE) convert-registered-notebooks
 	@$(TEST_MAKE) test-convert-required-notebooks
 	@$(TEST_MAKE) test-convert-listed-notebooks
-	@$(MAIN_MAKE) jekyll-serve HOST=$(HOST) PORT=$(PORT)
+	@$(TEST_MAKE) test-jekyll-serve
 	@$(TEST_MAKE) test-server
 	@echo ""
 	@echo "Test server running on http://localhost:$(PORT)"
@@ -37,14 +41,14 @@ make_test: stop
 	@echo "  Compiler logs:      tail -f $(TEST_SERVER_LOG)"
 	@echo "  Stop:               ./make_test stop"
 
-# `index`/`notebooks` only copy files; skipping project conversion is the speedup.
+# Only `index` (assets + index.md): the template's `notebooks` target now converts everything.
 test-build-project-assets:
 	@$(MAIN_MAKE) generate-makefiles >/dev/null
 	@$(MAIN_MAKE) build-project-includes
 	@for proj in $(ALL_PROJECTS); do \
 		[ -d "_projects/$$proj" ] || continue; \
 		echo "Copying assets: $$proj"; \
-		$(MAKE) --no-print-directory -C "_projects/$$proj" index notebooks >/dev/null 2>&1 || echo "  ⚠️  Failed: $$proj"; \
+		$(MAKE) --no-print-directory -C "_projects/$$proj" index >/dev/null 2>&1 || echo "  ⚠️  Failed: $$proj"; \
 	done
 	@echo "Generating dynamic SASS imports..."
 	@$(PYTHON) scripts/generate_sass_imports.py
@@ -52,9 +56,8 @@ test-build-project-assets:
 # Reference pages crash Jekyll if their `lesson_category` has no posts.
 test-convert-required-notebooks:
 	@echo "Converting notebooks required for the site to build..."
-	@$(PYTHON) scripts/required_test_notebooks.py | while read notebook; do \
-		$(MAIN_MAKE) convert-single NOTEBOOK_FILE="$$notebook"; \
-	done
+	@$(PYTHON) scripts/required_test_notebooks.py | \
+		xargs -r -d '\n' $(PYTHON) scripts/convert_notebooks.py --jobs $(CONVERT_JOBS)
 
 # Personal list is gitignored; copy the template on first run (like _projects Makefiles).
 test-notebook-list:
@@ -66,14 +69,24 @@ test-notebook-list:
 test-convert-listed-notebooks: test-notebook-list
 	@grep -v '^\s*#' $(NOTEBOOK_LIST) | grep -v '^\s*$$' | while read -r notebook; do \
 		if [ -f "$$notebook" ]; then \
-			$(MAIN_MAKE) convert-single NOTEBOOK_FILE="$$notebook"; \
+			echo "$$notebook"; \
 		else \
-			echo "⚠️  Not found (check $(NOTEBOOK_LIST)): $$notebook"; \
+			echo "⚠️  Not found (check $(NOTEBOOK_LIST)): $$notebook" >&2; \
 		fi; \
-	done
+	done | xargs -r -d '\n' $(PYTHON) scripts/convert_notebooks.py --jobs $(CONVERT_JOBS) || \
+		echo "⚠️  Some notebooks in $(NOTEBOOK_LIST) failed to convert (see above)"
+
+# Same as the main `jekyll-serve` plus the make_test config; reuses its log file,
+# so the main `wait-for-server` and `stop` work unchanged.
+test-jekyll-serve:
+	@$(MAIN_MAKE) bundle-install
+	@touch /tmp/.notebook_watch_marker
+	@rm -f /tmp/.jekyll_rebuild_trigger
+	@bundle exec jekyll serve -H $(HOST) -P $(PORT) --no-watch --config $(JEKYLL_CONFIG) > /tmp/jekyll$(PORT).log 2>&1 &
+	@$(MAIN_MAKE) wait-for-server PORT=$(PORT)
 
 test-server:
-	@nohup $(PYTHON) scripts/notebook_test_server.py --port $(TEST_SERVER_PORT) --site-port $(PORT) > $(TEST_SERVER_LOG) 2>&1 &
+	@nohup $(PYTHON) scripts/notebook_test_server.py --port $(TEST_SERVER_PORT) --site-port $(PORT) --jekyll-config $(JEKYLL_CONFIG) > $(TEST_SERVER_LOG) 2>&1 &
 	@for i in $$(seq 1 20); do \
 		if curl -sf "http://127.0.0.1:$(TEST_SERVER_PORT)/api/health" >/dev/null; then \
 			echo "Notebook compile server started on port $(TEST_SERVER_PORT)"; \
