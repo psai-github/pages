@@ -104,9 +104,10 @@
               Its summary is one line: the W pill, the week's title, then its
               count pill. The title ends with "…" when it doesn't fit
               (ocs__truncate) and the summary's title attribute shows it whole on
-              hover; a touch screen, which can't hover, wraps it instead
-              (ocs__truncate--hover). The sidebar is only 250px wide, so the row
-              has no chevron, which leaves the title as much room as it can.
+              hover. It stays cut on a touch screen too: wrapped in a space this
+              narrow it would break mid-word, and the phone menu shows it whole.
+              The sidebar is only 250px wide, so the row has no chevron, which
+              leaves the title as much room as it can.
               The week's intro, lessons and chat sit in an ocs__tree (the OCS
               tree grammar, in _sass/open-coding/elements/trees), which indents
               them one level under the summary and draws a guide line. Each row
@@ -119,7 +120,7 @@
             <details data-week-group data-week="{{ week }}"{% if week == current_week %} open{% endif %}>
               <summary class="sprint-toggle" title="W{{ week }}: {{ weekTitle | escape }}">
                 <span class="ocs__status-pill ocs__status-pill--good">W{{ week }}</span>
-                <span class="lesson-title ocs__truncate ocs__truncate--hover"><strong>{{ weekTitle | escape }}</strong></span>
+                <span class="lesson-title ocs__truncate"><strong>{{ weekTitle | escape }}</strong></span>
                 <span class="ocs__status-pill ocs__status-pill--neutral" data-week-count data-week-total="{{ weekPosts.size }}">0/{{ weekPosts.size }}</span>
               </summary>
 
