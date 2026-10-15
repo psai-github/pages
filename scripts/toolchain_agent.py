@@ -5,14 +5,15 @@ toolchain_agent
 Local agent for Toolchain Trail. Works on macOS, Windows, Linux and WSL, using
 only the Python standard library (nothing to pip install).
 
-How it fits together (one-time device pairing):
-  1. In the game, a signed-in student starts a station. The Spring backend
-     returns a pairing code that works once and expires in 5 minutes.
+How it fits together (one-time device pairing, once for the whole trail):
+  1. At the first station, the signed-in game gets a pairing code from the
+     Spring backend. The code works once and expires in 5 minutes.
   2. The student runs this agent and pastes the code. The code is read
      without echoing, like a password.
   3. The agent exchanges the code for an agent token that only works for that
-     one station session. The token is kept in memory, never written to disk.
-  4. The agent runs the station's real commands and sends the results with
+     student's trail session. The token is kept in memory, never written to disk.
+  4. The agent stays open. Each time the game asks for a station to be checked,
+     the agent runs that station's real commands and sends the results with
      "Authorization: Bearer <agent-token>". The backend decides pass/fail.
   5. The game polls the backend and updates the quest when the station is verified.
 
@@ -33,6 +34,7 @@ import shutil
 import ssl
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -43,6 +45,7 @@ DEFAULT_SERVER = "https://spring.opencodingsociety.com"
 COMMAND_TIMEOUT_SECONDS = 30
 MAX_OUTPUT_LENGTH = 4000  # the backend keeps at most this much per check
 REQUEST_TIMEOUT_SECONDS = 20
+POLL_SECONDS = 2  # how often the agent asks which station the game wants checked
 
 # (exit code, combined stdout + stderr)
 CommandResult = Tuple[int, str]
@@ -170,6 +173,10 @@ def collect_evidence(station_id: str, repo: Path, runner: Optional[Runner] = Non
 class AgentError(Exception):
     """A problem to show the student in one line, without a traceback."""
 
+    def __init__(self, message: str, status: Optional[int] = None):
+        super().__init__(message)
+        self.status = status  # HTTP status when the server refused the request
+
 
 def require_safe_server(server: str) -> str:
     """Evidence goes over HTTPS; plain http is only allowed to a backend on this computer."""
@@ -181,10 +188,22 @@ def require_safe_server(server: str) -> str:
 
 
 def post_json(url: str, body: Dict, token: Optional[str] = None) -> Dict:
-    headers = {"Content-Type": "application/json", "Accept": "application/json", "User-Agent": "toolchain-trail-agent/1"}
+    return request_json("POST", url, body, token)
+
+
+def get_json(url: str, token: Optional[str] = None) -> Dict:
+    return request_json("GET", url, None, token)
+
+
+def request_json(method: str, url: str, body: Optional[Dict], token: Optional[str]) -> Dict:
+    headers = {"Accept": "application/json", "User-Agent": "toolchain-trail-agent/2"}
+    data = None
+    if body is not None:
+        headers["Content-Type"] = "application/json"
+        data = json.dumps(body).encode("utf-8")
     if token:
         headers["Authorization"] = f"Bearer {token}"
-    request = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers, method="POST")
+    request = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
         with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
             return json.loads(response.read().decode("utf-8"))
@@ -193,7 +212,7 @@ def post_json(url: str, body: Dict, token: Optional[str] = None) -> Dict:
             message = json.loads(error.read().decode("utf-8")).get("error")
         except (ValueError, AttributeError):
             message = None
-        raise AgentError(message or f"The server answered HTTP {error.code}.") from None
+        raise AgentError(message or f"The server answered HTTP {error.code}.", error.code) from None
     except urllib.error.URLError as error:
         if isinstance(error.reason, ssl.SSLCertVerificationError):
             hint = ""
@@ -211,8 +230,65 @@ def print_results(view: Dict) -> None:
             print(f"        {check.get('detail')}")
 
 
+def check_station(server: str, session_id: str, token: str, station_id: str, os_name: str, repo: Path) -> None:
+    """Run one station's commands, send them, and print what the server decided."""
+    print(f"\nChecking {station_id}...")
+    evidence = collect_evidence(station_id, repo)
+    try:
+        view = post_json(f"{server}/api/toolchain/sessions/{session_id}/results",
+                         {"os": os_name, "stationId": station_id, "checks": evidence}, token=token)
+    except AgentError as error:
+        if error.status == 409:  # the student moved to another station while this ran
+            print("  The game moved on to another station; skipping these results.")
+            return
+        raise
+    print_results(view)
+    if view.get("status") == "VERIFIED":
+        print("  Station verified! Go back to the game.")
+    else:
+        print("  Fix the FAIL items, then click Check again in the game.")
+        if any(item["exitCode"] == 127 for item in evidence):
+            print("  (Just installed something? Restart this agent so it sees your new PATH,"
+                  " then use Pair a new agent in the game.)")
+
+
+def serve(server: str, session_id: str, token: str, os_name: str, repo: Path,
+          sleep: Callable[[float], None] = time.sleep) -> int:
+    """Wait for check requests from the game until the token expires or the student presses Ctrl+C."""
+    last_request = None
+    offline = False
+    while True:
+        try:
+            view = get_json(f"{server}/api/toolchain/sessions/{session_id}/next", token=token)
+            if offline:
+                print("Connected to the server again.")
+                offline = False
+        except AgentError as error:
+            if error.status == 401:
+                print("This pairing has ended. Run the agent again and use Pair a new agent in the game.")
+                return 1
+            if not offline:  # Wi-Fi blip or server restart: keep trying quietly
+                print(f"Lost contact with the server ({error}). Retrying...")
+                offline = True
+            sleep(POLL_SECONDS)
+            continue
+
+        request_id = (view.get("stationId"), view.get("requestedAt"))
+        if view.get("status") == "CHECKING" and request_id != last_request:
+            last_request = request_id
+            try:
+                check_station(server, session_id, token, view["stationId"], os_name, repo)
+            except AgentError as error:
+                if error.status == 401:
+                    print("This pairing has ended. Run the agent again and use Pair a new agent in the game.")
+                    return 1
+                print(f"Could not send results: {error}. Click Check again in the game to retry.")
+            print("\nWaiting for the next station...")
+        sleep(POLL_SECONDS)
+
+
 def main(argv: Optional[List[str]] = None) -> int:
-    parser = argparse.ArgumentParser(description="Pair with Toolchain Trail and verify a station.")
+    parser = argparse.ArgumentParser(description="Pair with Toolchain Trail and verify stations as you play.")
     parser.add_argument("--server", default=os.environ.get("TOOLCHAIN_SERVER", DEFAULT_SERVER),
                         help=f"backend URL (default {DEFAULT_SERVER})")
     parser.add_argument("--repo", default=".", help="repository the git and build checks run in (default: current folder)")
@@ -227,22 +303,9 @@ def main(argv: Optional[List[str]] = None) -> int:
             raise AgentError("No pairing code entered.")
 
         paired = post_json(f"{server}/api/toolchain/pair", {"pairingCode": code})
-        session_id, station_id, token = paired["sessionId"], paired["stationId"], paired["agentToken"]
-        print(f"Paired for station: {station_id}")
-
-        repo = Path(args.repo).resolve()
-        while True:
-            print("Running checks...")
-            evidence = collect_evidence(station_id, repo)
-            view = post_json(f"{server}/api/toolchain/sessions/{session_id}/results",
-                             {"os": os_name, "checks": evidence}, token=token)
-            print_results(view)
-            if view.get("status") == "VERIFIED":
-                print("Station verified! Go back to the game.")
-                return 0
-            print("Some checks failed. Fix them, then press Enter to check again (or type q to quit).")
-            if input().strip().lower() in ("q", "quit", "exit"):
-                return 1
+        print("Paired! Leave this window open while you play Toolchain Trail.")
+        print("Do your setup work in a second terminal window. Press Ctrl+C here to stop the agent.")
+        return serve(server, paired["sessionId"], paired["agentToken"], os_name, Path(args.repo).resolve())
     except AgentError as error:
         print(f"Error: {error}", file=sys.stderr)
         return 2
@@ -250,7 +313,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(f"Error: {error}", file=sys.stderr)
         return 2
     except (KeyboardInterrupt, EOFError):
-        print()
+        print("\nAgent stopped.")
         return 130
 
 

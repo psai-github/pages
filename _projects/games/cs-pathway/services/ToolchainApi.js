@@ -1,11 +1,39 @@
 // ToolchainApi.js
 // Spring endpoints for Toolchain Trail one-time device pairing (blueprint-spring: mvc/toolchain).
-// The signed-in page starts a station and gets a single-use pairing code; the
-// student's local agent (scripts/toolchain_agent.py) exchanges it for a scoped
-// token and sends check results; this page polls the session for the verdict.
+// The signed-in page gets a single-use pairing code once per trail; the student's
+// local agent (scripts/toolchain_agent.py) exchanges it for a scoped token and
+// stays open. At each station the page asks the backend to check that station,
+// the agent sends its results, and this page polls the session for the verdict.
 import { javaURI, fetchOptions } from '@assets/js/api/config.js';
 
 const BASE_URL = `${javaURI}/api/toolchain`;
+const PAIRED_SESSION_KEY = 'ocs-toolchain-agent-session';
+
+// The paired session id is remembered so later stations reuse the running agent.
+// It is not a secret: the backend only lets its owner (by login cookie) use it.
+export function loadPairedSessionId() {
+  try {
+    return localStorage.getItem(PAIRED_SESSION_KEY);
+  } catch (_) {
+    return null; // storage blocked: the student pairs at each station instead
+  }
+}
+
+export function savePairedSessionId(sessionId) {
+  try {
+    localStorage.setItem(PAIRED_SESSION_KEY, sessionId);
+  } catch (_) {
+    // storage blocked; see loadPairedSessionId
+  }
+}
+
+export function forgetPairedSessionId() {
+  try {
+    localStorage.removeItem(PAIRED_SESSION_KEY);
+  } catch (_) {
+    // storage blocked; nothing was saved
+  }
+}
 
 async function readError(response, fallback) {
   try {
@@ -41,7 +69,7 @@ export async function startToolchainSession(stationId) {
 /**
  * @param {string} sessionId
  * @returns {Promise<{sessionId: string, stationId: string,
- *   status: 'WAITING_FOR_AGENT'|'PAIRED'|'VERIFIED'|'FAILED'|'EXPIRED',
+ *   status: 'WAITING_FOR_AGENT'|'CHECKING'|'VERIFIED'|'FAILED'|'EXPIRED'|'AGENT_EXPIRED',
  *   checks: {id: string, label: string, passed: boolean, detail: string}[]}>}
  */
 export async function getToolchainSession(sessionId) {
@@ -52,6 +80,24 @@ export async function getToolchainSession(sessionId) {
   });
   if (!response.ok) {
     throw new Error(await readError(response, 'Checking the station failed'));
+  }
+  return response.json();
+}
+
+/**
+ * Points the student's already-paired agent at a station. Fails (409) when no
+ * agent is connected or (404) when the session is not this student's.
+ * @returns {Promise<object>} the session view, status 'CHECKING' (or 'VERIFIED' if it already was)
+ */
+export async function requestStationCheck(sessionId, stationId) {
+  const response = await fetch(`${BASE_URL}/sessions/${encodeURIComponent(sessionId)}/check`, {
+    ...fetchOptions,
+    method: 'POST',
+    cache: 'no-store',
+    body: JSON.stringify({ stationId }),
+  });
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Asking the agent to check failed'));
   }
   return response.json();
 }

@@ -1,19 +1,31 @@
 /**
  * Station verification for Toolchain Trail.
  *
- * Main path (one-time device pairing): the page asks the backend to start the
- * station, shows a single-use pairing code, and polls the session while the
- * student's local agent (scripts/toolchain_agent.py) runs the real commands and
- * reports them. The backend decides pass/fail.
+ * Main path (one-time device pairing, once per trail): at the first station the
+ * page gets a single-use pairing code and the student starts the local agent
+ * (scripts/toolchain_agent.py) with it. The agent stays open; at every later
+ * station the page just asks the backend to check that station, and the agent
+ * runs the real commands and reports them. The backend decides pass/fail; the
+ * page polls for the verdict.
  *
  * Fallback: when the backend cannot start a session (signed out, offline), the
  * student can paste output for practice feedback checked in the browser.
  */
 
 import { verifyStationOutput, PASTE_PROMPTS } from '@assets/js/projects/cs-pathway/model/stationVerifiers.js';
-import { startToolchainSession, getToolchainSession, agentCommands } from '../services/ToolchainApi.js';
+import {
+  startToolchainSession,
+  getToolchainSession,
+  requestStationCheck,
+  agentCommands,
+  loadPairedSessionId,
+  savePairedSessionId,
+  forgetPairedSessionId,
+} from '../services/ToolchainApi.js';
 
 const POLL_INTERVAL_MS = 3000;
+// After this long with no results, the agent window was probably closed.
+const SILENT_AGENT_HINT_MS = 20000;
 export default class StationVerificationTrial {
   /**
    * @param {Object} opts
@@ -39,6 +51,7 @@ export default class StationVerificationTrial {
     this.session = null;
     this.pollTimer = null;
     this.countdownTimer = null;
+    this.checkingSince = null;
   }
 
   start() {
@@ -344,6 +357,22 @@ export default class StationVerificationTrial {
           font-size: 12px;
           line-height: 1.6;
         }
+        .svt-agent-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-top: 10px;
+        }
+        .svt-link {
+          background: none;
+          border: none;
+          padding: 0;
+          color: #7dd3fc;
+          text-decoration: underline;
+          cursor: pointer;
+          font-family: inherit;
+          font-size: 11px;
+        }
         .svt-hidden { display: none !important; }
 
         @media (max-width: 860px) {
@@ -382,22 +411,23 @@ export default class StationVerificationTrial {
             <ol class="svt-steps">
               ${instructions.map((step) => `<li>${this._escape(step)}</li>`).join('')}
             </ol>
-            <div class="svt-verify"><strong>FINAL STEP, VERIFY:</strong> get a pairing code here, then run the Toolchain agent on your computer. It runs the real commands and reports them to the server.</div>
+            <div class="svt-verify"><strong>FINAL STEP, VERIFY:</strong> the Toolchain agent on your computer runs the real commands and reports them to the server. Start it once and leave it open for the whole trail.</div>
           </div>
 
           <div class="svt-panel" id="svt-agent-panel">
             <h4>VERIFY WITH THE TOOLCHAIN AGENT</h4>
-            <div id="svt-agent-start">
-              <div class="svt-prompt">Get a one-time pairing code, then paste it into the agent on your computer.</div>
+            <div id="svt-agent-start" class="svt-hidden">
+              <div class="svt-prompt">Get a one-time pairing code and paste it into the agent. You only do this once for the whole trail.</div>
               <button class="svt-btn primary" id="svt-get-code">Get pairing code</button>
             </div>
             <div id="svt-agent-pairing" class="svt-hidden">
               <ol class="svt-agent-steps">
-                <li>Open your terminal and <code>cd</code> into your pages repository.</li>
+                <li>Open a terminal and <code>cd</code> into your pages repository.</li>
                 <li>Run the agent:
                   ${agentCommands(this.os).map((item) => `<div class="svt-cmd">${this._escape(item.label)}<code>${this._escape(item.command)}</code></div>`).join('')}
                 </li>
-                <li>Paste this code when it asks (it stays hidden while you type):</li>
+                <li>Paste the code below when it asks (it stays hidden while you type).</li>
+                <li>Leave that window open. Do your setup work in a second terminal.</li>
               </ol>
               <div class="svt-code">
                 <input id="svt-code" type="text" readonly spellcheck="false" aria-label="Pairing code">
@@ -407,6 +437,10 @@ export default class StationVerificationTrial {
             </div>
             <div class="svt-status" id="svt-agent-status"></div>
             <div class="svt-checks" id="svt-agent-checks"></div>
+            <div class="svt-agent-actions">
+              <button class="svt-btn primary svt-hidden" id="svt-check-again">Check again</button>
+              <button class="svt-link svt-hidden" id="svt-new-agent">Pair a new agent</button>
+            </div>
           </div>
 
           <div class="svt-panel svt-hidden" id="svt-paste-panel">
@@ -451,11 +485,68 @@ export default class StationVerificationTrial {
     this.getCodeBtn = this.overlay.querySelector('#svt-get-code');
     this.getCodeBtn.onclick = () => this._startAgentSession();
     this.overlay.querySelector('#svt-copy-code').onclick = () => this._copyCode();
+    this.checkAgainBtn = this.overlay.querySelector('#svt-check-again');
+    this.checkAgainBtn.onclick = () => this._askAgentToCheck(this.session.sessionId);
+    this.overlay.querySelector('#svt-new-agent').onclick = () => {
+      forgetPairedSessionId();
+      this._startAgentSession();
+    };
+
+    // An agent paired at an earlier station keeps working here: no new code needed.
+    const pairedSessionId = loadPairedSessionId();
+    if (pairedSessionId) {
+      this._askAgentToCheck(pairedSessionId);
+    } else {
+      this._showPairingStart();
+    }
   }
 
-  /** Asks the backend for a single-use pairing code bound to this student and station. */
+  _show(selector, visible) {
+    this.overlay?.querySelector(selector)?.classList.toggle('svt-hidden', !visible);
+  }
+
+  _showPairingStart(message) {
+    this._stopPolling();
+    this.session = null;
+    this._show('#svt-agent-start', true);
+    this._show('#svt-agent-pairing', false);
+    this._show('#svt-check-again', false);
+    this._show('#svt-new-agent', false);
+    this.getCodeBtn.disabled = false;
+    this._renderChecks([], this.agentChecksEl);
+    this._setAgentStatus(message ? 'err' : '', message || '');
+  }
+
+  /** Points the already-paired agent at this station, then waits for its results. */
+  async _askAgentToCheck(sessionId) {
+    this._stopPolling();
+    this._show('#svt-agent-start', false);
+    this._show('#svt-agent-pairing', false);
+    this._show('#svt-check-again', false);
+    this._renderChecks([], this.agentChecksEl);
+    this._setAgentStatus('pending', 'Asking your agent to check this station...');
+    try {
+      this.session = await requestStationCheck(sessionId, this.station.id);
+    } catch (error) {
+      if (!this.overlay) return;
+      console.warn('[StationVerificationTrial] paired agent unavailable:', error);
+      forgetPairedSessionId();
+      this._showPairingStart("Your agent isn't connected anymore. Get a new pairing code and run the agent again.");
+      return;
+    }
+    if (!this.overlay) return;
+    this._show('#svt-new-agent', true);
+    this.checkingSince = Date.now();
+    this._setAgentStatus('pending', 'Your agent is running the checks...');
+    this.pollTimer = setInterval(() => this._pollSession(), POLL_INTERVAL_MS);
+  }
+
+  /** Asks the backend for a single-use pairing code bound to this student; it covers the whole trail. */
   async _startAgentSession() {
     this._stopPolling();
+    this._show('#svt-agent-start', true);
+    this._show('#svt-check-again', false);
+    this._show('#svt-new-agent', false);
     this.getCodeBtn.disabled = true;
     this._setAgentStatus('pending', 'Getting a pairing code...');
     this._renderChecks([], this.agentChecksEl);
@@ -473,8 +564,10 @@ export default class StationVerificationTrial {
     if (!this.overlay) return; // closed while waiting
 
     this.session = session;
-    this.overlay.querySelector('#svt-agent-start').classList.add('svt-hidden');
-    this.overlay.querySelector('#svt-agent-pairing').classList.remove('svt-hidden');
+    savePairedSessionId(session.sessionId);
+    this.checkingSince = null;
+    this._show('#svt-agent-start', false);
+    this._show('#svt-agent-pairing', true);
     const codeEl = this.overlay.querySelector('#svt-code');
     codeEl.value = session.pairingCode;
     codeEl.select();
@@ -496,19 +589,30 @@ export default class StationVerificationTrial {
     }
     if (this.session !== session || !this.overlay) return;
 
+    if (view.stationId !== this.station.id) return; // another tab moved the agent elsewhere
+
     switch (view.status) {
       case 'WAITING_FOR_AGENT':
         break;
-      case 'PAIRED':
-        this._stopCountdown('Code used. The agent is paired.');
-        this._setAgentStatus('pending', 'Agent paired. Waiting for check results...');
+      case 'CHECKING':
+        if (this.checkingSince === null) {
+          // Just paired: the agent is already running this station's checks.
+          this.checkingSince = Date.now();
+          this._stopCountdown('Code used. The agent is paired; keep its window open.');
+          this._show('#svt-new-agent', true);
+        }
+        this._setAgentStatus('pending', Date.now() - this.checkingSince > SILENT_AGENT_HINT_MS
+          ? 'No answer from your agent yet. Is its window still open? If you closed it, use Pair a new agent.'
+          : 'Your agent is running the checks...');
         break;
       case 'FAILED': {
-        this._stopCountdown('Code used. The agent is paired.');
+        this._stopCountdown('Code used. The agent is paired; keep its window open.');
         const checks = view.checks || [];
         const passed = checks.filter((c) => c.passed).length;
         this._renderChecks(checks, this.agentChecksEl);
-        this._setAgentStatus('err', `${passed}/${checks.length} checks passed. Fix the ✗ items, then press Enter in the agent to check again.`);
+        this._setAgentStatus('err', `${passed}/${checks.length} checks passed. Fix the ✗ items, then click Check again.`);
+        this._show('#svt-check-again', true);
+        this._show('#svt-new-agent', true);
         break;
       }
       case 'VERIFIED':
@@ -517,12 +621,13 @@ export default class StationVerificationTrial {
         this._succeed(this.agentStatusEl);
         break;
       case 'EXPIRED':
-        this._stopPolling();
-        this.overlay.querySelector('#svt-agent-pairing').classList.add('svt-hidden');
-        this.overlay.querySelector('#svt-agent-start').classList.remove('svt-hidden');
-        this.getCodeBtn.disabled = false;
+        forgetPairedSessionId();
         this.getCodeBtn.textContent = 'Get a new code';
-        this._setAgentStatus('err', 'The pairing code expired before the agent used it. Get a new code.');
+        this._showPairingStart('The pairing code expired before the agent used it. Get a new code.');
+        break;
+      case 'AGENT_EXPIRED':
+        forgetPairedSessionId();
+        this._showPairingStart('Your agent pairing has ended. Get a new pairing code and run the agent again.');
         break;
       default:
         break;
