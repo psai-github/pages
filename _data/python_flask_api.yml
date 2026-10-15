@@ -34,7 +34,7 @@ Topics:
     description: "Postman is a tool used to test API routes. It allows developers to simulate frontend requests to verify that the backend returns expected data and handles user input correctly."
   - title: "Error Handling"
     image: "/basic-api/api-err.png"
-    link: "/api-basics/lesson/error-handling"
+    link: "/python/flask/api/basics/error-handling"
     alt: "API Error Handling"
     keyPoints:
       - "Throw"

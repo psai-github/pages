@@ -1,0 +1,21 @@
+{
+  "files": [
+    { "source": "docs/2023-10-22-flask-debug-walk.md", "destination": "_posts/projects/flask/2026-04-15-flask-2023-10-22-flask-debug-walk.md" },
+    { "source": "docs/2023-10-22-flocker_api.md", "destination": "_posts/projects/flask/2026-04-15-flask-2023-10-22-flocker_api.md" },
+    { "source": "docs/2024-01-24-flask-intro.md", "destination": "_posts/projects/flask/2026-04-15-flask-2024-01-24-flask-intro.md" },
+    { "source": "docs/2024-01-25-flask-code-ideation.md", "destination": "_posts/projects/flask/2026-04-15-flask-2024-01-25-flask-code-ideation.md" },
+    { "source": "docs/2024-01-25-flask-code-login-page.md", "destination": "_posts/projects/flask/2026-04-15-flask-2024-01-25-flask-code-login-page.md" },
+    { "source": "docs/2024-01-25-flask-code-sign-up.md", "destination": "_posts/projects/flask/2026-04-15-flask-2024-01-25-flask-code-sign-up.md" },
+    { "source": "docs/2024-01-27-flask-deploy-aws.md", "destination": "_posts/projects/flask/2026-04-15-flask-2024-01-27-flask-deploy-aws.md" },
+    { "source": "docs/2025-08-06-flask-api.md", "destination": "_posts/projects/flask/2026-04-15-flask-2025-08-06-flask-api.md" },
+    { "source": "docs/2025-08-06-flask-file-structure.md", "destination": "_posts/projects/flask/2026-04-15-flask-2025-08-06-flask-file-structure.md" },
+    { "source": "docs/2025-08-06-flask-guide_IPYNB_2_2.md", "destination": "_posts/projects/flask/2026-04-15-flask-2025-08-06-flask-guide_IPYNB_2_2.md" },
+    { "source": "docs/2025-08-07-backend-ui.md", "destination": "_posts/projects/flask/2026-04-15-flask-2025-08-07-backend-ui.md" },
+    { "source": "docs/2025-11-08-api-basics.md", "destination": "_posts/projects/flask/2026-04-15-flask-2025-11-08-api-basics.md" },
+    { "source": "docs/2025-11-08-flask-infograph.md", "destination": "_posts/projects/flask/2026-04-15-flask-2025-11-08-flask-infograph.md" },
+    { "source": "docs/2025-11-08-microblog-playground.md", "destination": "_posts/projects/flask/2026-04-15-flask-2025-11-08-microblog-playground.md" },
+    { "source": "docs/2025-11-08-microblog-reference.md", "destination": "_posts/projects/flask/2026-04-15-flask-2025-11-08-microblog-reference.md" },
+    { "source": "docs/2025-11-12-flask-crash-course-build.md", "destination": "_posts/projects/flask/2026-04-15-flask-2025-11-12-flask-crash-course-build.md" },
+    { "source": "docs/2026-10-15-api-contracts-testing.md", "destination": "_posts/projects/flask/2026-04-15-flask-2026-10-15-api-contracts-testing.md" }
+  ]
+}

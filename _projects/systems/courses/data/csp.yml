@@ -150,6 +150,8 @@ Sprint3:
   10:
     theme: "Integration and Testing"
     goals:
+      - "API Interfaces: Agree on Requests, Responses, and Error Contracts"
+      - "Flask API Testing: Postman, Status Codes, and Invalid Inputs"
       - "Integration: Combining Team Contributions"
       - "User Experience: UX Refinement"
       - "Testing: End-to-End Application Testing"
