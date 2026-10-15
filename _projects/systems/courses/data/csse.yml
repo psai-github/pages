@@ -90,33 +90,33 @@ Sprint3:
   start: 9
   end: 12
   9:
-    theme: "Game Development Basics"
+    theme: "Game Design"
     goals:
-      - "Build Game Elements"
-      - "Backgrounds"
-      - "Sprites and Animation"
-      - "Player and NPCs"
+      - "Empathy Interviews"
+      - "Define POV & HMW Prompts"
+      - "Create Kanban Board"
+      - "Prototype Game Ideas"
   10:
-    theme: "Game Development Mechanics"
+    theme: "Game Building"
     goals:
-      - "Classroom Development Plan"
-      - "Kanban Board Assignments"
-      - "Add Levels and Challenges"
-      - "Add new Game Mechanics"
+      - "Create Game Level Elements"
+      - "Implement Object Interactions"
+      - "Implement Game Level Logic"
+      - "Test Game versus Rubric"
   11:
-    theme: "Game Polishing and Presentation"
+    theme: "Game Integration"
     goals:
-      - "Deploy Game"
-      - "Test Game"
       - "Polish Game Features"
-      - "Prepare for Presentation"
+      - "Update Kanban Board"
+      - "Submit Upstream Pull Request"
+      - "Test Game Integration"
   12:
-    theme: "Game Deployment and Feedback"
+    theme: "Game Test"
     goals:
-      - "Crossover Reviews"
-      - "Present at N@tM"
-      - "Collect Feedback"
-      - "Plan Next Steps on Game Design"
+      - "Crossover Group Testing"
+      - "Conduct User Testing"
+      - "Feedback Collection"
+      - "Retrospective and Next Steps"
 Sprint4:
   title: Ideating, Tinkering, Building and OOP
   description: Explore the OCS GameEngine—a platform designed to make learning computer science both fun and accesible. You will work collaboratively, build games, and apply key programming concepts in a creative, team-based environment.
