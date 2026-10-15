@@ -9,6 +9,7 @@ const SYSTEM_CONFIG = Object.freeze({
     icon: '🐧',
     terminalName: 'Terminal',
     command: 'python3 scripts/linux_setup_agent.py --check',
+    reportCommand: 'python3 scripts/linux_setup_agent.py --check --report',
   },
   kasm: {
     reportSystem: 'LINUX',
@@ -16,6 +17,7 @@ const SYSTEM_CONFIG = Object.freeze({
     icon: '☁️',
     terminalName: 'Kasm Terminal',
     command: 'python3 scripts/linux_setup_agent.py --check',
+    reportCommand: 'python3 scripts/linux_setup_agent.py --check --report',
   },
   windows: {
     reportSystem: 'WINDOWS',
@@ -23,16 +25,26 @@ const SYSTEM_CONFIG = Object.freeze({
     icon: '🪟',
     terminalName: 'WSL Ubuntu terminal',
     command: 'python3 scripts/windows_setup_agent.py --check | tee /dev/tty | clip.exe',
+    reportCommand: 'python3 scripts/windows_setup_agent.py --check --report',
   },
 });
 
 const CHECK_LINE = /^(PASS|FAIL)\s+([a-z0-9-]+)\s*\|\s*([^|]+?)\s*(?:\|\s*(.+))?$/;
 const MAX_PASTE_LENGTH = 20000;
+const STARTED_LINE = /^Started:\s*(.+)$/;
+const DURATION_LINE = /^Duration:\s*(\d+) seconds?\s*$/;
 
 export function getSystemSetupConfig(os) {
   return SYSTEM_CONFIG[os] || null;
 }
 
+/** The check command that also sends its report to the game, for a signed-in student. */
+export function getReportUploadCommand(os, uploadUrl) {
+  const config = getSystemSetupConfig(os);
+  return config ? `${config.reportCommand} ${uploadUrl}` : null;
+}
+
+// startedAt and durationSeconds are null for reports from older copies of the agent.
 export function parseSystemSetupReport(pasted, os) {
   const config = getSystemSetupConfig(os);
   if (!config) return failure('Choose Linux, Windows, or Kasm before checking your setup.');
@@ -48,8 +60,13 @@ export function parseSystemSetupReport(pasted, os) {
     return failure(`No ${config.label} setup report found. Run the shown command in ${config.terminalName}, then paste the complete report.`);
   }
 
+  const reportLines = lines.slice(start + 1, end);
+  const startedAt = reportLines.map((line) => STARTED_LINE.exec(line)).find(Boolean)?.[1].trim() || null;
+  const duration = reportLines.map((line) => DURATION_LINE.exec(line)).find(Boolean);
+  const durationSeconds = duration ? Number(duration[1]) : null;
+
   const checks = [];
-  for (const line of lines.slice(start + 1, end)) {
+  for (const line of reportLines) {
     const match = CHECK_LINE.exec(line);
     if (!match) continue;
     const [, status, id, label, fix] = match;
@@ -63,9 +80,9 @@ export function parseSystemSetupReport(pasted, os) {
 
   if (checks.length === 0) return failure('The setup report was empty. Run the command again and paste the whole report.');
   const passedCount = checks.filter((check) => check.passed).length;
-  return { ok: passedCount === checks.length, error: null, checks, passedCount, totalCount: checks.length };
+  return { ok: passedCount === checks.length, error: null, checks, passedCount, totalCount: checks.length, startedAt, durationSeconds };
 }
 
 function failure(error) {
-  return { ok: false, error, checks: [], passedCount: 0, totalCount: 0 };
+  return { ok: false, error, checks: [], passedCount: 0, totalCount: 0, startedAt: null, durationSeconds: null };
 }

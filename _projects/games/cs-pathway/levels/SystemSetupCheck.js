@@ -1,12 +1,21 @@
 // Linux, Kasm, and Windows/WSL setup-check panel for Toolchain Trail.
 // macOS keeps using MacSetupCheck.js and its existing implementation.
-import { getSystemSetupConfig, parseSystemSetupReport } from '../model/systemSetupReport.js';
+// Like the Mac panel, a signed-in student gets a check command that sends the
+// report to Spring, and the panel shows it when it arrives; otherwise (or if
+// sending fails) they paste it, and pasted reports are only shown, not saved.
+import { getReportUploadCommand, getSystemSetupConfig, parseSystemSetupReport } from '../model/systemSetupReport.js';
+import { fetchLatestSetupReport, requestReportUploadUrl } from '../services/SetupReportApi.js';
+
+const REPORT_POLL_INTERVAL_MS = 4000;
 
 class SystemSetupCheck {
   constructor() {
     this.os = null;
     this.button = null;
     this.overlay = null;
+    this.command = '';
+    this.reportPollTimer = null;
+    this.shownReportedAt = null;
   }
 
   setOS(os) {
@@ -48,12 +57,13 @@ class SystemSetupCheck {
         </div>
         <p class="cs-pathway-system-check__note">The agent only reads versions and settings; it does not install or change anything.
           ${this.os === 'windows' ? 'Run this inside WSL Ubuntu. The report is also copied to the Windows clipboard when <code>clip.exe</code> is available.' : ''}</p>
-        <p><strong>2.</strong> Paste the report here:</p>
+        <p class="cs-pathway-system-check__status" aria-live="polite"><strong>2.</strong> Paste the report here:</p>
         <textarea rows="7" spellcheck="false" placeholder="=== ${config.reportSystem} SETUP CHECK v1 === ..."></textarea>
         <button type="button" class="cs-pathway-system-check__submit">Check my setup</button>
         <div class="cs-pathway-system-check__results" aria-live="polite"></div>
       </div>`;
 
+    this.command = config.command;
     this.overlay.querySelector('.cs-pathway-system-check__command code').textContent = config.command;
     this.overlay.querySelector('.cs-pathway-system-check__close').addEventListener('click', () => this.close());
     this.overlay.querySelector('.cs-pathway-system-check__copy').addEventListener('click', (event) => this.copyCommand(event.currentTarget));
@@ -68,12 +78,12 @@ class SystemSetupCheck {
 
     document.body.appendChild(this.overlay);
     this.overlay.querySelector('textarea').focus();
+    this.startAutomaticReport();
   }
 
   async copyCommand(copyButton) {
-    const command = getSystemSetupConfig(this.os)?.command || '';
     try {
-      await navigator.clipboard.writeText(command);
+      await navigator.clipboard.writeText(this.command);
       copyButton.textContent = 'Copied!';
     } catch (error) {
       console.warn('[SystemSetupCheck] clipboard unavailable:', error);
@@ -81,8 +91,57 @@ class SystemSetupCheck {
     }
   }
 
+  // Switches to the command that uploads its report, then watches for it.
+  // Without a sign-in or a reachable server the paste flow stays as it is.
+  async startAutomaticReport() {
+    const overlay = this.overlay;
+    let uploadUrl;
+    try {
+      ({ uploadUrl } = await requestReportUploadUrl());
+    } catch (error) {
+      console.warn('[SystemSetupCheck] automatic results unavailable, using paste:', error);
+      return;
+    }
+    if (this.overlay !== overlay) return; // closed while waiting
+
+    this.command = getReportUploadCommand(this.os, uploadUrl);
+    overlay.querySelector('.cs-pathway-system-check__command code').textContent = this.command;
+    overlay.querySelector('.cs-pathway-system-check__copy').textContent = 'Copy command';
+    overlay.querySelector('.cs-pathway-system-check__status').textContent =
+      'Your report will show up below by itself after you run the command, and is saved to setup-report.md. If it does not, paste it here.';
+
+    this.shownReportedAt = null;
+    this.showUploadedReport();
+    this.reportPollTimer = setInterval(() => this.showUploadedReport(), REPORT_POLL_INTERVAL_MS);
+  }
+
+  async showUploadedReport() {
+    const overlay = this.overlay;
+    let uploaded;
+    try {
+      uploaded = await fetchLatestSetupReport();
+    } catch (error) {
+      // Keep polling: one failed check (Wi-Fi blip, server restart) should not end the wait.
+      console.warn('[SystemSetupCheck] could not check for uploaded results:', error);
+      return;
+    }
+    if (this.overlay !== overlay || !uploaded || uploaded.reportedAt === this.shownReportedAt) return;
+    this.shownReportedAt = uploaded.reportedAt;
+
+    // The latest report may come from another system (e.g. an earlier Mac check); leave it out.
+    const report = parseSystemSetupReport(uploaded.report, this.os);
+    if (report.error) return;
+    this.renderReport(report);
+    const sentAt = new Date(uploaded.reportedAt).toLocaleString();
+    overlay.querySelector('.cs-pathway-system-check__status').textContent =
+      `Report sent from your terminal on ${sentAt}. Run the command again after fixing anything.`;
+  }
+
   showResults() {
-    const report = parseSystemSetupReport(this.overlay.querySelector('textarea').value, this.os);
+    this.renderReport(parseSystemSetupReport(this.overlay.querySelector('textarea').value, this.os));
+  }
+
+  renderReport(report) {
     const results = this.overlay.querySelector('.cs-pathway-system-check__results');
     results.replaceChildren();
 
@@ -99,6 +158,14 @@ class SystemSetupCheck {
       : `${report.passedCount} of ${report.totalCount} checks passed. Fix the items marked ✗, then run the agent again.`;
     summary.classList.add(report.ok ? 'is-ok' : 'is-partial');
     results.appendChild(summary);
+
+    if (report.startedAt) {
+      const timing = document.createElement('p');
+      timing.className = 'cs-pathway-system-check__note';
+      const took = report.durationSeconds === null ? '' : `, took ${report.durationSeconds} second${report.durationSeconds === 1 ? '' : 's'}`;
+      timing.textContent = `Checked on ${report.startedAt}${took}.`;
+      results.appendChild(timing);
+    }
 
     const list = document.createElement('ul');
     for (const item of report.checks) {
@@ -118,6 +185,8 @@ class SystemSetupCheck {
   }
 
   close() {
+    clearInterval(this.reportPollTimer);
+    this.reportPollTimer = null;
     this.overlay?.remove();
     this.overlay = null;
   }

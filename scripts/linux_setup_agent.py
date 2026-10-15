@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
-"""Local Linux setup checks and an opt-in live Bash companion. Fixes are advice only."""
+"""Local Linux setup checks and an opt-in live Bash companion. Fixes are advice only.
+
+With --check --report <upload-url> (the CS Pathway game shows the exact command), the
+report is also saved to setup-report.md in the project and sent to that URL, so the
+game can show it without copy and paste."""
 import argparse
+import time
+import urllib.error
+import urllib.request
 import os
 import platform
 import re
@@ -10,11 +17,15 @@ import subprocess
 import sys
 import tempfile
 import uuid
+from datetime import datetime
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 ANSI = re.compile(r'\x1b\][^\x07]*(?:\x07|\x1b\\)|\x1b\[[0-?]*[ -/]*[@-~]')
 REPORT_VERSION = 1
+REPORT_FILE_NAME = 'setup-report.md'
+# Same rule as verifyToolsTerminal.sh: never send a report over plain HTTP to another host.
+UPLOAD_URL = re.compile(r'^(?:https://|http://localhost:|http://127\.0\.0\.1:)\S+$')
 
 
 def plain(text):
@@ -287,19 +298,66 @@ def collect_setup_checks(project, debian):
     return results
 
 
-def format_setup_report(results, system):
-    """Format a stable report that the Toolchain Trail can parse after pasting."""
+def format_setup_report(results, system, started_at='', duration_seconds=None):
+    """Format a stable report that the Toolchain Trail can parse after pasting.
+
+    The Summary:/Overall: lines match verifyToolsTerminal.sh, because Spring reads
+    them when the report is uploaded. This agent has no warnings, so warned is 0."""
     system = system.upper()
     lines = [f'=== {system} SETUP CHECK v{REPORT_VERSION} ===']
+    if started_at:
+        lines.append(f'Started: {started_at}')
     for result in results:
         if result['passed']:
             lines.append(f"PASS {result['id']} | {result['label']}")
         else:
             lines.append(f"FAIL {result['id']} | {result['label']} | {result['fix']}")
     passed = sum(1 for result in results if result['passed'])
-    lines.append(f'SUMMARY {passed}/{len(results)} passed')
+    failed = len(results) - passed
+    if duration_seconds is not None:
+        lines.append(f"Duration: {duration_seconds} second{'' if duration_seconds == 1 else 's'}")
+    lines.append(f'Summary: {passed} passed, 0 warned, {failed} failed')
+    lines.append(f"Overall: {'FAIL' if failed else 'PASS'}")
     lines.append(f'=== END {system} SETUP CHECK ===')
     return '\n'.join(lines)
+
+
+def run_setup_check(project, debian, system):
+    """Time the checks and return the formatted report plus whether every check passed."""
+    started_at = datetime.now().astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')
+    start = time.monotonic()
+    results = collect_setup_checks(project, debian)
+    duration_seconds = round(time.monotonic() - start)
+    report = format_setup_report(results, system, started_at, duration_seconds)
+    return report, all(result['passed'] for result in results)
+
+
+def write_report_file(report, project):
+    report_file = project / REPORT_FILE_NAME
+    created = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    try:
+        report_file.write_text(f'# Setup report\n\nCreated {created} by scripts/linux_setup_agent.py\n\n```text\n{report}\n```\n')
+    except OSError as exc:
+        print(f'Could not write {report_file}: {exc}', file=sys.stderr)
+        return
+    print(f'Saved these results to {report_file}')
+
+
+def upload_report(report, upload_url):
+    request = urllib.request.Request(
+        upload_url,
+        data=report.encode(),
+        method='POST',
+        headers={'Content-Type': 'text/plain'},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=20):
+            pass
+    except (urllib.error.URLError, OSError) as exc:
+        print(f'Could not send the results ({exc}). If the code expired, copy the check command from the game again, or paste the results into the game.', file=sys.stderr)
+        return False
+    print('Sent these results to the game. Look at the setup panel in your browser.')
+    return True
 
 
 def main():
@@ -308,12 +366,17 @@ def main():
     mode.add_argument('--log', type=Path, help='Analyze a saved terminal error locally')
     mode.add_argument('--watch', action='store_true', help='Open live Bash help in this project (Linux/WSL only)')
     mode.add_argument('--check', action='store_true', help='Print a setup report for the Toolchain Trail game')
+    parser.add_argument('--report', metavar='UPLOAD_URL', help='With --check: save the report to setup-report.md and send it to the game')
     parser.add_argument('--project', type=Path, default=PROJECT_ROOT, help='Project folder; defaults to the checkout containing this script')
     parser.add_argument('--color', choices=['auto', 'always', 'never'], default='auto', help='Yellow diagnostic text (default: auto)')
     parser.add_argument('--distro', choices=['debian', 'other'], help='Target Linux family for saved logs; useful when analyzing on a Mac')
     args = parser.parse_args()
     project = args.project.expanduser().resolve()
     color = args.color == 'always' or (args.color == 'auto' and sys.stdout.isatty() and 'NO_COLOR' not in os.environ and os.environ.get('TERM') != 'dumb')
+    if args.report and not args.check:
+        parser.error('--report is only used with --check')
+    if args.report and not UPLOAD_URL.match(args.report):
+        parser.error(f"'{args.report}' is not an upload URL; copy the full command from the game")
     if args.distro and not args.log:
         parser.error('--distro is for saved --log output; live checks detect the Linux distribution')
     is_linux = platform.system() == 'Linux'
@@ -323,7 +386,7 @@ def main():
         info = {}
     family = (info.get('ID', '') + ' ' + info.get('ID_LIKE', '')).split()
     debian = args.distro == 'debian' or (args.distro is None and bool(set(family) & {'debian', 'ubuntu', 'linuxmint', 'kali'}))
-    print('Linux setup helper — local, rule-based feedback; no AI service or uploads.')
+    print('Linux setup helper — local, rule-based feedback; no AI service. Results are only uploaded with --report.')
     print('Host:', info.get('PRETTY_NAME', platform.system()))
     if args.log:
         try:
@@ -346,9 +409,13 @@ def main():
         return watch(project, debian, color)
     if args.check:
         system = 'WINDOWS' if is_wsl() else 'LINUX'
-        results = collect_setup_checks(project, debian)
-        print(format_setup_report(results, system))
-        return 0 if all(result['passed'] for result in results) else 1
+        report, all_passed = run_setup_check(project, debian, system)
+        print(report)
+        if args.report:
+            print()
+            write_report_file(report, project)
+            upload_report(report, args.report)
+        return 0 if all_passed else 1
     print(f'Project: {project}\nEnter it with: cd -- {shlex.quote(str(project))}')
     print('For help after each failed command: python3 scripts/linux_setup_agent.py --watch')
     failed = False

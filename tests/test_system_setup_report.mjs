@@ -5,7 +5,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const source = await readFile(new URL('../_projects/games/cs-pathway/model/systemSetupReport.js', import.meta.url), 'utf8');
-const { getSystemSetupConfig, parseSystemSetupReport } = await import(
+const { getReportUploadCommand, getSystemSetupConfig, parseSystemSetupReport } = await import(
   `data:text/javascript;charset=utf-8,${encodeURIComponent(source)}`
 );
 
@@ -17,7 +17,7 @@ from linux_setup_agent import format_setup_report
 print(format_setup_report([
     {'id': 'git', 'label': 'Git', 'passed': True, 'fix': ''},
     {'id': 'vscode', 'label': 'VS Code code command', 'passed': False, 'fix': 'Install VS Code.'},
-], 'LINUX'))
+], 'LINUX', '2026-10-15 09:30:00 PDT', 3))
 `], { encoding: 'utf8' });
 
 test('parses a Linux report produced by the real agent formatter', () => {
@@ -26,6 +26,28 @@ test('parses a Linux report produced by the real agent formatter', () => {
   assert.equal(report.passedCount, 1);
   assert.equal(report.totalCount, 2);
   assert.equal(report.checks[1].fix, 'Install VS Code.');
+  assert.equal(report.startedAt, '2026-10-15 09:30:00 PDT');
+  assert.equal(report.durationSeconds, 3);
+});
+
+test('reports without a timestamp (older agent copies) still parse', () => {
+  const oldReport = linuxReport.split('\n').filter((line) => !/^(Started|Duration):/.test(line)).join('\n');
+  const report = parseSystemSetupReport(oldReport, 'linux');
+  assert.equal(report.error, null);
+  assert.equal(report.startedAt, null);
+  assert.equal(report.durationSeconds, null);
+});
+
+test('the real agent report has the Summary and Overall lines Spring requires on upload', () => {
+  assert.match(linuxReport, /^Summary: 1 passed, 0 warned, 1 failed$/m);
+  assert.match(linuxReport, /^Overall: FAIL$/m);
+});
+
+test('builds the upload command for each system', () => {
+  const url = 'https://spring.example/api/cs-pathway/setup-report/ABC123';
+  assert.equal(getReportUploadCommand('linux', url), `python3 scripts/linux_setup_agent.py --check --report ${url}`);
+  assert.equal(getReportUploadCommand('windows', url), `python3 scripts/windows_setup_agent.py --check --report ${url}`);
+  assert.equal(getReportUploadCommand('macos', url), null);
 });
 
 test('accepts Linux reports for Kasm', () => {

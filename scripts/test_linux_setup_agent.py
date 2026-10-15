@@ -1,3 +1,4 @@
+import http.server
 import os
 import platform
 import re
@@ -7,11 +8,14 @@ import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
-from linux_setup_agent import LiveFeedback, diagnose, feedback, format_setup_report, is_wsl
+from linux_setup_agent import (LiveFeedback, diagnose, feedback, format_setup_report, is_wsl,
+                               run_setup_check, upload_report, write_report_file)
 
 SCRIPT = Path(__file__).with_name('linux_setup_agent.py')
 WINDOWS_SCRIPT = Path(__file__).with_name('windows_setup_agent.py')
@@ -26,8 +30,55 @@ class LinuxSetupTests(unittest.TestCase):
         self.assertIn('=== LINUX SETUP CHECK v1 ===', report)
         self.assertIn('PASS git | Git', report)
         self.assertIn('FAIL vscode | VS Code | Install VS Code.', report)
-        self.assertIn('SUMMARY 1/2 passed', report)
+        self.assertIn('Summary: 1 passed, 0 warned, 1 failed', report)
+        self.assertIn('Overall: FAIL', report)
         self.assertTrue(report.endswith('=== END LINUX SETUP CHECK ==='))
+
+    def test_setup_report_shows_when_the_check_ran_and_how_long_it_took(self):
+        report = format_setup_report([
+            {'id': 'git', 'label': 'Git', 'passed': True, 'fix': ''},
+        ], 'linux', '2026-10-15 09:30:00 PDT', 1)
+        self.assertIn('Started: 2026-10-15 09:30:00 PDT', report)
+        self.assertIn('Duration: 1 second\n', report)
+        self.assertIn('Overall: PASS', report)
+
+    def test_check_report_is_saved_and_sent_to_the_upload_url(self):
+        received = []
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def do_POST(self):
+                received.append(self.rfile.read(int(self.headers['Content-Length'])).decode())
+                self.send_response(200)
+                self.end_headers()
+
+            def log_message(self, *args):
+                pass
+
+        server = http.server.HTTPServer(('127.0.0.1', 0), Handler)
+        threading.Thread(target=server.handle_request, daemon=True).start()
+        with tempfile.TemporaryDirectory() as project:
+            with mock.patch('linux_setup_agent.collect_setup_checks', return_value=[
+                {'id': 'git', 'label': 'Git', 'passed': True, 'fix': ''},
+            ]):
+                report, all_passed = run_setup_check(Path(project), True, 'LINUX')
+            write_report_file(report, Path(project))
+            self.assertTrue(upload_report(report, f'http://127.0.0.1:{server.server_port}/api/cs-pathway/setup-report/CODE'))
+            saved = (Path(project) / 'setup-report.md').read_text()
+        server.server_close()
+        self.assertTrue(all_passed)
+        self.assertRegex(report, r'(?m)^Started: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}')
+        self.assertRegex(report, r'(?m)^Duration: \d+ seconds?$')
+        self.assertEqual(received, [report])
+        self.assertIn(report, saved)
+
+    def test_report_option_rejects_urls_that_are_not_upload_urls(self):
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), '--check', '--report', 'http://example.com/x'],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn('is not an upload URL', result.stderr)
 
     def test_wsl_environment_is_detected_as_windows(self):
         previous = os.environ.get('WSL_DISTRO_NAME')
