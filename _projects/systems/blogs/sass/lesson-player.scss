@@ -757,20 +757,6 @@ body:has(.lesson-player) {
   color: #ef4444;
 }
 
-// Shown only after Gist export fails; .form-group's display would otherwise override [hidden].
-.notebook-fallback[hidden] {
-  display: none;
-}
-
-.notebook-fallback__notice {
-  margin: 0 0 8px;
-  padding: 10px 12px;
-  border-left: 3px solid #f59e0b;
-  border-radius: 4px;
-  background: rgba(245, 158, 11, 0.12);
-  font-size: 0.9rem;
-}
-
 /* Bottom Navigation */
 .lesson-bottom {
   border-top: 1px solid var(--pref-accent-color);

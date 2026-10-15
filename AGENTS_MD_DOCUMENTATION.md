@@ -96,7 +96,6 @@ Split logic into clear layers:
 ### Backend Boundary
 
 * The backend service lives under [node_backend/README.md](node_backend/README.md) and is separate from the site build pipeline; read it before making backend changes.
-* Code submissions must not stop at a Gist failure. When `exportToGist` throws, the course player and Blogs code forms reveal a `[data-notebook-fallback]` field via [assets/js/notebook-link-fallback.js](assets/js/notebook-link-fallback.js) and submit a GitHub `.ipynb` link as `{type: 'code', url, fallbackFrom: 'gist'}`. The Spring backend accepts Gist or GitHub file links for `code`, normalizes a `link` sent to a `code`/`github_issue` assignment to that type, and grades by URL shape rather than declared type. Test: `node --test tests/notebook_link_fallback.test.mjs`.
 
 ## Coding Standards
 

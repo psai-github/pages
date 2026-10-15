@@ -145,7 +145,6 @@
   import { exportToGist } from '{{ site.baseurl }}/assets/js/gist.js';
   import { appendGistSettingsLink } from '{{ site.baseurl }}/assets/js/gist-connection-errors.js';
   import { listRunners, unsavedRunners, readRunners } from '{{ site.baseurl }}/assets/js/runner-io.js';
-  import { activateNotebookFallback, gistFallbackNotice, isNotebookFallbackActive, readNotebookFallbackUrl } from '{{ site.baseurl }}/assets/js/notebook-link-fallback.js';
   import { createNavigationState } from '{{ site.baseurl }}/assets/js/course-navigation-state.js';
   import { rememberCourse } from '{{ site.baseurl }}/assets/js/course-entry.js';
 
@@ -673,12 +672,12 @@
     }).catch(() => {}); // non-blocking — don't fail submission if grades write fails
   }
 
-  // codeUrl is a Gist, or a GitHub notebook link when Gist export failed (fallbackFrom: 'gist').
-  async function submitCodeToBackend(codeUrl, description, selfAssessment, fallbackFrom) {
+  async function submitCodeToBackend(files, description, selfAssessment) {
     const assignmentId = await ensureAssignmentId();
+    // Resolve the user first so we don't burn a Gist creation on a request that will fail anyway.
     const { uid, personId } = await resolveCurrentUser();
-    const content = { type: 'code', url: codeUrl, notes: description };
-    if (fallbackFrom) content.fallbackFrom = fallbackFrom;
+    const gistUrl = await exportToGist(files, { type: 'submission', description: description || 'Code submission' });
+    const content = { type: 'code', url: gistUrl, notes: description };
     const res = await fetch(`${javaURI}/api/submissions/${assignmentId}`, {
       ...fetchOptions,
       method: 'POST',
@@ -706,6 +705,7 @@
       method: 'POST',
       body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: { ...content, selfAssessment }, submittedAt: new Date().toISOString() })
     }).catch(() => {}); // non-blocking
+    return gistUrl;
   }
 
   async function submitFilesToBackend(files, notes, selfAssessment) {
@@ -1028,27 +1028,14 @@
         e.preventDefault();
         const notes = document.getElementById('code-notes')?.value?.trim() || '';
         const submitBtn = codeForm.querySelector('button[type="submit"]');
-        // After a Gist failure the form submits a GitHub notebook link instead of the runners.
-        const usingNotebookLink = isNotebookFallbackActive(codeForm);
-        let codeUrl = null;
-        let files = null;
-        if (usingNotebookLink) {
-          try {
-            codeUrl = readNotebookFallbackUrl(codeForm);
-          } catch (err) {
-            showStatus('error', err.message);
-            return;
-          }
-        } else {
-          if (unsavedRunners().length > 0) {
-            showStatus('error', 'Save your code with the 💾 button in each runner before submitting.');
-            return;
-          }
-          files = readRunners();
-          if (Object.keys(files).length === 0) {
-            showStatus('error', "No saved code found in this lesson's code runner(s).");
-            return;
-          }
+        if (unsavedRunners().length > 0) {
+          showStatus('error', 'Save your code with the 💾 button in each runner before submitting.');
+          return;
+        }
+        const files = readRunners();
+        if (Object.keys(files).length === 0) {
+          showStatus('error', "No saved code found in this lesson's code runner(s).");
+          return;
         }
         const selfAssessment = getSelfAssessmentData();
         const selfAssessmentError = validateSelfAssessment(selfAssessment);
@@ -1065,31 +1052,11 @@
           submitBtn.disabled = false;
           return;
         }
-        if (!usingNotebookLink) {
-          try {
-            // Resolve the assignment first so we don't burn a Gist creation on a request that will fail anyway.
-            await ensureAssignmentId();
-          } catch (err) {
-            showStatus('error', err.message);
-            submitBtn.disabled = false;
-            return;
-          }
-          showStatus('loading', 'Creating Gist...');
-          try {
-            codeUrl = await exportToGist(files, { type: 'submission', description: notes || 'Code submission' });
-          } catch (err) {
-            console.error('Gist export failed; switching to notebook link submission', err);
-            activateNotebookFallback(codeForm, err);
-            showStatus('error', gistFallbackNotice(err), err);
-            submitBtn.disabled = false;
-            return;
-          }
-        }
-        showStatus('loading', 'Submitting...');
+        showStatus('loading', 'Creating Gist and submitting...');
         try {
-          await submitCodeToBackend(codeUrl, notes, selfAssessment, usingNotebookLink ? 'gist' : null);
+          await submitCodeToBackend(files, notes, selfAssessment);
           saveSubmissionLocally('code', { notes, selfAssessment });
-          showStatus('success', usingNotebookLink ? 'Notebook link submitted successfully (Gist fallback)!' : 'Code submitted successfully!');
+          showStatus('success', 'Code submitted successfully!');
           this.reset();
           resetSelfAssessment();
         } catch (err) {

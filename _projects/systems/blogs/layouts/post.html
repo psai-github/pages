@@ -379,11 +379,6 @@ Sprint and blogs pages are not part of one week, so their current_week is null.
           <p class="form-hint">This submits the code from this lesson's code runner(s) below as a Gist for automatic review. Save each runner with its 💾 button before submitting.</p>
           <ul class="code-runner-summary" id="code-runner-summary-blog"></ul>
         </div>
-        <div class="form-group notebook-fallback" data-notebook-fallback hidden>
-          <p class="notebook-fallback__notice" role="alert" data-notebook-fallback-notice></p>
-          <label for="code-notebook-url-blog">GitHub notebook link (.ipynb)</label>
-          <input type="url" id="code-notebook-url-blog" data-notebook-fallback-url placeholder="https://github.com/user/repo/blob/main/lesson.ipynb">
-        </div>
         <div class="form-group">
           <label for="code-notes-blog">Notes (Optional)</label>
           <textarea id="code-notes-blog" placeholder="Add any additional comments..."></textarea>
@@ -868,28 +863,14 @@ Sprint and blogs pages are not part of one week, so their current_week is null.
           e.preventDefault();
           const notes = document.getElementById('code-notes-blog')?.value?.trim() || '';
           const btn = this.querySelector('button[type="submit"]');
-          const fallback = window.notebookLinkFallback;
-          // After a Gist failure the form submits a GitHub notebook link instead of the runners.
-          const usingNotebookLink = fallback.isNotebookFallbackActive(this);
-          let codeUrl = null;
-          let files = null;
-          if (usingNotebookLink) {
-            try {
-              codeUrl = fallback.readNotebookFallbackUrl(this);
-            } catch (err) {
-              showStatusBlog('error', err.message);
-              return;
-            }
-          } else {
-            if (window.unsavedRunners().length > 0) {
-              showStatusBlog('error', 'Save your code with the 💾 button in each runner before submitting.');
-              return;
-            }
-            files = window.readRunners();
-            if (Object.keys(files).length === 0) {
-              showStatusBlog('error', "No saved code found in this lesson's code runner(s).");
-              return;
-            }
+          if (window.unsavedRunners().length > 0) {
+            showStatusBlog('error', 'Save your code with the 💾 button in each runner before submitting.');
+            return;
+          }
+          const files = window.readRunners();
+          if (Object.keys(files).length === 0) {
+            showStatusBlog('error', "No saved code found in this lesson's code runner(s).");
+            return;
           }
           const selfAssessment = getSelfAssessmentDataBlog();
           const selfAssessmentError = validateSelfAssessmentBlog(selfAssessment);
@@ -907,30 +888,11 @@ Sprint and blogs pages are not part of one week, so their current_week is null.
             btn.disabled = false;
             return;
           }
-          let assignmentId;
+          showStatusBlog('loading', 'Creating Gist and submitting...');
           try {
-            assignmentId = await ensureAssignmentIdBlog();
-          } catch (err) {
-            showStatusBlog('error', err.message);
-            btn.disabled = false;
-            return;
-          }
-          if (!usingNotebookLink) {
-            showStatusBlog('loading', 'Creating Gist...');
-            try {
-              codeUrl = await window.exportToGist(files, { type: 'submission', description: notes || 'Code submission' });
-            } catch (err) {
-              console.error('Gist export failed; switching to notebook link submission', err);
-              fallback.activateNotebookFallback(this, err);
-              showStatusBlog('error', fallback.gistFallbackNotice(err), err);
-              btn.disabled = false;
-              return;
-            }
-          }
-          showStatusBlog('loading', 'Submitting...');
-          try {
-            const content = { type: 'code', url: codeUrl, notes };
-            if (usingNotebookLink) content.fallbackFrom = 'gist';
+            const assignmentId = await ensureAssignmentIdBlog();
+            const gistUrl = await window.exportToGist(files, { type: 'submission', description: notes || 'Code submission' });
+            const content = { type: 'code', url: gistUrl, notes };
             const res = await fetch(`${javaURI}/api/submissions/${assignmentId}`, {
               ...fetchOptions,
               method: 'POST',
@@ -959,7 +921,7 @@ Sprint and blogs pages are not part of one week, so their current_week is null.
               method: 'POST',
               body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: { ...content, selfAssessment }, submittedAt: new Date().toISOString() })
             }).catch(() => {});
-            showStatusBlog('success', usingNotebookLink ? 'Notebook link submitted successfully (Gist fallback)!' : 'Code submitted successfully!');
+            showStatusBlog('success', 'Code submitted successfully!');
             this.reset();
             resetSelfAssessmentBlog();
           } catch (err) {
@@ -1004,10 +966,7 @@ Sprint and blogs pages are not part of one week, so their current_week is null.
     import { exportToGist } from '{{ site.baseurl }}/assets/js/gist.js';
     import { appendGistSettingsLink } from '{{ site.baseurl }}/assets/js/gist-connection-errors.js';
     import { listRunners, unsavedRunners, readRunners } from '{{ site.baseurl }}/assets/js/runner-io.js';
-    import * as notebookLinkFallback from '{{ site.baseurl }}/assets/js/notebook-link-fallback.js';
     window.pythonURI = pythonURI;
-    // Used by the blog code-submission form to switch to a GitHub notebook link when Gist export fails.
-    window.notebookLinkFallback = notebookLinkFallback;
     window.javaURI = javaURI;
     window.fetchOptions = fetchOptions;
     window.exportToGist = exportToGist;
