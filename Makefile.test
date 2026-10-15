@@ -3,12 +3,9 @@
 
 HOST ?= localhost
 PORT ?= 4500
-TEST_SERVER_PORT ?= 4600
 NOTEBOOK_LIST := make_test_notebooks.txt
-NOTEBOOK_TEMPLATE := make_test_notebooks.template.txt
 # Second config only make_test loads (adds _make_test/plugins); see that file.
 JEKYLL_CONFIG := _config.yml,_make_test/jekyll_config.yml
-TEST_SERVER_LOG = /tmp/notebook_test_server$(TEST_SERVER_PORT).log
 PYTHON := venv/bin/python3
 # One batched, parallel conversion call instead of a make + Python start per notebook.
 CONVERT_JOBS ?= 4
@@ -23,7 +20,7 @@ PROJECT_FILE := _projects/.makeprojects
 ALL_PROJECTS := $(shell grep -v '^\#' $(PROJECT_FILE) 2>/dev/null | grep -v '^$$' | cut -d: -f1)
 
 .DEFAULT_GOAL := make_test
-.PHONY: make_test stop test-build-project-assets test-convert-required-notebooks test-notebook-list test-convert-listed-notebooks test-jekyll-serve test-server test-stop-server
+.PHONY: make_test stop test-build-project-assets test-convert-required-notebooks test-notebook-list test-convert-listed-notebooks test-jekyll-serve
 
 make_test: stop
 	@$(MAIN_MAKE) clean
@@ -33,13 +30,11 @@ make_test: stop
 	@$(TEST_MAKE) test-convert-required-notebooks
 	@$(TEST_MAKE) test-convert-listed-notebooks
 	@$(TEST_MAKE) test-jekyll-serve
-	@$(TEST_MAKE) test-server
 	@echo ""
 	@echo "Test server running on http://localhost:$(PORT)"
-	@echo "  Compile a notebook: http://localhost:$(PORT)/notebook-tester/"
-	@echo "  Jekyll logs:        tail -f /tmp/jekyll$(PORT).log"
-	@echo "  Compiler logs:      tail -f $(TEST_SERVER_LOG)"
-	@echo "  Stop:               ./make_test stop"
+	@echo "  Add notebooks:  $(NOTEBOOK_LIST), then rerun ./make_test"
+	@echo "  Jekyll logs:    tail -f /tmp/jekyll$(PORT).log"
+	@echo "  Stop:           ./make_test stop"
 
 # Only `index` (assets + index.md): the template's `notebooks` target now converts everything.
 test-build-project-assets:
@@ -59,11 +54,11 @@ test-convert-required-notebooks:
 	@$(PYTHON) scripts/required_test_notebooks.py | \
 		xargs -r -d '\n' $(PYTHON) scripts/convert_notebooks.py --jobs $(CONVERT_JOBS)
 
-# Personal list is gitignored; copy the template on first run (like _projects Makefiles).
+# Personal list is gitignored, so each machine creates its own on first run.
 test-notebook-list:
 	@if [ ! -f $(NOTEBOOK_LIST) ]; then \
-		echo "📋 Creating $(NOTEBOOK_LIST) (from template) - add your notebook paths there"; \
-		cp $(NOTEBOOK_TEMPLATE) $(NOTEBOOK_LIST); \
+		echo "📋 Creating $(NOTEBOOK_LIST) - add your notebook paths there"; \
+		echo "# Notebooks ./make_test converts, one path per line (_notebooks/... or _projects/...)." > $(NOTEBOOK_LIST); \
 	fi
 
 test-convert-listed-notebooks: test-notebook-list
@@ -85,21 +80,6 @@ test-jekyll-serve:
 	@bundle exec jekyll serve -H $(HOST) -P $(PORT) --no-watch --config $(JEKYLL_CONFIG) > /tmp/jekyll$(PORT).log 2>&1 &
 	@$(MAIN_MAKE) wait-for-server PORT=$(PORT)
 
-test-server:
-	@nohup $(PYTHON) scripts/notebook_test_server.py --port $(TEST_SERVER_PORT) --site-port $(PORT) --jekyll-config $(JEKYLL_CONFIG) > $(TEST_SERVER_LOG) 2>&1 &
-	@for i in $$(seq 1 20); do \
-		if curl -sf "http://127.0.0.1:$(TEST_SERVER_PORT)/api/health" >/dev/null; then \
-			echo "Notebook compile server started on port $(TEST_SERVER_PORT)"; \
-			exit 0; \
-		fi; \
-		sleep 0.5; \
-	done; \
-	echo "Compile server failed to start. Log:"; cat $(TEST_SERVER_LOG); exit 1
-
-test-stop-server:
-	@lsof -ti :$(TEST_SERVER_PORT) | xargs kill >/dev/null 2>&1 || true
-	@rm -f $(TEST_SERVER_LOG)
-
-stop: test-stop-server
+stop:
 	@$(MAIN_MAKE) stop PORT=$(PORT)
 

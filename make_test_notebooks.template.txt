@@ -1,3 +1,0 @@
-# Notebooks ./make_test converts on startup, one path per line.
-# This is your local copy (gitignored); the shared default is make_test_notebooks.template.txt.
-# Paths can be in _notebooks/ or a project's notebooks/ folder, for example:
