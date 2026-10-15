@@ -158,90 +158,48 @@ If you have problems with port-in-use errors in VSCode, you can stop Python proc
    - **Store Data**: SQL Alchemy is used to interact with the database, storing and retrieving data as needed.
 
 
-## Using Postman
+## Test Interfaces with REST Client
 
-Postman is a powerful tool for testing APIs. It allows developers to send HTTP requests to their APIs, inspect responses, and automate testing. Here are some key points and steps to guide your discussion on Postman:
+Install **REST Client** by Huachao Mao in VS Code and open the Flask backend
+repository. Select its `local` REST Client environment; the shared `baseUrl`
+comes from `.vscode/settings.json`. Do not override it with a file-level URL.
 
-1. **Postman Concepts**:
-   - Postman can be used to test individual endpoints of the backend API without needing the frontend to be fully developed.
-   - This allows developers to ensure that the backend logic is working correctly before integrating it with the frontend.
+Start with the request blocks in
+[API Interfaces and Testing]({{ site.baseurl }}/python/flask/api/contracts-testing).
+Keep requests in `.http` files, separate them with `###`, and choose **Send Request**
+above the individual request. Inspect the response status, headers, and JSON.
+These are manual checks, not automatically executed assertions.
 
-2. **Backend / Frontend are independent until Integration**:
-   - Developers can verify that each API endpoint behaves as expected, which simplifies debugging and ensures that the backend is robust before integration with the frontend.
-   - Postman can help in designing and documenting APIs.
-     - By defining the expected inputs and outputs for each endpoint, developers can establish clear requirements for the frontend.
-     - This ensures that both frontend and backend teams are aligned on the API specifications.
+### Agree on the Boundary
 
-4. **Postman Demo**:
+Before frontend integration, both developers should agree on the method, path,
+required input fields, authentication, success response, and error response.
+Use the existing source files rather than inventing routes from their filenames:
 
-### Demonstration Steps
+| Interface | Handler and Data | First Check |
+| --- | --- | --- |
+| Jokes | `hacks/joke.py` calls `hacks/jokes.py` | Read `/api/jokes/count`, then `/api/jokes`. |
+| Users | `api/user.py` calls `model/user.py` | Authenticate, then read `/api/id`. |
+| Microblog | `api/microblog_api.py` calls `model/microblog.py` | After authentication, read `/api/microblog?limit=5`. |
 
-1. **Open Postman**:
-   - Launch the Postman application on your computer.
+### Authenticate with the Existing Request File
 
-2. **Create a New Request**:
-   - Click on the "New" button and select "Request".
-   - Enter a name for your request and choose a collection to save it in.
+Open `api/user_auth.http` and choose **Send Request**. Enter your own credentials
+when prompted; never commit passwords or copy them into lesson request files.
+REST Client remembers response cookies by default for subsequent requests to
+the same host. Authenticate again after changing environments.
 
-3. **Set the Request Method and URL**:
-   - Select the HTTP method (e.g., GET, POST, PUT, DELETE) from the dropdown menu.
-   - Enter the URL of the API endpoint you want to test (e.g., `http://127.0.0.1:8587/api/jokes`).
+For the full user CRUD sequence, inspect `api/user_crud.http` with your teacher,
+use an Admin account and a disposable UID, and set `kasm_server_needed` to
+`false` unless server provisioning is intended. Stop on any failed prerequisite;
+do not update or delete a user whose test creation did not succeed.
 
-4. **Add Request Body (for POST/PUT requests)**:
-   - If you are sending data to the server (e.g., for a POST or PUT request), add the request body in the "Body" tab.
-   - Select the appropriate format (e.g., JSON) and enter the data.
+### Compare Direct Requests with the Frontend
 
-5. **Send the Request**:
-   - Click the "Send" button to send the request to the server.
-
-6. **Inspect the Response**:
-   - Review the response returned by the server in the "Response" section.
-   - Check the status code, headers, and body to ensure that the API is behaving as expected.
-
-7. **Save the Request**:
-   - Save the request in a collection for future use and documentation.
-
-### Summary
-
-- **Testing Frontend in Different Parts**: Use Postman to test individual backend endpoints.
-- **Independent Testing**: Verify backend functionality independently before integration.
-- **API Design and Documentation**: Use Postman to design and document APIs, establishing clear requirements for the frontend.
-- **Demonstration**: Follow the steps to create, send, and inspect requests using Postman.
-
-
-### Authenticate through Postman
-
-Here’s how you can use Postman to authenticate users:
-
-Request type `POST`
-Endpoint `http://127.0.0.1:8887/api/authenticate`
-
-To authenticate different users, you need to send the appropriate JSON payload in the body of the request. i
-
-Here are examples for different users:
-Payload in Body-Raw-JSON 
-    Toby: `{"uid": "toby", "password": "123Toby!"}`
-    Hop:  `{"uid": "hop", "password": "123Hoby!"}`
-    Niko: `{"uid": "niko", "password": "123Niko!"}`
-
-
-### GET requests through Postman
-
-Testing your APIs using Postman will save time!  It will help you determine if backend is working prior to defining frontend.  This enables you to split the work between people or debug backend prior to completing frontend work.
-
-Request type `GET`
-
-Obtain list of Users
-Endpoint: `http://127.0.0.1:8887/api/users`
-
-Obtain list of posts for logged in user.  This should change depending on cookies.
-Endpoint: `http://127.0.0.1:8887/api/post`
-
-Obtain a list of sections (aka communities) in flocker.
-Endpoint: `http://127.0.0.1:8887/api/section`
-
-Obtain a list of groups (aka sub communities) in flocker.
-Endpoint: `http://127.0.0.1:8887/api/group`
+Once a REST Client request works, compare the frontend's Network-panel request
+with it. Match the method, exact route, inputs, authentication, and response
+shape. REST Client does not enforce browser CORS rules, so browser integration
+still needs its own check. Use only local or authorized test data for mutations.
 
 
 
@@ -401,7 +359,7 @@ The code for API endpoints is located in the [flocker_backend repository](https:
 ### Key Points
 
 - **View in VSCode**: It's best to view these files in VSCode.
-- **Testing with Postman**: Use Postman and run `main.py` in debug mode to verify code performance.
+- **Testing with REST Client**: Use REST Client and run `main.py` in debug mode to verify code performance.
 - **Request Handling**: These files handle `POST`, `GET`, `PUT`, and `DELETE` requests from the frontend.
 - **RESTful Responses**: Methods provide RESTful responses containing JSON and status codes (e.g., 200, 500).
 

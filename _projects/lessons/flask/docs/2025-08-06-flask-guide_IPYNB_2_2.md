@@ -15,7 +15,7 @@ breadcrumb: true
 lesson_group: Flask
 ---
 
-# Flask, Postman, and Backend UIs
+# Flask, REST Client, and Backend UIs
 
 **Focus of this Blog:** Backend fundamentals + real-world application via a demo project
 
@@ -55,15 +55,20 @@ def create_user():
 
 ---
 
-### Postman (API Testing Tool)
+### REST Client (API Testing in VS Code)
 
-Postman lets you send requests to your API without needing a full frontend.
+Install **REST Client** by Huachao Mao and open the Flask backend repository.
+Select its `local` environment, then open `api/user_auth.http` and
+`api/user_crud.http`. Choose **Send Request** above one request at a time and
+inspect the response status, headers, and body.
 
 **Students and teachers should show how to:**
 
 - Send a `POST` request with JSON
 - View the response (status codes, error messages)
-- Chain requests: e.g., login → get token → access protected route
+- Authenticate through the prompted login request, then use the remembered
+  response cookie for protected requests on the same host
+- Select `baseUrl` through the backend's REST Client environment settings
 
 ---
 
@@ -87,25 +92,26 @@ Helps bridge the gap between “just APIs” and a full application.
 
 A real, running backend system using Flask that supports:
 
-- User registration & login (with optional token auth)
-- Calendar API: create, list, delete events
-- Issues API: submit and track feedback/issues
-- Backend UI: simple dashboard that pulls data from these APIs
+- Users: `api/user.py` and `model/user.py`, including authentication
+- Jokes: `hacks/joke.py` and file-backed data in `hacks/jokes.py`
+- Microblog: `api/microblog_api.py` and `model/microblog.py`
+- Backend UI: server-rendered Jinja templates for administration
 
 ### Suggested Tinkering Extensions for Teachers:
 
-**Use Postman to:**
+**Use REST Client to:**
 
-- Register a user
-- Log in, get back a token
-- Create a calendar event
-- Submit an issue
+- Read `/api/jokes/count` and `/api/jokes` without authentication
+- Authenticate with `api/user_auth.http`, then inspect `/api/id`
+- Read `/api/microblog?limit=5` with the authenticated cookie
+- Send an authenticated empty-content microblog request and inspect its
+  validation error without creating a post
 
 **Switch to the backend UI and show:**
 
 - The user now appears in the dashboard
-- Events and issues are visible/editable
-- *Optional:* Edit something in the UI and check if it reflects when you query via Postman again
+- Compare displayed backend data with the JSON returned by API requests
+- *Optional:* Edit something in the UI and check if it reflects when you query via REST Client again
 
 ---
 
@@ -119,7 +125,7 @@ A real, running backend system using Flask that supports:
 
 ## 5. Tips for Teaching Backend Logic
 
-- Start with teaching the logic behind Postman and backend requests
+- Start with teaching the logic behind REST Client and backend requests
 - Let students build one route at a time and test it as they go.
 - Encourage debugging with print statements/logs.
 - Keep the UI simple (e.g., a table of users, or just a form) to focus on function over form.
@@ -128,12 +134,12 @@ A real, running backend system using Flask that supports:
 
 ## 6. Wrap-Up
 
-**Recap:** Flask handles routes and logic, Postman helps test, backend UI makes it usable.
+**Recap:** Flask handles routes and logic, REST Client helps test, backend UI makes it usable.
 
 **Provide access to:**
 
 - The Flask codebase
-- A ready-to-import Postman collection
+- Version-controlled `.http` request files without committed credentials
 - Simple UI templates or examples
 
 **Optional challenge:** Let students extend the backend with one more API (e.g., notes, assignments)
@@ -146,8 +152,8 @@ Ready to dive in?
 
 We’ve set up a simple Flask starter repo to help you explore everything you learned in this recap. It includes:
 
-- A working backend with user registration, calendar, and issue APIs
-- Sample Postman collection to test endpoints
+- A backend with user, jokes, and microblog APIs
+- REST Client authentication and user CRUD request files
 - A basic backend UI to view and manage data
 
  **[View the Flask Starter Repo](https://github.com/Open-Coding-Society/flask)**
@@ -164,24 +170,34 @@ We’ve set up a simple Flask starter repo to help you explore everything you le
 2. **Install Dependencies:**
 
    ```bash
+  python -m venv venv
+  source venv/bin/activate
    pip install -r requirements.txt
    ```
 
-3. **Initialize and Run the Server:**
+3. **Configure and Run the Server:**
+
+  Follow the backend README for local configuration. Database reset is a
+  separate, potentially destructive operation: inspect `scripts/db_init.py`
+  and its backup requirements with your teacher rather than running it as a
+  routine startup command.
 
    ```bash
-   python scripts/db_init.py
-   python __init__.py
    python main.py
    ```
 
-4. **Test with Postman or Visit the UI:**
+4. **Test with REST Client or Visit the UI:**
 
-   - Try hitting the endpoints or log in to the localhost UI using Postman
+  - Select the local environment and send a request from an `.http` file.
+  - The full user CRUD sequence requires Admin access. Use a disposable UID,
+    set `kasm_server_needed` to `false` unless provisioning is intended, and
+    stop before Update/Delete if test-user creation did not succeed.
+  - Read [API Interfaces and Testing]({{ site.baseurl }}/python/flask/api/contracts-testing)
+    for the jokes, user, and microblog request examples.
 
 ### 🙌 Bonus Challenge
 
-Try adding your own API route — maybe for notes, assignments, or anything else! Then use Postman to test it.
+Try adding your own API route — maybe for notes, assignments, or anything else! Then use REST Client to test it.
 
 ---
 

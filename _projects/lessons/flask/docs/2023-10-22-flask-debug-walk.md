@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Flask Debug Walk-Through
-description: Start using Flask API's with Frontend or Postman.
+description: Trace Flask APIs with the frontend debugger and VS Code REST Client requests.
 permalink: "/flask-debug-walk"
 toc: true
 type: ccc
@@ -199,56 +199,31 @@ To set up the workspace for your frontend project, follow these steps:
    - **Store Data**: SQL Alchemy is used to interact with the database, storing and retrieving data as needed.
 
 
-## Discuss Postman
+## Debug Requests with REST Client
 
-Postman is a powerful tool for testing APIs. It allows developers to send HTTP requests to their APIs, inspect responses, and automate testing. Here are some key points and steps to guide your discussion on Postman:
+1. Install **REST Client** by Huachao Mao in VS Code and open the Flask backend.
+2. Start `main.py` with the Python debugger and select the `local` REST Client
+   environment. Check that its shared `baseUrl` matches the backend's port.
+3. Place a breakpoint in the handler you are studying: user `_Security.post`,
+   jokes `_ReadCount.get`, or microblog `_CRUD.get`.
+4. Open `api/user_auth.http` and choose **Send Request** to authenticate when
+   required. Supply credentials through its prompts. For the public jokes
+   count request, authentication is not required.
+5. Send the matching `.http` request from
+   [API Interfaces and Testing]({{ site.baseurl }}/python/flask/api/contracts-testing).
+   Step into the data function or model; compare the inputs with the contract.
+6. Continue execution before expecting a response in REST Client. Inspect the
+   HTTP status, headers, and body, not just whether the request connected.
+7. Repeat from the frontend and compare the Network-panel request. Direct
+   REST Client checks do not verify browser CORS behavior.
 
-1. **Postman Concepts**:
-   - Postman can be used to test individual endpoints of the backend API without needing the frontend to be fully developed.
-   - This allows developers to ensure that the backend logic is working correctly before integrating it with the frontend.
+Trace the three paths separately:
 
-2. **Backend / Frontend are independent until Integration**:
-   - Developers can verify that each API endpoint behaves as expected, which simplifies debugging and ensures that the backend is robust before integration with the frontend.
-   - Postman can help in designing and documenting APIs.
-     - By defining the expected inputs and outputs for each endpoint, developers can establish clear requirements for the frontend.
-     - This ensures that both frontend and backend teams are aligned on the API specifications.
+- `hacks/joke.py` -> `hacks/jokes.py`: file-backed jokes data.
+- `api/user.py` -> `model/user.py`: authentication and user persistence.
+- `api/microblog_api.py` -> `model/microblog.py`: authenticated posts and topics.
 
-4. **Postman Demo**:
-
-### Demonstration Steps
-
-1. **Open Postman**:
-   - Launch the Postman application on your computer.
-
-2. **Create a New Request**:
-   - Click on the "New" button and select "Request".
-   - Enter a name for your request and choose a collection to save it in.
-
-3. **Set the Request Method and URL**:
-   - Select the HTTP method (e.g., GET, POST, PUT, DELETE) from the dropdown menu.
-   - Enter the URL of the API endpoint you want to test (e.g., `http://127.0.0.1:8587/api/jokes`).
-
-4. **Add Request Headers (if needed)**:
-   - If your API requires specific headers (e.g., Content-Type, Authorization), add them in the "Headers" tab.
-
-5. **Add Request Body (for POST/PUT requests)**:
-   - If you are sending data to the server (e.g., for a POST or PUT request), add the request body in the "Body" tab.
-   - Select the appropriate format (e.g., JSON) and enter the data.
-
-6. **Send the Request**:
-   - Click the "Send" button to send the request to the server.
-
-7. **Inspect the Response**:
-   - Review the response returned by the server in the "Response" section.
-   - Check the status code, headers, and body to ensure that the API is behaving as expected.
-
-8. **Save the Request**:
-   - Save the request in a collection for future use and documentation.
-
-### Summary
-
-- **Testing Frontend in Different Parts**: Use Postman to test individual backend endpoints.
-- **Independent Testing**: Verify backend functionality independently before integration.
-- **API Design and Documentation**: Use Postman to design and document APIs, establishing clear requirements for the frontend.
-- **Demonstration**: Follow the steps to create, send, and inspect requests using Postman.
+REST Client remembers response cookies by default. Keep the host consistent
+and authenticate again after switching environments. Use disposable local
+records for writes; the request files are manual checks, not an automated suite.
 

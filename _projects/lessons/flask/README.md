@@ -14,10 +14,17 @@ The shared `nav/flask.html` points at the current map and core routes.
 
 ## Week 10
 
+Teach APIs with VS Code REST Client and `.http` files, using the sibling backend's
+`api/user_auth.http`, `api/user_crud.http`, and shared environment `baseUrl`.
+The source examples are `api/user.py` with `model/user.py`, `hacks/joke.py` with
+file-backed `hacks/jokes.py`, and `api/microblog_api.py` with `model/microblog.py`.
+Read-only requests come first; credential prompts, cookie reuse, authorized test
+data, and mutation side effects are part of the contract/testing lesson.
+
 Only these Flask readings are assigned to CSP Week 10:
 
 - `/python/flask/api/contracts-testing`: interface agreements and API test cases.
-- `/flask--api`: existing workspace, interface, and Postman planning reference.
+- `/flask--api`: existing workspace, interface, and REST Client planning reference.
 - `/flask-debug-walk`: existing request tracing and debugging reference.
 
 Intro, ideation, login, and AWS deployment remain browseable references rather

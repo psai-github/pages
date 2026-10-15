@@ -35,17 +35,80 @@ than assuming every endpoint uses the same fields or status codes.
 | Errors | What happens for missing fields, invalid values, missing records, or unauthorized access? |
 | Side effects | Does the request create, change, or delete data? How will test data be cleaned up? |
 
-For example, a **proposed** reading-list interface might accept
-`POST /api/books` with `{"title": "A Book"}` and return `201` with an object
-containing `id` and `title`. A blank title might return `400` with an error
-message. This is a design example, not an endpoint supplied by this site.
-Compare the proposed contract with your Flask route and agree on any changes.
+## Three Interfaces to Trace
+
+| Example | HTTP Handler | Data Layer | Start Here |
+| --- | --- | --- | --- |
+| Jokes | `hacks/joke.py` | `hacks/jokes.py`, JSON file storage | `GET /api/jokes/count` returns an object with `count`; `GET /api/jokes` returns a list. |
+| Users | `api/user.py` | `model/user.py`, SQLAlchemy | Authenticate with `POST /api/authenticate`, then inspect `GET /api/id`. |
+| Microblog | `api/microblog_api.py` | `model/microblog.py`, `MicroBlog` and `Topic` | After authentication, `GET /api/microblog?limit=5` returns an object with `microblogs` and `count`. |
+
+Find each blueprint's prefix and resource registration, then follow the handler
+to its data function or model. Jokes use file-backed data, not a SQLAlchemy
+model. The jokes create handler is unfinished: a registered URL is not proof
+that every CRUD operation is implemented.
 
 ## Test the Backend Without the Frontend
 
-Use Postman with a local or authorized test backend, not production records.
-Keep the backend URL in a Postman environment variable such as `baseUrl`.
-Do not put real passwords, cookies, or tokens into a committed collection.
+Use the **REST Client** extension by Huachao Mao in VS Code with a local or
+authorized test backend, not production records.
+
+1. Open the **Flask backend repository** in VS Code and install REST Client.
+2. Use **REST Client: Switch Environment** to select `local`. The backend's
+  `.vscode/settings.json` supplies the shared `baseUrl`, normally
+  `http://127.0.0.1:8587`. Match it to your configured backend port.
+3. Open `api/user_auth.http`. Its `# @prompt` declarations ask for your user ID
+  and password when you choose **Send Request**. Never commit real credentials.
+4. Keep the same host when testing protected endpoints: REST Client remembers
+  response cookies by default. Authenticate again after switching environments.
+5. Put the following requests in a new `.http` file under that backend's `api/`
+  directory. Do not add a file-level `@baseUrl`: it would override the selected
+  environment. Separate requests with `###` and send each independently.
+
+These are manual checks, not automatically executed assertions. REST Client
+does not run the whole sequence as an automated test suite; inspect each
+response before sending the next request.
+
+{% raw %}
+```http
+### Jokes count - expect 200 and a JSON object with count
+GET {{baseUrl}}/api/jokes/count
+Accept: application/json
+
+### Jokes list - expect 200 and a JSON array
+GET {{baseUrl}}/api/jokes
+Accept: application/json
+
+### Current user - authenticate in user_auth.http first
+GET {{baseUrl}}/api/id
+Accept: application/json
+
+### Microblog list - authenticate first; expect microblogs and count
+GET {{baseUrl}}/api/microblog?limit=5
+Accept: application/json
+
+### Microblog validation - authenticate first; expect 400, no new post
+POST {{baseUrl}}/api/microblog
+Content-Type: application/json
+Accept: application/json
+
+{
+  "content": ""
+}
+```
+{% endraw %}
+
+The empty-content request should return `Content is required` after successful
+authentication. If authentication fails first, you have tested that boundary,
+not content validation. Inspect the actual status and message before continuing.
+
+For user CRUD, read the existing `api/user_crud.http` and its expected responses
+with your teacher. It requires an Admin account for the full sequence. Use a
+disposable UID, and set `kasm_server_needed` to `false` unless you deliberately
+intend to request server provisioning. Stop if Create fails; do not continue
+to Update or Delete an existing account.
+
+### Inspect Each Response
 
 1. Start the Flask backend and send a known-good request directly to its route.
 2. Set the method, URL, headers, authentication, and body from the contract.
@@ -71,9 +134,9 @@ returns the right data.
 
 Once direct API tests pass, send the same request from the frontend and compare
 it in the browser's Network panel. Check the request method, exact URL, JSON
-body, status, and response against the working Postman request.
+body, status, and response against the working REST Client request.
 
-Postman does not enforce browser CORS rules. If Postman succeeds but the browser
+REST Client does not enforce browser CORS rules. If REST Client succeeds but the browser
 fails, inspect the browser console, preflight request, allowed origin, and
 credential settings. Do not bypass authentication or disable security to hide
 an integration failure.
@@ -84,7 +147,7 @@ results, and errors as well as successful data.
 
 ## Week 10 Readings
 
-- [Planning Workspaces and APIs]({{ site.baseurl }}/flask--api): frontend/backend boundaries and Postman planning.
+- [Planning Workspaces and APIs]({{ site.baseurl }}/flask--api): frontend/backend boundaries and REST Client planning.
 - [Flask Debug Walk-Through]({{ site.baseurl }}/flask-debug-walk): trace a request through the browser and backend debugger.
 - [Flask API map]({{ site.baseurl }}/python/flask/api): supporting API fundamentals.
 - [All Flask references]({{ site.baseurl }}/topics/?category=flask).

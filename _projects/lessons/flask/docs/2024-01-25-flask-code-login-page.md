@@ -416,7 +416,7 @@ api.add_resource(_Security, '/authenticate')
 
 This adds '/authenticate' to the _Security class endpoint. Therefore, the full API endpoint is `/api/authenticate`
 
-You can try using  [Postman](https://learning.postman.com/docs/introduction/overview/) to test out your  backend API on flask_2025 before starting this part! If you're running flask_2025 locally add the `api/user` to the [localhost](https://blog.hubspot.com/website/what-is-localhost#:~:text=Typically%2C%20you%20can%20access%20the,running%20on%20the%20same%20device.) link.
+You can try using  [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) to test out your  backend API on flask_2025 before starting this part! If you're running flask_2025 locally add the `api/user` to the [localhost](https://blog.hubspot.com/website/what-is-localhost#:~:text=Typically%2C%20you%20can%20access%20the,running%20on%20the%20same%20device.) link.
 
 ## Error Handling
 
@@ -426,7 +426,7 @@ What does the try/catch error block do in the login function for config.js? The 
 
 - A 401 error
 
-Developers can always check the console and use Postman to understand how to debug code. Thus, logging the error in the console is important. But why is the login message involved? In order for users to have a seamless experience, they need to be informed of how their actions led to  the error. (How that error translates to the user's mistake is up to developers presentation.)
+Developers can always check the console and use REST Client to understand how to debug code. Thus, logging the error in the console is important. But why is the login message involved? In order for users to have a seamless experience, they need to be informed of how their actions led to  the error. (How that error translates to the user's mistake is up to developers presentation.)
 
 In this case, we have a login message element that details the error so text pops up on their screen when they make a mistake.  However, alerting the user might be a viable option as well.
 

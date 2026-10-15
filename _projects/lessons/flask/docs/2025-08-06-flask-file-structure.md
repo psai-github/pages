@@ -3,7 +3,7 @@ toc: true
 layout: post
 data: flask
 title: Flask File Structure
-description: An overview of the file structure of flask
+description: Navigate the OCS Flask starter, from application setup and API routes to models, templates, and API testing.
 categories:
 - Python
 - flask
@@ -12,267 +12,165 @@ author: Anusha Khobare
 breadcrumb: true
 lesson_group: Flask
 ---
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Flask Project Structure Explained - Interactive Guide</title>
-<style>
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 2rem;
-    line-height: 1.6;
-    color: #ffffff; /* All text white */
-    background: none;
-    background-color: #000000; /* Black background for contrast */
-  }
 
-  /* File tree styles */
-  .file-tree {
-    max-width: 600px;
-    margin: 0 auto 3rem;
-    background: none;
-    border: none;
-    padding: 1rem 2rem;
-    user-select: none;
-    font-family: Consolas, monospace;
-    font-size: 1rem;
-    white-space: pre;
-    cursor: default;
-    color: #ffffff; /* White text */
-  }
+<!-- markdownlint-disable MD033 -->
 
-  .clickable {
-    color: #ffffff; /* White text */
-    cursor: pointer;
-    border-radius: 4px;
-    outline: none;
-    text-decoration: underline; /* Underline links */
-  }
-  .clickable:hover, .clickable:focus {
-    background-color: rgba(255, 255, 255, 0.1); /* subtle white highlight */
-    color: #ffffff;
-  }
+<p class="ocs__description">The Open Coding Society Flask starter is the backend beside your Pages frontend. The tree below shows selected files in that repository, not every feature. Follow a filename to its explanation.</p>
 
-  .indent-1 { padding-left: 1.5em; }
-  .indent-2 { padding-left: 3em; }
-  .indent-3 { padding-left: 4.5em; }
+<nav aria-label="Flask repository structure">
+  <div class="ocs__tree-item"><strong>flask/</strong></div>
+  <div class="ocs__tree">
+    <div class="ocs__tree-item"><a href="#init-py" data-flask-path="__init__.py"><code>__init__.py</code></a> - shared application and configuration</div>
+    <div class="ocs__tree-item"><a href="#main-py" data-flask-path="main.py"><code>main.py</code></a> - routes, blueprints, and server startup</div>
+    <div class="ocs__tree-item"><a href="#demo-app" data-flask-path="app.py"><code>app.py</code></a> - separate introductory demo</div>
+    <div class="ocs__tree-item"><a href="#api-folder" data-flask-path="api"><code>api/</code></a></div>
+    <div class="ocs__tree">
+      <div class="ocs__tree-item"><a href="#users-py" data-flask-path="api/user.py"><code>user.py</code></a> - user API endpoints</div>
+      <div class="ocs__tree-item"><code data-flask-path="api/section.py">section.py</code> - section API endpoints</div>
+      <div class="ocs__tree-item"><a href="#microblog-api" data-flask-path="api/microblog_api.py"><code>microblog_api.py</code></a> - authenticated microblog requests</div>
+      <div class="ocs__tree-item"><a href="#api-testing" data-flask-path="api/user_auth.http"><code>user_auth.http</code></a> - authentication requests</div>
+      <div class="ocs__tree-item"><a href="#api-testing" data-flask-path="api/user_crud.http"><code>user_crud.http</code></a> - manual CRUD checks</div>
+    </div>
+    <div class="ocs__tree-item"><a href="#models-folder" data-flask-path="model"><code>model/</code></a></div>
+    <div class="ocs__tree">
+      <div class="ocs__tree-item"><a href="#user-py" data-flask-path="model/user.py"><code>user.py</code></a> - users and related persistence</div>
+      <div class="ocs__tree-item"><code data-flask-path="model/post.py">post.py</code> - post persistence</div>
+      <div class="ocs__tree-item"><a href="#microblog-api" data-flask-path="model/microblog.py"><code>microblog.py</code></a> - microblog persistence</div>
+    </div>
+    <div class="ocs__tree-item"><a href="#jokes-api" data-flask-path="hacks"><code>hacks/</code></a></div>
+    <div class="ocs__tree">
+      <div class="ocs__tree-item"><a href="#jokes-api" data-flask-path="hacks/joke.py"><code>joke.py</code></a> - jokes API blueprint</div>
+      <div class="ocs__tree-item"><a href="#jokes-api" data-flask-path="hacks/jokes.py"><code>jokes.py</code></a> - file-backed jokes data</div>
+    </div>
+    <div class="ocs__tree-item"><code>scripts/</code></div>
+    <div class="ocs__tree">
+      <div class="ocs__tree-item"><a href="#db-init-py" data-flask-path="scripts/db_init.py"><code>db_init.py</code></a> - database reset and seed workflow</div>
+    </div>
+    <div class="ocs__tree-item"><a href="#dashboard-html" data-flask-path="templates"><code>templates/</code></a></div>
+    <div class="ocs__tree">
+      <div class="ocs__tree-item"><code data-flask-path="templates/index.html">index.html</code></div>
+      <div class="ocs__tree-item"><code data-flask-path="templates/login.html">login.html</code></div>
+      <div class="ocs__tree-item"><code data-flask-path="templates/u2table.html">u2table.html</code></div>
+    </div>
+    <div class="ocs__tree-item"><a href="#styles-css" data-flask-path="static"><code>static/</code></a> - assets and JavaScript served by Flask</div>
+    <div class="ocs__tree-item"><a href="#instance-folder" data-flask-path="instance"><code>instance/</code></a> - runtime data, uploads, and local databases</div>
+    <div class="ocs__tree-item"><a href="#requirements-txt" data-flask-path="requirements.txt"><code>requirements.txt</code></a> - Python dependencies</div>
+    <div class="ocs__tree-item"><a href="#deployment" data-flask-path="Dockerfile"><code>Dockerfile</code></a> - production container</div>
+  </div>
+</nav>
 
-  /* Lesson section card style */
-  section.lesson-section {
-    max-width: 700px;
-    margin: 2rem auto;
-    background: none;
-    border: 1.5px solid #ffffff; /* white outline */
-    border-left: 6px solid #ffffff;
-    border-radius: 8px;
-    padding: 1.5rem 2rem;
-    box-shadow: none;
-    scroll-margin-top: 80px;
-    color: #ffffff; /* White text */
-  }
-
-  section.lesson-section h2 {
-    margin-top: 0;
-    color: #ffffff; /* White heading */
-    font-weight: 700;
-    border-bottom: 2px solid #ffffff;
-    padding-bottom: 0.3rem;
-    font-size: 1.6rem;
-  }
-
-  section.lesson-section p {
-    font-size: 1rem;
-    margin: 1rem 0;
-    color: #ffffff; /* White text */
-  }
-
-  section.lesson-section pre {
-    background-color: transparent;
-    border: 1px solid #ffffff; /* white border */
-    border-radius: 6px;
-    padding: 1rem 1.2rem;
-    font-size: 1rem;
-    overflow-x: auto;
-    font-family: 'Courier New', Courier, monospace;
-    color: #ffffff; /* White code text */
-  }
-
-  /* Headings for sub files */
-  .subfile-header {
-    font-weight: 600;
-    margin-top: 1rem;
-    color: #ffffff; /* White text */
-  }
-</style>
-</head>
-<body>
-
-<h1 style="text-align:center; color:#ffffff; margin-bottom:2rem;">Flask Project Structure: Explained</h1>
-
-<div class="file-tree" aria-label="Flask project file structure">
-/flask-app
-│
-├── <span class="clickable" role="button" tabindex="0" onclick="scrollToSection('init-py')">init.py</span>
-├── <span class="clickable" role="button" tabindex="0" onclick="scrollToSection('main-py')">main.py</span>
-│
-├── <span class="clickable" role="button" tabindex="0" onclick="scrollToSection('api-folder')">/api</span>
-│   ├── users.py
-│   ├── calendar.py
-│   └── issues.py
-│
-├── <span class="clickable" role="button" tabindex="0" onclick="scrollToSection('models-folder')">/models</span>
-│   ├── user.py
-│   ├── event.py
-│   └── issue.py
-│
-├── /scripts
-│   <span class="clickable indent-2" role="button" tabindex="0" onclick="scrollToSection('db-init-py')">└── db_init.py</span>
-│
-├── /templates
-│   <span class="clickable indent-2" role="button" tabindex="0" onclick="scrollToSection('dashboard-html')">└── dashboard.html</span>
-│
-├── /static
-│   <span class="clickable indent-2" role="button" tabindex="0" onclick="scrollToSection('styles-css')">└── styles.css</span>
-│
-└── <span class="clickable" role="button" tabindex="0" onclick="scrollToSection('requirements-txt')">requirements.txt</span>
-</div>
-
-<!-- Sections for clickable files -->
-
-<section id="main-py" class="lesson-section" tabindex="-1">
-  <h2>main.py</h2>
-  <p><strong>Purpose:</strong> Entry point of your app. Runs the server using Flask.</p>
-  <pre>from __init__ import create_app
-app = create_app()
-
-if __name__ == '__main__':
-    app.run(debug=True)
-  </pre>
+<section id="init-py">
+  <h2 class="ocs__section-title">Application Setup: __init__.py</h2>
+  <p class="ocs__text">This module creates the shared Flask application and configures extensions including SQLAlchemy, Flask-Login, CORS, and Flask-Migrate. It reads environment settings, including values loaded from your local <code>.env</code>. Keep secrets out of version control.</p>
+  <p class="ocs__text">This starter uses a shared application object, not a <code>create_app()</code> factory. Its setup includes:</p>
+  <pre><code>app = Flask(__name__)
+db = SQLAlchemy(app)</code></pre>
+  <p class="ocs__text">The development server's default <code>FLASK_PORT</code> is <code>8587</code>; an environment setting can override it. CORS settings determine which frontend origins may make browser requests with credentials.</p>
 </section>
 
-<section id="init-py" class="lesson-section" tabindex="-1">
-  <h2>__init__.py</h2>
-  <p><strong>Purpose:</strong> App configuration and Blueprint registration.</p>
-  <p>Sets up Flask and brings together all your routes.</p>
-  <pre>from flask import Flask
-from api.users import user_api
-from api.calendar import calendar_api
+<section id="main-py">
+  <h2 class="ocs__section-title">Application Assembly: main.py</h2>
+  <p class="ocs__text">The main module imports the shared objects, imports API blueprints and model classes, registers the blueprints, and defines server-rendered routes. These are excerpts from that assembly, not replacement files:</p>
+  <pre><code>from __init__ import app, db, login_manager
+from api.user import user_api
 
-def create_app():
-    app = Flask(__name__)
-    app.register_blueprint(user_api)
-    app.register_blueprint(calendar_api)
-    return app
-  </pre>
+app.register_blueprint(user_api)</code></pre>
+  <p class="ocs__text">For local development, activate the Flask repository's virtual environment and run the main module from that repository's root:</p>
+  <pre><code>source venv/bin/activate
+python main.py</code></pre>
+  <p class="ocs__text">Its development entry point uses the configured port, debug mode, and <code>use_reloader=False</code>. The Pages frontend runs separately; this command does not start Jekyll.</p>
 </section>
 
-<section id="api-folder" class="lesson-section" tabindex="-1">
-  <h2>/api folder</h2>
-  <p>This folder contains the API route handler files such as <code>users.py</code>, <code>calendar.py</code>, and <code>issues.py</code>.</p>
+<section id="demo-app">
+  <h2 class="ocs__section-title">Separate Demo: app.py</h2>
+  <p class="ocs__text">The root <code>app.py</code> creates a different Flask application for an introductory example. It keeps an in-memory <code>InfoModel</code>, exposes <code>/api/data</code>, and defaults to port <code>5001</code> when run directly. It is not the full starter's entry point and does not replace the database-backed application assembled by <code>main.py</code>.</p>
 </section>
 
-<section id="models-folder" class="lesson-section" tabindex="-1">
-  <h2>/models folder</h2>
-  <p>This folder contains database model files like <code>user.py</code>, <code>event.py</code>, and <code>issue.py</code>.</p>
+<section id="api-folder">
+  <h2 class="ocs__section-title">HTTP Interfaces: api/</h2>
+  <p class="ocs__text">API modules define blueprints and resource handlers. A handler reads a request, validates inputs and permissions, calls the model or other supporting logic, and returns an HTTP response. A module must be registered with the shared application before its routes are available.</p>
+  <p class="ocs__text">Examples in this repository include <code>user.py</code>, <code>section.py</code>, <code>post.py</code>, and <code>microblog_api.py</code>. A filename is not itself a route: combine the blueprint's prefix with its registered resource path.</p>
 </section>
 
-<section id="users-py" class="lesson-section" tabindex="-1">
-  <h2>/api/users.py</h2>
-  <p>Handles user-related routes like <code>/register</code> and <code>/login</code>.</p>
-  <p>Defines HTTP endpoints and returns JSON responses for user actions.</p>
+<section id="users-py">
+  <h2 class="ocs__section-title">User Endpoints: api/user.py</h2>
+  <p class="ocs__text">The user blueprint has the prefix <code>/api</code>. Flask-RESTful resources add paths such as <code>/authenticate</code>, <code>/id</code>, and <code>/user</code>.</p>
+  <div class="ocs__table-wrap">
+    <table class="ocs__table">
+      <thead><tr><th scope="col">Request</th><th scope="col">Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>POST /api/authenticate</code></td><td>Authenticate and issue the authentication cookie.</td></tr>
+        <tr><td><code>GET /api/id</code></td><td>Read the currently authenticated user's identity.</td></tr>
+        <tr><td><code>/api/user</code></td><td>User CRUD resource; input fields and permissions depend on the HTTP method.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="ocs__text">The <code>/login</code> route in the main module serves the backend's HTML login flow. Do not confuse it with the JSON API's <code>/api/authenticate</code> endpoint.</p>
 </section>
 
-<section id="calendar-py" class="lesson-section" tabindex="-1">
-  <h2>/api/calendar.py</h2>
-  <p>Handles calendar-related routes like <code>/calendar/create</code>.</p>
-  <p>Defines HTTP endpoints and returns JSON responses for calendar events.</p>
+<section id="models-folder">
+  <h2 class="ocs__section-title">Persistence: model/</h2>
+  <p class="ocs__text">The directory is named <code>model</code>, singular. Its modules define database-backed entities and operations. They use the shared <code>db</code> object rather than creating a separate database connection for every API request.</p>
+  <p class="ocs__text">Keep HTTP request handling in API modules and persistence responsibilities in model modules. The same model can support both JSON APIs and server-rendered administration pages.</p>
 </section>
 
-<section id="issues-py" class="lesson-section" tabindex="-1">
-  <h2>/api/issues.py</h2>
-  <p>Handles issue reporting routes like <code>/issues/report</code>.</p>
-  <p>Defines HTTP endpoints and returns JSON responses for issues.</p>
+<section id="jokes-api">
+  <h2 class="ocs__section-title">Jokes: HTTP Handler and File-Backed Data</h2>
+  <p class="ocs__text">The blueprint in <code>hacks/joke.py</code> uses the prefix <code>/api/jokes</code>. It calls functions in <code>hacks/jokes.py</code>, which store JSON under the configured data folder. Start with read-only <code>GET /api/jokes/count</code> and <code>GET /api/jokes</code> requests in REST Client, then trace the calls to <code>countJokes()</code> and <code>getJokes()</code>.</p>
+  <p class="ocs__text">This is a data layer without SQLAlchemy. Like and jeer requests change stored votes; the create handler is unfinished. Do not assume every registered operation has a complete implementation.</p>
 </section>
 
-<section id="user-py" class="lesson-section" tabindex="-1">
-  <h2>/models/user.py</h2>
-  <p>Defines the User database model using SQLAlchemy.</p>
-  <pre># models/user.py
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True)
-  </pre>
+<section id="microblog-api">
+  <h2 class="ocs__section-title">Microblog: Authenticated API and Models</h2>
+  <p class="ocs__text">The blueprint in <code>api/microblog_api.py</code> uses <code>/api</code> and registers the <code>/microblog</code> resource. Its CRUD handlers use <code>token_required()</code> and the <code>MicroBlog</code> and <code>Topic</code> classes from <code>model/microblog.py</code>.</p>
+  <p class="ocs__text">After authenticating with the existing REST Client request, send <code>GET /api/microblog?limit=5</code>. Inspect the <code>microblogs</code> array and <code>count</code> field. Compare read filtering with the create handler's required <code>content</code>, 280-character limit, and optional <code>topicId</code>, <code>topicPath</code>, and <code>data</code>. Updates and deletes also check ownership or Admin permissions.</p>
 </section>
 
-<section id="event-py" class="lesson-section" tabindex="-1">
-  <h2>/models/event.py</h2>
-  <p>Defines the Event database model (example).</p>
-  <pre># models/event.py
-class Event(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100))
-    date = db.Column(db.DateTime)
-  </pre>
+<section id="user-py">
+  <h2 class="ocs__section-title">User Persistence: model/user.py</h2>
+  <p class="ocs__text">This module defines the user model and related persistence used by the starter. The API imports <code>User</code> from <code>model.user</code>. Read the actual model before choosing JSON field names or assuming a database column is called <code>username</code>.</p>
 </section>
 
-<section id="issue-py" class="lesson-section" tabindex="-1">
-  <h2>/models/issue.py</h2>
-  <p>Defines the Issue database model (example).</p>
-  <pre># models/issue.py
-class Issue(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.String(255))
-  </pre>
+<section id="db-init-py">
+  <h2 class="ocs__section-title">Database Reset: scripts/db_init.py</h2>
+  <div class="ocs__callout" role="note">
+    <p class="ocs__text"><strong>Destructive operation:</strong> this script can back up, drop and recreate database tables, then seed data. It is not just a harmless <code>db.create_all()</code> helper. Do not run it against a database you need to preserve without checking the selected database, backup, and restore plan.</p>
+  </div>
+  <p class="ocs__text">The script imports the assembled application's <code>app</code>, <code>db</code>, and <code>generate_data</code> from <code>main</code>. It performs schema operations inside an application context. Inspect its prompts and backup requirements with your teacher before resetting a development database.</p>
 </section>
 
-<section id="db-init-py" class="lesson-section" tabindex="-1">
-  <h2>scripts/db_init.py</h2>
-  <p>Utility script to initialize the database.</p>
-  <pre># scripts/db_init.py
-from __init__ import create_app
-from models import db
-
-app = create_app()
-with app.app_context():
-    db.create_all()
-  </pre>
+<section id="dashboard-html">
+  <h2 class="ocs__section-title">Backend Views: templates/</h2>
+  <p class="ocs__text">Flask uses Jinja templates for server-rendered pages such as <code>index.html</code>, <code>login.html</code>, and <code>u2table.html</code>. For example, the main module's user-table route queries users and passes them to <code>render_template("u2table.html", user_data=users)</code>.</p>
+  <p class="ocs__text">These backend views are separate from the Pages site's Jekyll/Liquid templates. JSON API routes serve data to the Pages frontend; Jinja routes render HTML on the Flask server.</p>
 </section>
 
-<section id="dashboard-html" class="lesson-section" tabindex="-1">
-  <h2>templates/dashboard.html</h2>
-  <p>HTML template using Jinja2 for backend UI or dashboard.</p>
-  <pre>&lt;h1&gt;User Dashboard&lt;/h1&gt;
-&lt;ul&gt;
-  {% raw %}{% for user in users %}{% endraw %}
-    &lt;li&gt;{{ user.username }}&lt;/li&gt;
-  {% raw %}{% endfor %}{% endraw %}
-&lt;/ul&gt;
-  </pre>
+<section id="styles-css">
+  <h2 class="ocs__section-title">Backend Assets: static/</h2>
+  <p class="ocs__text">The current repository has <code>static/assets/</code> and <code>static/js/</code>. Templates can reference these Flask-served assets. There is no root <code>static/styles.css</code> in this starter; check the actual asset directories before adding a stylesheet reference.</p>
 </section>
 
-<section id="styles-css" class="lesson-section" tabindex="-1">
-  <h2>static/styles.css</h2>
-  <p>CSS file for styling frontend views served by Flask.</p>
+<section id="instance-folder">
+  <h2 class="ocs__section-title">Runtime Data: instance/</h2>
+  <p class="ocs__text">Local SQLite data is stored under <code>instance/volumes/</code>, including <code>user_management.db</code>. Application configuration also creates upload and data directories under the instance folder. The database configuration can select MySQL when the required database environment settings are supplied. Treat runtime data and backups differently from source files.</p>
 </section>
 
-<section id="requirements-txt" class="lesson-section" tabindex="-1">
-  <h2>requirements.txt</h2>
-  <p>Dependency file listing Python packages required for the app.</p>
-  <p>Install all dependencies with:</p>
-  <pre>pip install -r requirements.txt</pre>
+<section id="api-testing">
+  <h2 class="ocs__section-title">API Checks: .http Request Files</h2>
+  <p class="ocs__text">Open <code>api/user_auth.http</code> and <code>api/user_crud.http</code> in VS Code with the REST Client extension. The repository's <code>.vscode/settings.json</code> defines shared and environment-specific <code>baseUrl</code> values. Select the local environment before testing; keep credentials out of committed settings.</p>
+  <p class="ocs__text">Authenticate separately, then send CRUD requests one at a time using disposable development records. These files are manual checks, not an automated test suite. Updating or deleting other users requires the appropriate permissions, and requests sent to the deployed environment can change real data.</p>
+  <p class="ocs__text">Use REST Client to compare the user, jokes, and microblog interfaces. Check method, URL, status, response fields, and expected failures before connecting the frontend. Browser-only CORS behavior still needs a browser integration check.</p>
+  <p class="ocs__text"><a href="{{ site.baseurl }}/python/flask/api/contracts-testing">API Interfaces and Testing</a> covers the Week 10 contract and test checklist.</p>
 </section>
 
-<script>
-  // Smooth scroll to section
-  function scrollToSection(id) {
-    const el = document.getElementById(id);
-    if (el) {
-      el.focus();
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  }
-</script>
+<section id="requirements-txt">
+  <h2 class="ocs__section-title">Dependencies: requirements.txt</h2>
+  <p class="ocs__text">Install the backend's Python dependencies into its own virtual environment from the Flask repository root:</p>
+  <pre><code>source venv/bin/activate
+pip install -r requirements.txt</code></pre>
+</section>
 
-</body>
-</html>
+<section id="deployment">
+  <h2 class="ocs__section-title">Deployment: Dockerfile</h2>
+  <p class="ocs__text">The container starts Gunicorn with <code>main:app</code>, importing the assembled application. This differs from running Flask's debug development server. The repository also contains <code>docker-compose.yml</code> and Nginx configuration; review those deployment settings separately from the local startup workflow.</p>
+</section>

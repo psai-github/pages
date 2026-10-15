@@ -210,7 +210,7 @@ This adds the /user to the the _CRUD class endpoint. Therefore,  the api endpoin
 
 
 
-You can try using  [Postman](https://learning.postman.com/docs/introduction/overview/) to test out your  backend API on flask_2025 before starting this part! If you're running flask_2025 locally add the `api/user` to the [localhost](https://blog.hubspot.com/website/what-is-localhost#:~:text=Typically%2C%20you%20can%20access%20the,running%20on%20the%20same%20device.) link.
+You can try using  [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) to test out your  backend API on flask_2025 before starting this part! If you're running flask_2025 locally add the `api/user` to the [localhost](https://blog.hubspot.com/website/what-is-localhost#:~:text=Typically%2C%20you%20can%20access%20the,running%20on%20the%20same%20device.) link.
 
 
 
@@ -223,7 +223,7 @@ What does the try/catch error block do? The try block attempts to send a payload
 
 Error handling is needed for users and developers. For example, what if a user creates the same user twice? If we have the same uid for both users, we get a 400 BAD REQUEST Error. 
 
-Developers can always check the console and use Postman to understand how to debug code. Thus,  logging the error in the console is important. But why is the sign up message involved? In order for users to have a seamless experience, they need to be informed of how their actions led to  the error. (How that error translates to the user's mistake is up to our interpretation.) 
+Developers can always check the console and use REST Client to understand how to debug code. Thus,  logging the error in the console is important. But why is the sign up message involved? In order for users to have a seamless experience, they need to be informed of how their actions led to  the error. (How that error translates to the user's mistake is up to our interpretation.)
 
 In this case, we have a signup message element that details the error so text pops up on their screen when they make a mistake.  However, alerting the user might be more a  clear option as well.
 

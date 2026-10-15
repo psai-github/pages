@@ -113,7 +113,7 @@ In our Teaching we will explore the Flask Jinja2 server side frontend, but we wi
 
 1. **Setup Flask Environment:** Download VS Code and install dependencies, including flask. 
 
-2. **Explore CRUD Operations:** Create a simple database-driven application by forking/generating a template using the teacher's backend(flask_2025) Use  Flask  Restful API to add CRUD operations. Test with Postman.
+2. **Explore CRUD Operations:** Create a simple database-driven application by forking/generating a template using the teacher's backend(flask_2025) Use  Flask  Restful API to add CRUD operations. Test with REST Client.
 
 3. **Implement JWT Authentication:** Secure your Flask application using JWT tokens for user authentication and authorization.
 

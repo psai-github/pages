@@ -691,11 +691,11 @@ If you want to learn more about how backend APIs work with our framework, Flask 
 
 Now that we've covered the backend API basics, it;s  important to note that  before forming out HTTP request in the frontend, we have to test if our API is ready to receive data, in the form of JSON, from the frontend. But how do we do that? 
 
-The answer is Postman!
+The answer is REST Client!
 
-Postman is a popular tool used for API development and testing. It allows developers to make HTTP requests to web servers, inspect responses, and debug APIs. 
+REST Client is a popular tool used for API development and testing. It allows developers to make HTTP requests to web servers, inspect responses, and debug APIs.
 
-Check out the [Postman Docs](https://learning.postman.com/docs/introduction/overview/) to learn more on how to get started. Postman is a really helpful tool to validate backend logic and help construct the HTTP request in the frontend. The teacher will also expect you to work with Postman in the future!
+Check out the [REST Client Docs](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) to learn more on how to get started. REST Client is a really helpful tool to validate backend logic and help construct the HTTP request in the frontend. The teacher will also expect you to work with REST Client in the future!
 
 
 
