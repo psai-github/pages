@@ -84,31 +84,92 @@ class ServerTest(unittest.TestCase):
         self.assertIn("command not found", output)
 
 
+class ServeTest(unittest.TestCase):
+    """The agent stays open and checks each station the game asks about, once per request."""
+
+    def run_serve(self, next_views, post=None):
+        views = iter(next_views)
+        posts = []
+
+        def fake_get(url, token=None):
+            self.assertEqual(token, "secret-token")
+            item = next(views)
+            if isinstance(item, Exception):
+                raise item
+            return item
+
+        def fake_post(url, body, token=None):
+            posts.append((url, body, token))
+            return post(body) if post else {"status": "VERIFIED", "checks": []}
+
+        def stop_after_views(_seconds):
+            pass
+
+        with mock.patch.object(toolchain_agent, "get_json", side_effect=fake_get), \
+                mock.patch.object(toolchain_agent, "post_json", side_effect=fake_post), \
+                mock.patch.object(toolchain_agent, "run_command", side_effect=fake_runner({"code --version": (0, "1.94.2")})), \
+                redirect_stdout(io.StringIO()) as out:
+            try:
+                code = toolchain_agent.serve("http://localhost:8585", "abc", "secret-token", "linux", Path("."),
+                                             sleep=stop_after_views)
+            except StopIteration:
+                code = None
+        return code, posts, out.getvalue()
+
+    def test_checks_each_new_request_once(self):
+        editor = {"status": "CHECKING", "stationId": "editor-isle-tower", "requestedAt": 1}
+        code, posts, _ = self.run_serve([
+            {"status": "CHECKING", "stationId": "build-bridge", "requestedAt": 0},
+            editor, editor,
+            {"status": "VERIFIED", "stationId": "editor-isle-tower", "requestedAt": 1},
+            {"status": "CHECKING", "stationId": "editor-isle-tower", "requestedAt": 2},  # Check again
+        ])
+        self.assertIsNone(code)
+        self.assertEqual([body["stationId"] for _, body, _ in posts],
+                         ["build-bridge", "editor-isle-tower", "editor-isle-tower"])
+        self.assertTrue(all(url.endswith("/api/toolchain/sessions/abc/results") for url, _, _ in posts))
+        self.assertTrue(all(token == "secret-token" for _, _, token in posts))
+        self.assertEqual(posts[1][1]["checks"], [{"id": "editor", "exitCode": 0, "output": "1.94.2"}])
+
+    def test_network_blips_do_not_stop_the_agent(self):
+        blip = toolchain_agent.AgentError("Could not reach server")
+        code, posts, out = self.run_serve([blip, blip, {"status": "CHECKING", "stationId": "editor-isle-tower", "requestedAt": 1}])
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(out.count("Lost contact"), 1)
+
+    def test_expired_token_ends_the_agent(self):
+        code, posts, out = self.run_serve([toolchain_agent.AgentError("expired", 401)])
+        self.assertEqual(code, 1)
+        self.assertIn("Pair a new agent", out)
+
+    def test_results_for_a_station_the_game_left_are_skipped(self):
+        def moved_on(_body):
+            raise toolchain_agent.AgentError("different station", 409)
+        code, posts, out = self.run_serve([{"status": "CHECKING", "stationId": "editor-isle-tower", "requestedAt": 1}], post=moved_on)
+        self.assertIn("moved on", out)
+
+
 class MainFlowTest(unittest.TestCase):
-    def test_pairs_then_sends_results_with_the_bearer_token(self):
+    def test_pairs_once_then_serves_with_the_token_in_memory(self):
         calls = []
 
         def fake_post(url, body, token=None):
             calls.append((url, body, token))
-            if url.endswith("/pair"):
-                return {"sessionId": "abc", "stationId": "editor-isle-tower", "agentToken": "secret-token"}
-            return {"status": "VERIFIED", "checks": [{"label": "VS Code or Cursor", "passed": True}]}
+            return {"sessionId": "abc", "stationId": "editor-isle-tower", "agentToken": "secret-token"}
 
         with mock.patch.object(toolchain_agent.getpass, "getpass", return_value="  the-code  "), \
                 mock.patch.object(toolchain_agent, "post_json", side_effect=fake_post), \
-                mock.patch.object(toolchain_agent, "run_command", side_effect=fake_runner({"code --version": (0, "1.94.2")})), \
+                mock.patch.object(toolchain_agent, "serve", return_value=0) as serve, \
                 redirect_stdout(io.StringIO()) as out:
             self.assertEqual(toolchain_agent.main(["--server", "http://localhost:8585"]), 0)
 
-        self.assertEqual(calls[0], ("http://localhost:8585/api/toolchain/pair", {"pairingCode": "the-code"}, None))
-        self.assertEqual(calls[1][0], "http://localhost:8585/api/toolchain/sessions/abc/results")
-        self.assertEqual(calls[1][2], "secret-token")
-        self.assertEqual(calls[1][1]["checks"][0], {"id": "editor", "exitCode": 0, "output": "1.94.2"})
+        self.assertEqual(calls, [("http://localhost:8585/api/toolchain/pair", {"pairingCode": "the-code"}, None)])
+        self.assertEqual(serve.call_args.args[:4], ("http://localhost:8585", "abc", "secret-token", toolchain_agent.detect_os()))
         self.assertNotIn("secret-token", out.getvalue())
         self.assertNotIn("the-code", out.getvalue())
 
     def test_rejected_code_prints_the_server_message(self):
-        error = toolchain_agent.AgentError("Pairing code is invalid, expired, or already used")
+        error = toolchain_agent.AgentError("Pairing code is invalid, expired, or already used", 401)
         with mock.patch.object(toolchain_agent.getpass, "getpass", return_value="old"), \
                 mock.patch.object(toolchain_agent, "post_json", side_effect=error), \
                 redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()) as err:
