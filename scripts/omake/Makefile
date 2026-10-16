@@ -1,11 +1,11 @@
-# Fast localhost for testing. Run ./make_test, stop with ./make_test stop.
+# Fast localhost for testing. Run ./omake, stop with ./omake stop.
 # Reuses targets from the main Makefile via sub-make.
 
 HOST ?= localhost
 PORT ?= 4500
-NOTEBOOK_LIST := make_test_notebooks.txt
-# Second config only make_test loads (adds _make_test/plugins); see that file.
-JEKYLL_CONFIG := _config.yml,_make_test/jekyll_config.yml
+NOTEBOOK_LIST := omake_notebooks.txt
+# Second config only omake loads (adds scripts/omake/plugins); see that file.
+JEKYLL_CONFIG := _config.yml,scripts/omake/jekyll_config.yml
 PYTHON := venv/bin/python3
 # One batched, parallel conversion call instead of a make + Python start per notebook.
 CONVERT_JOBS ?= 4
@@ -14,15 +14,15 @@ SHELL = /bin/bash -c
 .SHELLFLAGS = -e
 
 MAIN_MAKE := $(MAKE) --no-print-directory -f Makefile
-TEST_MAKE := $(MAKE) --no-print-directory -f Makefile.test
+TEST_MAKE := $(MAKE) --no-print-directory -f scripts/omake/Makefile
 
 PROJECT_FILE := _projects/.makeprojects
 ALL_PROJECTS := $(shell grep -v '^\#' $(PROJECT_FILE) 2>/dev/null | grep -v '^$$' | cut -d: -f1)
 
-.DEFAULT_GOAL := make_test
-.PHONY: make_test stop test-build-project-assets test-convert-required-notebooks test-notebook-list test-convert-listed-notebooks test-jekyll-serve
+.DEFAULT_GOAL := omake
+.PHONY: omake stop test-build-project-assets test-convert-required-notebooks test-notebook-list test-convert-listed-notebooks test-jekyll-serve
 
-make_test: stop
+omake: stop
 	@$(MAIN_MAKE) clean
 	@$(TEST_MAKE) test-build-project-assets
 	@echo "Converting :dev project notebooks only..."
@@ -32,9 +32,9 @@ make_test: stop
 	@$(TEST_MAKE) test-jekyll-serve
 	@echo ""
 	@echo "Test server running on http://localhost:$(PORT)"
-	@echo "  Add notebooks:  $(NOTEBOOK_LIST), then rerun ./make_test"
+	@echo "  Add notebooks:  $(NOTEBOOK_LIST), then rerun ./omake"
 	@echo "  Jekyll logs:    tail -f /tmp/jekyll$(PORT).log"
-	@echo "  Stop:           ./make_test stop"
+	@echo "  Stop:           ./omake stop"
 
 # Only `index` (assets + index.md): the template's `notebooks` target now converts everything.
 test-build-project-assets:
@@ -51,14 +51,14 @@ test-build-project-assets:
 # Reference pages crash Jekyll if their `lesson_category` has no posts.
 test-convert-required-notebooks:
 	@echo "Converting notebooks required for the site to build..."
-	@$(PYTHON) scripts/required_test_notebooks.py | \
+	@$(PYTHON) scripts/omake/required_notebooks.py | \
 		xargs -r -d '\n' $(PYTHON) scripts/convert_notebooks.py --jobs $(CONVERT_JOBS)
 
 # Personal list is gitignored, so each machine creates its own on first run.
 test-notebook-list:
 	@if [ ! -f $(NOTEBOOK_LIST) ]; then \
 		echo "📋 Creating $(NOTEBOOK_LIST) - add your notebook paths there"; \
-		echo "# Notebooks ./make_test converts, one path per line (_notebooks/... or _projects/...)." > $(NOTEBOOK_LIST); \
+		echo "# Notebooks ./omake converts, one path per line (_notebooks/... or _projects/...)." > $(NOTEBOOK_LIST); \
 	fi
 
 test-convert-listed-notebooks: test-notebook-list
@@ -71,7 +71,7 @@ test-convert-listed-notebooks: test-notebook-list
 	done | xargs -r -d '\n' $(PYTHON) scripts/convert_notebooks.py --jobs $(CONVERT_JOBS) || \
 		echo "⚠️  Some notebooks in $(NOTEBOOK_LIST) failed to convert (see above)"
 
-# Same as the main `jekyll-serve` plus the make_test config; reuses its log file,
+# Same as the main `jekyll-serve` plus the omake config; reuses its log file,
 # so the main `wait-for-server` and `stop` work unchanged.
 test-jekyll-serve:
 	@$(MAIN_MAKE) bundle-install

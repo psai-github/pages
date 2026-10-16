@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Print the notebooks make_test must convert so `lesson_category` pages don't crash Jekyll."""
+"""Print the notebooks omake must convert so `lesson_category` pages don't crash Jekyll."""
 
 import json
 import re
@@ -7,7 +7,7 @@ from pathlib import Path
 
 import yaml
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 LESSON_CATEGORY_PATTERN = re.compile(r"^lesson_category:\s*(.+?)\s*$", re.MULTILINE)
 
 

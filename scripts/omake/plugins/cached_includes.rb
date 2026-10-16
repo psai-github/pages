@@ -1,8 +1,8 @@
-# Loaded only by ./make_test via _make_test/jekyll_config.yml.
-# Renders each include listed in `make_test_cached_includes` once per build and
+# Loaded only by ./omake via scripts/omake/jekyll_config.yml.
+# Renders each include listed in `omake_cached_includes` once per build and
 # reuses the output, instead of re-rendering it on every page.
 
-module MakeTest
+module Omake
   module CachedIncludes
     @cache = {}
 
@@ -13,7 +13,7 @@ module MakeTest
     def render(context)
       site = context.registers[:site]
       file = render_variable(context) || @file
-      cacheable = site.config.fetch("make_test_cached_includes", [])
+      cacheable = site.config.fetch("omake_cached_includes", [])
       # Parameterized includes can render differently per call, so never cache them.
       return super unless @params.nil? && cacheable.include?(file)
 
@@ -26,7 +26,7 @@ module MakeTest
 end
 
 Jekyll::Hooks.register :site, :pre_render do
-  MakeTest::CachedIncludes.cache.clear
+  Omake::CachedIncludes.cache.clear
 end
 
-Jekyll::Tags::IncludeTag.prepend(MakeTest::CachedIncludes)
+Jekyll::Tags::IncludeTag.prepend(Omake::CachedIncludes)

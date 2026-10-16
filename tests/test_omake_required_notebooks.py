@@ -1,11 +1,11 @@
-"""Behavior tests for picking the minimum notebooks make_test must convert."""
+"""Behavior tests for picking the minimum notebooks omake must convert."""
 
 import json
 import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.required_test_notebooks import find_required_notebooks
+from scripts.omake.required_notebooks import find_required_notebooks
 
 
 def write_notebook(path, front_matter):
