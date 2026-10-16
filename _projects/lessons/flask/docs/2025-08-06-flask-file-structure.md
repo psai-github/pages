@@ -160,7 +160,7 @@ python main.py</code></pre>
   <p class="ocs__text">Open <code>api/user_auth.http</code> and <code>api/user_crud.http</code> in VS Code with the REST Client extension. The repository's <code>.vscode/settings.json</code> defines shared and environment-specific <code>baseUrl</code> values. Select the local environment before testing; keep credentials out of committed settings.</p>
   <p class="ocs__text">Authenticate separately, then send CRUD requests one at a time using disposable development records. These files are manual checks, not an automated test suite. Updating or deleting other users requires the appropriate permissions, and requests sent to the deployed environment can change real data.</p>
   <p class="ocs__text">Use REST Client to compare the user, jokes, and microblog interfaces. Check method, URL, status, response fields, and expected failures before connecting the frontend. Browser-only CORS behavior still needs a browser integration check.</p>
-  <p class="ocs__text"><a href="{{ site.baseurl }}/python/flask/api/contracts-testing">API Interfaces and Testing</a> covers the Week 10 contract and test checklist.</p>
+  <p class="ocs__text">Follow the <a href="{{ site.baseurl }}/python/flask/api">Flask API learning path</a>: Jokes, Users, and Microblog. Each lesson traces requests into the corresponding data/model calls; detailed model and SQL work belongs in a separate series.</p>
 </section>
 
 <section id="requirements-txt">

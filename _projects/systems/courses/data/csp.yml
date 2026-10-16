@@ -143,6 +143,7 @@ Sprint3:
   9:
     theme: "Interactive Features and Data"
     goals:
+      - "Easy API: Read Jokes Handlers and File-Backed Data Calls"
       - "Forms: Input Handling and Validation"
       - "Client-Side State: localStorage and User Preferences"
       - "APIs: Fetching and Working with Application Data"
@@ -150,8 +151,8 @@ Sprint3:
   10:
     theme: "Integration and Testing"
     goals:
-      - "API Interfaces: Agree on Requests, Responses, and Error Contracts"
-      - "Flask API Testing: REST Client, Status Codes, and Invalid Inputs"
+      - "User API: Authentication, REST Client, and User Model Calls"
+      - "API Interfaces: Requests, Responses, Permissions, and Errors"
       - "Integration: Combining Team Contributions"
       - "User Experience: UX Refinement"
       - "Testing: End-to-End Application Testing"
@@ -159,6 +160,7 @@ Sprint3:
   11:
     theme: "Project Polish and Presentation"
     goals:
+      - "Microblog API: Filtering, Validation, and Model Call Tracing"
       - "Code Review and Debugging"
       - "Documentation: README, Setup, and Usage"
       - "N@tM Presentation Practice"

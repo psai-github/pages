@@ -4,9 +4,7 @@ layout: post
 tailwind: true
 infoGraph: python_flask
 title: Python/Flask Backend Infograph
-description: As your development journey continues, it's time to go behind the scenes.
-  Flask is a lightweight, flexible web framework for Python that makes it easy to
-  build web applications and APIs. Unlike larger frameworks.
+description: Explore the Flask backend through its crash course, project anatomy, API learning path, and Jinja administration views.
 courses:
   csp:
     week: 8

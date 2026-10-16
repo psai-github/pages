@@ -192,7 +192,7 @@ We’ve set up a simple Flask starter repo to help you explore everything you le
   - The full user CRUD sequence requires Admin access. Use a disposable UID,
     set `kasm_server_needed` to `false` unless provisioning is intended, and
     stop before Update/Delete if test-user creation did not succeed.
-  - Read [API Interfaces and Testing]({{ site.baseurl }}/python/flask/api/contracts-testing)
+  - Read the [Flask API learning path]({{ site.baseurl }}/python/flask/api)
     for the jokes, user, and microblog request examples.
 
 ### 🙌 Bonus Challenge

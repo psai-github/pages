@@ -12,33 +12,56 @@ Every lesson carries the `flask` category, so the shared collection is
 `/topics/?category=flask`. `/navigation/flask/` hosts the same Topics browser.
 The shared `nav/flask.html` points at the current map and core routes.
 
-## Week 10
+## Top-Level Reference Map
+
+The top-level map in `docs/2025-11-08-flask-infograph.md` uses
+`_data/python_flask.yml` to organize the retained reference areas:
+
+- Crash Course: `/python/flask/crash-course` - server setup and a minimal application.
+- Anatomy: `/python/flask/anatomy` - the repository structure and its responsibilities.
+- APIs: `/python/flask/api` - the separate three-example API learning path.
+- Jinja UI: `/python/flask/jinja_ui` - backend administration views.
+
+Use this map and the anatomy guide to decide which supporting non-API
+documents belong here. Do not duplicate the API lessons in those references.
+Keep course placements in `courses.<course>.week` front matter and course data;
+do not put teaching-week labels or time estimates in lesson prose or map cards.
+
+## API Learning Path
 
 Teach APIs with VS Code REST Client and `.http` files, using the sibling backend's
 `api/user_auth.http`, `api/user_crud.http`, and shared environment `baseUrl`.
 The source examples are `api/user.py` with `model/user.py`, `hacks/joke.py` with
 file-backed `hacks/jokes.py`, and `api/microblog_api.py` with `model/microblog.py`.
 Read-only requests come first; credential prompts, cookie reuse, authorized test
-data, and mutation side effects are part of the contract/testing lesson.
+data, and mutation side effects are discussed in the API lessons.
 
-Only these Flask readings are assigned to CSP Week 10:
+The central API page is `docs/2025-11-08-api-basics.md`, published at
+`/python/flask/api`. Its three infographic entries come from
+`_data/python_flask_api.yml`. Keep only these dedicated API lessons:
 
-- `/python/flask/api/contracts-testing`: interface agreements and API test cases.
-- `/flask--api`: existing workspace, interface, and REST Client planning reference.
-- `/flask-debug-walk`: existing request tracing and debugging reference.
+- `/python/flask/api/jokes` - Easy API, handlers and file-backed jokes data.
+- `/python/flask/api/users` - authentication, user operations, and model calls.
+- `/python/flask/api/microblog` - filters, validation, permissions, and model calls.
 
-Intro, ideation, login, and AWS deployment remain browseable references rather
-than Week 10 assignments. Existing Week 7 foundations and the Week 8 map retain
-their schedules. Lesson bodies, including historical examples, are preserved;
-moving a reference is not certification that every old setup command is current.
+After these examples, students read Flask code for further API learning.
+The model scope is identifying calls, inputs, and returned values; detailed
+SQLAlchemy models and SQL belong in a separate series. Other API tutorials
+are deleted, not published as an archive. See `API_MATERIAL_REVIEW.md` for
+useful material retained in the lessons and ideas worth revisiting elsewhere.
+
+Non-API references (structure, setup, deployment, Jinja, ideation, and digital
+citizenship) remain available. Existing course placements remain in front
+matter. Retention is not certification that every historical
+setup command or unrelated example is current.
 
 ## Route Collisions Resolved
 
 The Anatomy notebook formerly duplicated `/python/flask/crash-course`. It now
 uses `/python/flask/server-anatomy`; the existing authored file-structure guide
-retains `/python/flask/anatomy`, the route used by the map. The API hacks notebook
-formerly duplicated `/api-basics/lesson/handling-data`; it now uses
-`/api-basics/lesson/hacks`, while the data-handling lesson keeps its original URL.
+retains `/python/flask/anatomy`, the route used by the map. The former standalone
+`hacks/api-usage/jokes_flask.md` demo was retired so only the Easy API lesson owns
+`/python/flask/api/jokes`.
 
 ## Build and Check
 
