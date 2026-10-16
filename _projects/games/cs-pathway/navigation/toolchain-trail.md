@@ -19,5 +19,12 @@ both entry points share the same level and profile data.
 import { startFullPageLevel } from '@assets/js/projects/cs-pathway/fullPageLevel.js';
 import GameLevelCsPath4Toolchain from '@assets/js/projects/cs-pathway/levels/GameLevelCsPath4Toolchain.js';
 
-startFullPageLevel({ containerId: 'cs-pathway-toolchain-trail', levelClass: GameLevelCsPath4Toolchain, path: '{{ site.baseurl }}' });
+// Fixed 16:9 stage, scaled to fit the window, so the whole map stays visible
+// when the browser shares the screen with a terminal.
+startFullPageLevel({
+  containerId: 'cs-pathway-toolchain-trail',
+  levelClass: GameLevelCsPath4Toolchain,
+  path: '{{ site.baseurl }}',
+  stage: { width: 1600, height: 900 },
+});
 </script>
