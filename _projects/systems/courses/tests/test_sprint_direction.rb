@@ -135,4 +135,32 @@ assert(csp_intro.text.include?("Personalized Project Reference") && csp_intro.te
 assert(!csp_intro.text.match?(/Postman/i) && csp_intro.text.include?("REST Client"),
        "CSP debugging guidance uses REST Client")
 
+csa_sprint = YAML.safe_load(File.read(File.join(PROJECT, "data/csa.yml")), aliases: true).fetch("Sprint3")
+assert(csa_sprint.fetch("direction_include") == "projects/courses/sprint-intro/csa-sprint-3.md",
+       "CSA Sprint 3 selects its migrated capstone intro")
+csa_page = Nokogiri::HTML.fragment(render_sprint(csa_sprint, course: "csa"))
+csa_intro = csa_page.at_css("section[aria-label='Sprint directions']")
+assert(csa_intro, "CSA Sprint 3 renders the migrated planning content")
+assert(csa_intro.text.include?("Formal CS112/CS113 curriculum alignment begins in Sprint 4"),
+       "CSA intro explains when formal CS112/CS113 alignment begins")
+assert(csa_intro.text.include?("Not every student is expected to complete every advanced CS113 layer"),
+       "CSA alignment does not imply every advanced layer is required")
+{ "Assignments" => [5, 10], "Skills" => [4, 5] }.each do |label, (count, total)|
+  heading = csa_intro.css("h3").find { |element| element.text == label }
+  table = heading&.next_element&.at_css("table")
+  assert(table, "CSA #{label} scoring is a table")
+  rows = table.css("tbody tr").reject { |row| row.css("td").first.text == "Total" }
+  assert(rows.size == count && rows.sum { |row| Integer(row.css("td")[1].text.strip) } == total,
+         "CSA preserves its #{label.downcase} categories and #{total}-point total")
+end
+assert(csa_intro.css("ul, ol").empty?, "CSA uses heading/table sections like CSP")
+csa_intro.css("table").each do |table|
+  assert(table["class"] == "ocs__table" && table.parent["class"] == "ocs__table-wrap",
+         "CSA tables use shared styling and responsive wrappers")
+end
+%w[/capstone/toolchain-trail/ /capstone/ocs-admin-security/ /capstone/submissions/
+   /csa/csa2/ /csa/cs112/ /csa/cs113/ /navigation/java-reference/].each do |route|
+  assert(csa_intro.at_css("a[href='/preview#{route}']"), "CSA preserves the capstone/curriculum link: #{route}")
+end
+
 puts "PASS: optional sprint directions, placement, rubric points, navigation, shared descriptions, and missing-file failure"
