@@ -41,7 +41,7 @@ The central API page is `docs/2025-11-08-api-basics.md`, published at
 `_data/python_flask_api.yml`. Keep only these dedicated API lessons:
 
 - `/python/flask/api/jokes` - Easy API, handlers and file-backed jokes data.
-- `/python/flask/api/users` - authentication, user operations, and model calls.
+- `/flask/api/users` - authentication, user operations, and model calls.
 - `/python/flask/api/microblog` - filters, validation, permissions, and model calls.
 
 After these examples, students read Flask code for further API learning.

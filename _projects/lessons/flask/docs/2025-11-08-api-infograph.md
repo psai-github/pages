@@ -25,7 +25,7 @@ separate tutorials for every API.
 | Example | Read the Handler | Follow the Data Call |
 | --- | --- | --- |
 | [Easy API - Jokes]({{ site.baseurl }}/python/flask/api/jokes) | `hacks/joke.py` | Functions in `hacks/jokes.py`, backed by a JSON file |
-| [User API]({{ site.baseurl }}/python/flask/api/users) | `api/user.py` | User operations in `model/user.py` |
+| [User API]({{ site.baseurl }}/flask/api/users) | `api/user.py` | User operations in `model/user.py` |
 | [Microblog API]({{ site.baseurl }}/python/flask/api/microblog) | `api/microblog_api.py` | `MicroBlog` and `Topic` in `model/microblog.py` |
 
 ## The Reading Routine

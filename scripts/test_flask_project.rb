@@ -42,7 +42,7 @@ assert(routes.uniq.size == routes.size, "No duplicate Flask permalinks")
 end
 weekly_routes = {
   "/python/flask/api/jokes" => 9,
-  "/python/flask/api/users" => 10,
+  "/flask/api/users" => 10,
   "/python/flask/api/microblog" => 11
 }
 weekly_routes.each do |route, week|

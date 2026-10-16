@@ -13,7 +13,7 @@ Topics:
     description: "Read a small API and explain how its count and list handlers call the jokes data layer."
   - title: "User API"
     image: "/backend/flask/api_creation.svg"
-    link: "/python/flask/api/users"
+    link: "/flask/api/users"
     alt: "User API"
     keyPoints:
       - "Prompted authentication"

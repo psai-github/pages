@@ -73,5 +73,5 @@ validation or complete CRUD behavior.
 
 Use your existing project discussion to identify the handler for each read,
 show its response shape, and point to the data function it calls. Next, read
-the [User API]({{ site.baseurl }}/python/flask/api/users) to add authentication
+the [User API]({{ site.baseurl }}/flask/api/users) to add authentication
 and a database-backed model boundary.
