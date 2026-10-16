@@ -3,7 +3,7 @@ toc: true
 layout: post
 codemirror: true
 data: flask
-title: Flask and Backend UIs
+title: Flask, REST Client, and Backend UIs
 description: A Holistic Overview of Flask and Backend Operations
 categories:
 - Python
@@ -14,8 +14,6 @@ author: Risha Guha
 breadcrumb: true
 lesson_group: Flask
 ---
-
-# Flask, REST Client, and Backend UIs
 
 **Focus of this Blog:** Backend fundamentals + real-world application via a demo project
 
@@ -92,8 +90,8 @@ Helps bridge the gap between “just APIs” and a full application.
 
 A real, running backend system using Flask that supports:
 
-- Users: `api/user.py` and `model/user.py`, including authentication
 - Jokes: `hacks/joke.py` and file-backed data in `hacks/jokes.py`
+- Users: `api/user.py` and `model/user.py`, including authentication
 - Microblog: `api/microblog_api.py` and `model/microblog.py`
 - Backend UI: server-rendered Jinja templates for administration
 
@@ -144,38 +142,7 @@ A real, running backend system using Flask that supports:
 
 **Optional challenge:** Let students extend the backend with one more API (e.g., notes, assignments)
 
----
-
-## Try It Yourself!
-
-Ready to dive in?
-
-We’ve set up a simple Flask starter repo to help you explore everything you learned in this recap. It includes:
-
-- A backend with user, jokes, and microblog APIs
-- REST Client authentication and user CRUD request files
-- A basic backend UI to view and manage data
-
- **[View the Flask Starter Repo](https://github.com/Open-Coding-Society/flask)**
-
-### How to Get Started
-
-1. **Clone the Repo:**
-
-   ```bash
-   git clone https://github.com/Open-Coding-Society/flask.git
-   cd flask
-   ```
-
-2. **Install Dependencies:**
-
-   ```bash
-  python -m venv venv
-  source venv/bin/activate
-   pip install -r requirements.txt
-   ```
-
-3. **Configure and Run the Server:**
+**Configure and Run the Server:**
 
   Follow the backend README for local configuration. Database reset is a
   separate, potentially destructive operation: inspect `scripts/db_init.py`
@@ -186,13 +153,13 @@ We’ve set up a simple Flask starter repo to help you explore everything you le
    python main.py
    ```
 
-4. **Test with REST Client or Visit the UI:**
+**Test with REST Client or Visit the UI:**
 
-  - Select the local environment and send a request from an `.http` file.
-  - The full user CRUD sequence requires Admin access. Use a disposable UID,
+- Select the local environment and send a request from an `.http` file.
+- The full user CRUD sequence requires Admin access. Use a disposable UID,
     set `kasm_server_needed` to `false` unless provisioning is intended, and
     stop before Update/Delete if test-user creation did not succeed.
-  - Read the [Flask API learning path]({{ site.baseurl }}/python/flask/api)
+- Read the [Flask API learning path]({{ site.baseurl }}/python/flask/api)
     for the jokes, user, and microblog request examples.
 
 ### 🙌 Bonus Challenge
@@ -558,4 +525,4 @@ startBtn.onclick = () => {
 
 **Let us know what you build!**
 
-Tag us on GitHub or submit an issue to share your progress and achievements! 
+Tag us on GitHub or submit an issue to share your progress and achievements!

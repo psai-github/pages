@@ -12,6 +12,7 @@ categories:
 - Python
 lesson_group: Flask
 ---
+
 {%- include tailwind/infograph.html -%}
 
 ## From Examples to Reading Flask Code

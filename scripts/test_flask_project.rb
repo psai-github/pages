@@ -76,6 +76,24 @@ structure_source = File.read(File.join(PROJECT, "docs/2025-08-06-flask-file-stru
 structure_body = structure_source.split(/^---\s*$/, 3).last
 structure_liquid = Liquid::Template.parse(structure_body).render!("site" => { "baseurl" => "/preview" })
 markdown = Jekyll::Converters::Markdown.new(Jekyll.configuration("config" => [], "quiet" => true))
+flask_map_source = File.read(File.join(PROJECT, "docs/2025-11-08-flask-infograph.md"))
+flask_map_body = flask_map_source.split(/^---\s*$/, 3).last
+flask_map = Nokogiri::HTML.fragment(markdown.convert(flask_map_body))
+assert(flask_map.at_css("h2#create-performance-task-priorities"), "The top-level Flask guide includes Create task priorities")
+cpt_priorities = ["Program with Purpose", "Input", "Output", "List or Other Collection",
+        "Student-Developed Procedure", "Sequencing", "Selection", "Iteration",
+        "Calling Procedures", "Testing and Errors"]
+assert(flask_map.css("tbody tr td:first-child").map(&:text) == cpt_priorities,
+  "Create priorities cover purpose, input/output, abstraction, algorithm, calls, and testing")
+assert(flask_map.text.include?("parameters must matter") && flask_map.text.include?("sequencing, selection, and iteration together"),
+  "Create guidance distinguishes a qualifying procedure and its algorithm from scattered framework code")
+assert(flask_map.text.include?("Personalized Project Reference") && flask_map.text.include?("completed on the AP exam"),
+  "Submission guidance distinguishes the PPR from exam-day written responses")
+%w[https://apcentral.collegeboard.org/courses/ap-computer-science-principles/exam
+   https://apcentral.collegeboard.org/media/pdf/ap-csp-student-task-directions.pdf
+   https://apcentral.collegeboard.org/media/pdf/ap-csp-personalized-project-reference-tip-sheet.pdf].each do |url|
+  assert(flask_map.at_css("a[href='#{url}']"), "Create guidance links its official source: #{url}")
+end
 structure = Nokogiri::HTML.fragment(markdown.convert(structure_liquid))
 assert(structure.css("style, script, html, head, body, [style], [onclick]").empty?,
   "Structure guide uses shared styling and native navigation, not a nested page or inline code")

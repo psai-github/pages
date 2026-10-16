@@ -24,7 +24,13 @@ The goal is to demonstrate your ability to design, develop, and deploy a web app
 - User interaction and authentication
 - Dynamic content and performance tracking
 
-These components will fulfill your APCSP Create Performance Task requirements, including code, video, and written reflection.
+These components are full-stack project practice, not automatic fulfillment of
+the AP CSP Create Performance Task. Use the
+[Create task priorities]({{ site.baseurl }}/python/flask/csp/#create-performance-task-priorities)
+to check your own program's input/output, collection, student-developed
+procedure, algorithm, and procedure call. The submitted components are program
+code, video, and a Personalized Project Reference; written responses are
+completed on the AP exam, not uploaded as a separate written reflection.
 
 **Subject and Grade:**  
 Computer Science, Grades 10–12
