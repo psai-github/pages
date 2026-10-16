@@ -8,7 +8,6 @@ categories:
 - Python
 - flask
 permalink: "/python/flask/jinja_ui"
-menu: nav/flask.html
 author: Vibha Mandayam
 breadcrumb: true
 lesson_group: Flask

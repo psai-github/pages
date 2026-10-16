@@ -4,7 +4,6 @@ title: Easy API - Jokes
 description: Read a small Flask API, send REST Client requests, and follow its file-backed data calls.
 permalink: /python/flask/api/jokes
 categories: [flask, Python, APIs]
-courses: {csp: {week: 9}}
 lesson_group: Flask
 toc: true
 ---

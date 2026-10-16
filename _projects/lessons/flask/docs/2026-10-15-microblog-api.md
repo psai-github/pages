@@ -4,7 +4,6 @@ title: Microblog API
 description: Read authenticated microblog handlers, filtering, validation, permissions, and their model calls.
 permalink: /python/flask/api/microblog
 categories: [flask, Python, APIs]
-courses: {csp: {week: 11}}
 lesson_group: Flask
 toc: true
 ---

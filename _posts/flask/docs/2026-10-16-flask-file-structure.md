@@ -2,13 +2,13 @@
 toc: true
 layout: post
 data: flask
-title: Flask File Structure
+title: Flask Anatomy
 description: Navigate the OCS Flask starter, from application setup and API routes to models, templates, and API testing.
-categories:
-- Python
-- flask
-permalink: "/python/flask/anatomy"
-author: Anusha Khobare
+courses:
+  csp:
+    week: 9
+permalink: "/flask/anatomy"
+author: Anusha Khobare, Isabel Marilla
 breadcrumb: true
 lesson_group: Flask
 ---
@@ -139,6 +139,7 @@ python main.py</code></pre>
   <p class="ocs__text">The script imports the assembled application's <code>app</code>, <code>db</code>, and <code>generate_data</code> from <code>main</code>. It performs schema operations inside an application context. Inspect its prompts and backup requirements with your teacher before resetting a development database.</p>
 </section>
 
+
 <section id="dashboard-html">
   <h2 class="ocs__section-title">Backend Views: templates/</h2>
   <p class="ocs__text">Flask uses Jinja templates for server-rendered pages such as <code>index.html</code>, <code>login.html</code>, and <code>u2table.html</code>. For example, the main module's user-table route queries users and passes them to <code>render_template("u2table.html", user_data=users)</code>.</p>
@@ -174,3 +175,46 @@ pip install -r requirements.txt</code></pre>
   <h2 class="ocs__section-title">Deployment: Dockerfile</h2>
   <p class="ocs__text">The container starts Gunicorn with <code>main:app</code>, importing the assembled application. This differs from running Flask's debug development server. The repository also contains <code>docker-compose.yml</code> and Nginx configuration; review those deployment settings separately from the local startup workflow.</p>
 </section>
+
+### Key Components
+
+1. **Frontend (Dining Area)**:
+   - **Customers (Users)**: Interact with the menu, place orders, and receive food.
+   - **Menu (User Interface)**: Displays the options available to customers (e.g., list of users, forms to add new users).
+   - **Order Form (Forms and Buttons)**: Allows customers to place orders (e.g., submit data).
+
+2. **Backend API (Waiter)**:
+   - **Takes Orders (HTTP Requests)**: Receives requests from customers (frontend) and delivers them to the kitchen (backend).
+   - **Brings Food (HTTP Responses)**: Delivers the prepared food from the kitchen (backend) to the customers (frontend).
+
+3. **Backend Model (Kitchen)**:
+   - **Chefs (Server-side Logic)**: Prepare the food (process data, perform operations) according to user input. 
+   - **Order Processing (Endpoints)**: Different stations in the kitchen handle different tasks (e.g., fetching user data, adding new users).
+
+## Backend Model Example
+
+The is a UML diagram. DRAW.io is also easy to use marketplace plugin to create a UML diagram for database planning. Create a UML diagram prior to creating a model file.
+
+```text
++---------------------+
+|        User         |
++--------------------------------+
+| - name: String                 |
+| - uid: String                  |
+| - password: String             |
+| - sections: List<SectionID>    |
+| - kasm_server_needed: Boolean  |
+| - ProfilePicture: Base64 String|
++--------------------------------+
+          |
+          | 1
+          |         (1 * repersents one to many)
+          | *
++----------------------+
+|      Section         |
++----------------------+
+| - SectionID: Integer |
+| - Abbreviation: String |
+| - Name: String       |
++----------------------+
+```

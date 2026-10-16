@@ -9,8 +9,7 @@ categories:
 - DevOps
 - flask
 - Python
-permalink: "/flask-deploy-on-aws"
-menu: nav/flask.html
+permalink: /flask/deploy
 toc: true
 lesson_group: Flask
 ---

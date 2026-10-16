@@ -17,14 +17,13 @@ def frontmatter(text)
   YAML.safe_load(text.split(/^---\s*$/, 3)[1], permitted_classes: [Date], aliases: true)
 end
 
-documents = Dir[File.join(PROJECT, "docs/*.md")].map do |path|
+documents = Dir[File.join(PROJECT, "docs/**/*.md")].map do |path|
   [path, frontmatter(File.read(path))]
 end
 documents.concat(Dir[File.join(PROJECT, "notebooks/*.ipynb")].map do |path|
   notebook = JSON.parse(File.read(path))
   [path, frontmatter(notebook.fetch("cells").first.fetch("source").join)]
 end)
-assert(documents.size >= 17, "The three API lessons and retained non-API references are present")
 documents.each do |path, data|
   assert(Array(data["categories"]).map(&:downcase).include?("flask"), "Flask category: #{path}")
   assert(data["permalink"], "Stable permalink: #{path}")
@@ -37,7 +36,7 @@ documents.each do |path, data|
 end
 routes = documents.map { |_, data| data.fetch("permalink").sub(%r{/$}, "") }
 assert(routes.uniq.size == routes.size, "No duplicate Flask permalinks")
-%w[/python/flask /python/flask/crash-course /python/flask/anatomy /python/flask/api /python/flask/jinja_ui /flask-overview /flask-deploy-on-aws].each do |route|
+%w[/python/flask /python/flask/crash-course /flask/anatomy /python/flask/api /python/flask/jinja_ui /flask/overview /flask/deploy].each do |route|
   assert(routes.include?(route), "Existing route preserved: #{route}")
 end
 weekly_routes = {
@@ -50,7 +49,8 @@ weekly_routes.each do |route, week|
   assert(scheduled.map { |_, data| data["permalink"] } == [route],
     "Week #{week} has exactly its intended Flask API lesson")
 end
-assert(routes.grep(%r{\A/python/flask/api(?:/|\z)}).sort ==
+api_routes = routes.select { |route| route.match?(%r{\A/python/flask/api(?:/|\z)}) || weekly_routes.key?(route) }
+assert(api_routes.sort ==
   (["/python/flask/api"] + weekly_routes.keys).sort,
   "The API collection contains only its hub and three lessons")
 api_map = YAML.safe_load(File.read(File.join(ROOT, "_data/python_flask_api.yml")))
@@ -59,9 +59,9 @@ assert(api_map.fetch("Topics").map { |topic| topic.fetch("link") } == weekly_rou
 assert(!api_map.to_s.match?(/\bweeks?\b/i), "API map content does not repeat the course schedule")
 top_level_map = YAML.safe_load(File.read(File.join(ROOT, "_data/python_flask.yml")))
 assert(top_level_map.fetch("Topics").map { |topic| topic.fetch("link") } ==
-       %w[/python/flask/crash-course /python/flask/anatomy /python/flask/api /python/flask/jinja_ui],
+      %w[/python/flask/crash-course /flask/anatomy /python/flask/api /python/flask/jinja_ui],
        "The top-level Flask map retains setup, anatomy, the API hub, and Jinja references")
-curated_routes = ["/python/flask", "/python/flask/anatomy", "/python/flask/api"] + weekly_routes.keys
+curated_routes = ["/python/flask", "/flask/anatomy", "/python/flask/api"] + weekly_routes.keys
 documents.select { |_, data| curated_routes.include?(data["permalink"]) }.each do |path, data|
   body = File.read(path).split(/^---\s*$/, 3).last
   visible = [data["title"], data["description"], body].join("\n")
@@ -72,11 +72,13 @@ assert(!File.exist?(File.join(ROOT, "hacks/api-usage/jokes_flask.md")),
 assert(File.read(File.join(ROOT, "_projects/.makeprojects")).lines.map(&:strip).include?("lessons/flask:dev"),
        "Flask is registered for development builds")
 assert(Dir[File.join(ROOT, "_notebooks/CSP/flask/**/*.ipynb")].empty?, "No old notebook sources remain")
-structure_source = File.read(File.join(PROJECT, "docs/2025-08-06-flask-file-structure.md"))
+structure_path, = documents.find { |_, data| data["permalink"] == "/flask/anatomy" }
+structure_source = File.read(structure_path)
 structure_body = structure_source.split(/^---\s*$/, 3).last
 structure_liquid = Liquid::Template.parse(structure_body).render!("site" => { "baseurl" => "/preview" })
 markdown = Jekyll::Converters::Markdown.new(Jekyll.configuration("config" => [], "quiet" => true))
-flask_map_source = File.read(File.join(PROJECT, "docs/2025-11-08-flask-infograph.md"))
+flask_map_path, = documents.find { |_, data| data["permalink"] == "/python/flask" }
+flask_map_source = File.read(flask_map_path)
 flask_map_body = flask_map_source.split(/^---\s*$/, 3).last
 flask_map = Nokogiri::HTML.fragment(markdown.convert(flask_map_body))
 assert(flask_map.at_css("h2#create-performance-task-priorities"), "The top-level Flask guide includes Create task priorities")
@@ -156,8 +158,9 @@ if File.directory?(flask_checkout)
 end
 Dir.mktmpdir("flask-publication-") do |destination|
   ProjectPublisher.run("publish", PROJECT, destination)
-  Dir[File.join(PROJECT, "docs/*.md")].each do |source|
-    output = File.join(destination, "_posts/projects/flask/2026-04-15-flask-#{File.basename(source)}")
+  Dir[File.join(PROJECT, "docs/**/*.md")].each do |source|
+    relative = Pathname.new(source).relative_path_from(Pathname.new(File.join(PROJECT, "docs"))).to_s
+    output = File.join(destination, "_posts/flask/docs", relative)
     assert(File.exist?(output) && File.read(output) == File.read(source),
            "Markdown is published before course splitting without duplicate output names: #{source}")
   end

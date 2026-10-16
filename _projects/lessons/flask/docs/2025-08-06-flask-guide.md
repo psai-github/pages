@@ -8,8 +8,7 @@ description: A Holistic Overview of Flask and Backend Operations
 categories:
 - Python
 - flask
-permalink: "/flask-overview"
-menu: nav/flask.html
+permalink: "/flask/overview"
 author: Risha Guha
 breadcrumb: true
 lesson_group: Flask

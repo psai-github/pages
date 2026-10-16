@@ -7,15 +7,12 @@ title: Python/Flask Backend Infograph
 description: Explore the Flask backend through its crash course, project anatomy, API learning path, and Jinja administration views.
 courses:
   csp:
-    week: 8
+    week: 9
   csa:
     week: 2
 type: framework
-categories:
-- Python
-- flask
 permalink: "/python/flask"
-sticky_rank: 2
+sticky_rank: 1
 show_reading_time: false
 canonical_id: python-flask
 lesson_group: Flask

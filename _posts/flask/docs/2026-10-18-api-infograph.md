@@ -3,13 +3,13 @@ layout: post
 title: Flask APIs
 tailwind: true
 description: Read Flask APIs through jokes, users, and microblog examples using VS Code REST Client.
+courses:
+  csp:
+    week: 10 
 infoGraph: python_flask_api
 permalink: "/python/flask/api"
 breadcrumb: true
 show_reading_time: false
-categories:
-- flask
-- Python
 lesson_group: Flask
 ---
 

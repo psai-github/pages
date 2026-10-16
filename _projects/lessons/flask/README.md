@@ -4,21 +4,22 @@ This registered lesson project owns the Flask notebooks and authored Markdown
 previously scattered through `_notebooks/CSP/flask`, `_posts/CSP/flask`, and
 the Foundation tools references. Notebook sources are flat in `notebooks/`;
 authored Markdown and historical Markdown-only exports are in `docs/`.
-Edit these sources, not the published `_posts/projects/flask/` copies.
+Edit these sources, not the published copies. Authored documents mirror into
+`_posts/flask/docs/`; converted notebooks remain under `_posts/projects/flask/`.
 
-The existing map remains at `/python/flask/csp/`; its unsplit source is
-`docs/2025-11-08-flask-infograph.md`. Preserve its CSP/CSA split and permalink.
+The existing map remains at `/python/flask/csp/`; its unsplit source is the
+document in `docs/` with permalink `/python/flask`. Preserve its CSP/CSA split and permalink.
 Every lesson carries the `flask` category, so the shared collection is
 `/topics/?category=flask`. `/navigation/flask/` hosts the same Topics browser.
 The shared `nav/flask.html` points at the current map and core routes.
 
 ## Top-Level Reference Map
 
-The top-level map in `docs/2025-11-08-flask-infograph.md` uses
+The top-level document with permalink `/python/flask` uses
 `_data/python_flask.yml` to organize the retained reference areas:
 
 - Crash Course: `/python/flask/crash-course` - server setup and a minimal application.
-- Anatomy: `/python/flask/anatomy` - the repository structure and its responsibilities.
+- Anatomy: `/flask/anatomy` - the repository structure and its responsibilities.
 - APIs: `/python/flask/api` - the separate three-example API learning path.
 - Jinja UI: `/python/flask/jinja_ui` - backend administration views.
 
@@ -36,8 +37,8 @@ file-backed `hacks/jokes.py`, and `api/microblog_api.py` with `model/microblog.p
 Read-only requests come first; credential prompts, cookie reuse, authorized test
 data, and mutation side effects are discussed in the API lessons.
 
-The central API page is `docs/2025-11-08-api-basics.md`, published at
-`/python/flask/api`. Its three infographic entries come from
+The central API page is the document with permalink `/python/flask/api`.
+Its three infographic entries come from
 `_data/python_flask_api.yml`. Keep only these dedicated API lessons:
 
 - `/python/flask/api/jokes` - Easy API, handlers and file-backed jokes data.
@@ -59,7 +60,7 @@ setup command or unrelated example is current.
 
 The Anatomy notebook formerly duplicated `/python/flask/crash-course`. It now
 uses `/python/flask/server-anatomy`; the existing authored file-structure guide
-retains `/python/flask/anatomy`, the route used by the map. The former standalone
+uses `/flask/anatomy`, the route used by the map. The former standalone
 `hacks/api-usage/jokes_flask.md` demo was retired so only the Easy API lesson owns
 `/python/flask/api/jokes`.
 
@@ -75,6 +76,13 @@ bundle exec ruby scripts/test_flask_project.rb
 
 The Flask project is tagged `:dev`. The normal workflow publishes notebooks,
 Markdown, and multi-course map pages before Jekyll renders the Topics index.
-`distribution.json` publishes Markdown during the assets phase, before course
-splitting, at the same paths used by the shared `docs` target. Add a matching
-mapping when adding an authored document; the project test checks coverage.
+`distribution.json` maps the entire `docs/` directory to `_posts/flask/docs/`
+recursively. New, renamed, and moved documents need no manifest edits. Keep
+dated post filenames and stable frontmatter permalinks; filenames determine
+generated paths, while permalinks determine public URLs. Publication removes
+unchanged outputs for deleted or renamed sources and refuses to remove outputs
+that have been edited independently.
+
+The shared `docs` target delegates to this directory mapping instead of writing
+a second date-prefixed copy. Both targets use the same publisher and ownership
+cache. Tests locate the key documents by permalink, not by their filenames.
