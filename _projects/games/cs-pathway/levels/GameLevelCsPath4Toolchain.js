@@ -830,8 +830,12 @@ class GameLevelCsPath4Toolchain {
       { key: 'toolchainScore', label: 'Level 2 Score', emptyValue: '0.000' },
     ];
 
+    // The HUD lives in the game container so it scales with the map when the
+    // full-page stage is fitted to a small window (js/fullPageLevel.js).
+    const hudMount = this.gameEnv.container || document.body;
     const panelConfig = {
       id: PROFILE_PANEL_ID,
+      mountTo: hudMount,
       title: 'PLAYER PROFILE',
       fields: panelFields,
       actions: [
@@ -867,7 +871,7 @@ class GameLevelCsPath4Toolchain {
 
     this.profilePanelView = new StatusPanel(panelConfig);
     this.profilePanelView.render();
-    this.scoreboard = new PathwayScoreboard({ currentLevelKey: 'toolchain-trail', basePath: this.gameEnv.path });
+    this.scoreboard = new PathwayScoreboard({ currentLevelKey: 'toolchain-trail', basePath: this.gameEnv.path, mountTo: hudMount });
     this.scoreboard.show();
     // Mac setup agent trigger: only offered when macOS is the selected OS.
     this.macSetupCheck = new MacSetupCheck();
@@ -1349,7 +1353,10 @@ class GameLevelCsPath4Toolchain {
   // Turns HUD DOM elements into closed barrier outlines in game coordinates.
   _hudPolylines() {
     const ids = [PROFILE_PANEL_ID, 'cs-pathway-scoreboard'];
-    const origin = (this.gameEnv?.container || document.body).getBoundingClientRect();
+    const container = this.gameEnv?.container || document.body;
+    const origin = container.getBoundingClientRect();
+    // Screen pixels per game pixel: 1 unless the stage is scaled to fit the window.
+    const screenScale = container.offsetWidth ? origin.width / container.offsetWidth : 1;
     const pad = 4;
     const out = [];
     ids.forEach((id) => {
@@ -1357,8 +1364,8 @@ class GameLevelCsPath4Toolchain {
       if (!el) return;
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) return;
-      const l = r.left - origin.left - pad, t = r.top - origin.top - pad;
-      const rt = r.right - origin.left + pad, b = r.bottom - origin.top + pad;
+      const l = (r.left - origin.left) / screenScale - pad, t = (r.top - origin.top) / screenScale - pad;
+      const rt = (r.right - origin.left) / screenScale + pad, b = (r.bottom - origin.top) / screenScale + pad;
       out.push([{ x: l, y: t }, { x: rt, y: t }, { x: rt, y: b }, { x: l, y: b }, { x: l, y: t }]);
     });
     return out;
