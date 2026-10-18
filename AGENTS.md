@@ -56,6 +56,7 @@ while preserving all critical instructions. The agent must still communicate wit
 * **使用 `_projects`：** 利用 `_projects/` 目录中的模块化项目自动注册系统来创建新项目。
 * **系统扩展：** 在现有系统内工作并在需要时进行扩展，而不是创建全新的并行架构。
 * **日历页面约定：** `navigation/calendar.md` 里的布局和弹层样式要放到 SCSS 中，用语义化 class 代替 utility 风格的内联类。
+* **日历事件编辑：** Spring 的 `PUT /api/calendar/edit/{id}` 拒绝空 `period` 或 `description`；无课程事件发送 `Personal`。关联文档存于描述末行（`Linked doc: <url>`，见 `_projects/systems/calendar/js/CalendarDocLinks.js`）；测试：`node --test tests/calendar_doc_links.test.mjs`。
 * **跨域 API：** 供 `pages.opencodingsociety.com` 调用的 Spring API 端点要显式允许带凭据的跨域请求。
 * **文档：** 必要时为困难或复杂的实现创建详细文档。
 * **注释：** 为非平凡的逻辑添加注释，但要保持简短，重点关注“为什么”而不是“是什么”。
@@ -96,6 +97,7 @@ while preserving all critical instructions. The agent must still communicate wit
 * 新项目遵循 [_projects/REGISTRATION.md](_projects/REGISTRATION.md) 注册/构建约定；架构示例见 [_projects/ARCHITECTURE.md](_projects/ARCHITECTURE.md)。
 * 样式优先使用 SCSS；主题切换与样式约定见 [README.md](README.md)。
 * 主题预设（[assets/js/user-preferences.js](assets/js/user-preferences.js)）会用 `!important` 把所有 `span`、`div`、`p`、`li` 和标题改成主题文字色。按钮的图标和文字要直接写在 `ocs__btn` 里（像 [_layouts/post.html](_layouts/post.html) 的 Submit 按钮），不要包在 `<span>` 里，否则 `fill` 按钮上的文字会变成主题文字色，可能看不清。
+* Mermaid 图源里不要写 `var(--panel)` 或 `style` 色值：括号会被当成节点语法。颜色由 [_includes/mermaid.html](_includes/mermaid.html) 读取偏好变量，并由 [user-preferences.scss](_sass/open-coding/theme/user-preferences.scss) 的 `.mermaid` 规则在主题切换后保持同步。
 
 ### 后端边界
 
