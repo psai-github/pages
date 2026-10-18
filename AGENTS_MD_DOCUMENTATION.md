@@ -54,6 +54,7 @@ Split logic into clear layers:
 * **Use `_projects`:** Leverage the modular project auto-registration system in the `_projects/` directory for new projects.
 * **System Expansion:** Work within the existing systems and expand them if needed, rather than creating completely new parallel architectures.
 * **Calendar pages:** Keep layout and modal styling out of `navigation/calendar.md`; use semantic classes and SCSS instead of utility-heavy inline markup.
+* **Calendar event edits:** Spring's `PUT /api/calendar/edit/{id}` rejects an empty `period` or `description`; send `Personal` for events with no course. Linked docs live on the description's last line (`Linked doc: <url>`, see `_projects/systems/calendar/js/CalendarDocLinks.js`); test with `node --test tests/calendar_doc_links.test.mjs`.
 * **Cross-origin APIs:** Spring endpoints consumed from `pages.opencodingsociety.com` should explicitly allow credentialed cross-origin requests.
 * **Documentation:** Create detailed documentation for difficult or complex implementations as necessary.
 * **Commenting:** Add comments for non-trivial logic, but keep them minimal and focused on *why* rather than *what*.
