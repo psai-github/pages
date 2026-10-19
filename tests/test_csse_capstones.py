@@ -44,7 +44,7 @@ class CsseCapstoneTests(unittest.TestCase):
         for card in self.cards:
             game = by_url[card['data-page-url'].rstrip('/')]
             self.assertEqual(card.select_one('h3').get_text(strip=True), game['title'].strip())
-            self.assertEqual(card['data-year'], game.get('school_year', 'unspecified'))
+            self.assertEqual(card['data-year'], game.get('school_year', ''))
             if game.get('description'):
                 self.assertIn(game['description'], card.get_text())
             if game.get('author'):
@@ -53,6 +53,9 @@ class CsseCapstoneTests(unittest.TestCase):
 
     def test_course_control_and_legacy_link(self):
         self.assertEqual(self.page.select_one('#show-csse').get_text(), 'CSSE')
+        self.assertIsNone(self.page.select_one('#year-select option[value="unspecified"]'))
+        grid = self.page.select_one('#capstone-grid')
+        self.assertEqual(grid.select('.CSSE'), grid.find_all('div', recursive=False)[-len(self.cards):])
         old = BeautifulSoup((ROOT / '_site/cs-pathway/games/index.html').read_text(), 'html.parser')
         self.assertIsNotNone(old.select_one('a[href="/capstone/?course=CSSE"]'))
         self.assertIn('window.location.replace("/capstone/?course=CSSE")', str(old))

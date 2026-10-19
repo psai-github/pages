@@ -27,7 +27,6 @@ show_reading_time: false
         <option value="2026-2027" selected>2026/2027</option>
         <option value="2025-2026">2025/2026</option>
         <option value="">All years</option>
-        <option value="unspecified">Year not specified</option>
       </select>
     </div>
   </div>
@@ -368,8 +367,6 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 
 <div id="capstone-grid" class="ocs__grid ocs__grid--card cols-3">
-
-   {% include capstone-games.html %}
 
    <!-- SFI Foundation 2026–27 (CSP) -->
    <div class="ocs__grid-cell CSP"
@@ -1079,6 +1076,8 @@ document.addEventListener('DOMContentLoaded', function(){
            <p>Team: Akhil, Syown, Leon, Perry, Skandan, Sathwik, Akshajh, Tarun, Samarth</p>
        </div>
    </div>
+
+   {% include capstone-games.html %}
 </div>
 
 <!-- Edit Capstone Modal -->
@@ -1479,3 +1478,4 @@ document.addEventListener('DOMContentLoaded', function(){
 })();
 </script>
 
+  <!-- markdownlint-enable MD033 MD046 -->
