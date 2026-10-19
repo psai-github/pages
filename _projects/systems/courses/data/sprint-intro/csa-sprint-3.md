@@ -8,33 +8,28 @@ demonstrate your individual contribution, not just the team's finished product.
 
 ### Grading Guideline
 
-| Guideline | Evidence |
+| Guideline | Description |
 | --- | --- |
-| **55% - Minimum evidence** | Initial work is present, but major requirements or explanations remain incomplete. |
-| **75% - Mostly complete** | Most requirements are demonstrated, with identified implementation, integration, or validation gaps. |
-| **85% - Complete** | Required work is integrated, demonstrated, and supported by individual evidence. |
-| **90% - Thorough evidence** | Complete work includes clear design reasoning, relevant tests, feedback-driven revision, and reflection. This is the maximum in this guideline, not a claim of perfection. |
+| **55%** | Minimum per item |
+| **77%** | Mostly done |
+| **88%** | Complete |
+| **90%** | Maximum perfection |
 
-### Assignments
+### Points
 
-| Assignment | Points | Grade | Evidence |
-| --- | --- | --- | --- |
-| Sprint 1-3 review ticket | 3 | | Personal progress, feedback, and reflection links |
-| Sprint 3 team issues and plan | 2 | | Scope, design, responsibilities, and acceptance tests |
-| Beginning-to-end contribution | 2 | | Individual code, integration, and validation links |
-| N@tM team presentation | 2 | | Demonstration, mentor, and audience feedback |
-| Live review individual demonstration | 1 | | Explain and demonstrate your own implementation |
-| **Total** | **10** | | |
-
-### Skills
-
-| Skill | Points | Grade | Evidence |
-| --- | --- | --- | --- |
-| Work habits and analytics | 1 | | Reliable progress and follow-through supported by artifacts |
-| Evidence of role in team | 1 | | Responsibilities, contributions, and collaboration |
-| Function and purpose design | 1 | | Explain how the design meets the user need |
-| Live review | 2 | | Explain design choices, test results, and limitations |
-| **Total** | **5** | | |
+| **Assignment**             | **Points**    |  **Due** |
+|----------------------------|---------------|----------|
+| Beyond Perfunctory         | 1   Bonus     | Phase 1  |
+| Sprint 1-2, CB Quiz Retro  | 1             | Phase 1  |
+| Sprint 3, Team Issue/Kanban| 1             | Phase 1 - Team |
+| CB Unit 1 x 2 best         | 1  Auto Grade | Phase 2  |
+| Project Phase: Ideate      | 1             | Phase 2 - Team |
+| Sprint 3, Personal Issue(s)| 1             | Phase 2  |
+| CB Unit 2 x 2 best         | 1  Auto Grade | Phase 3  |
+| Collectables HW            | 1  Auto Grade | Phase 3  |
+| Project Phase: Prototype   | 1             | Phase 3 - Team |
+| Work Habits (Analytics)    | 2  Auto Grade | Phase 4  |
+| N@tM, Project Phase: Test  | 2             | Phase 4 - Team |
 
 ## CS112 and CS113 Curriculum Alignment
 
