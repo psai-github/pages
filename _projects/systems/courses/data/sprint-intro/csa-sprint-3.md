@@ -31,22 +31,18 @@ demonstrate your individual contribution, not just the team's finished product.
 | Work Habits (Analytics)    | 2  Auto Grade | Phase 4  |
 | N@tM, Project Phase: Test  | 2             | Phase 4 - Team |
 
-## CS112 and CS113 Curriculum Alignment
+## Course Work - CS112 and CS113 Curriculum Alignment
 
 Sprint 3 establishes the project, team practices, and lead-in skills.
 **Formal CS112/CS113 curriculum alignment begins in Sprint 4.** Use the
 outlines to plan an individual curriculum success path supported by your team.
-This does not mean every advanced CS113 topic is introduced or completed in
-Sprint 4, or that participating in a capstone automatically establishes mastery.
 
 | Connection | How to Use It |
 | --- | --- |
 | **CS112 Foundations** | Connect demonstrated Java/OOP, models, collections, persistence, and Web-interface work to the relevant outline topics as the formal alignment begins. |
 | **CS113 Extensions** | Plan differentiated implementation and efficiency-analysis work when the relevant topics are introduced. Not every student is expected to complete every advanced CS113 layer. |
-| **Individual Evidence** | Link your own design, code, CodeRunner competence, tests, and explanations. Using a collection library or calling an API does not by itself demonstrate a CS113 algorithm or data structure. |
-| **Alignment, Not Credit** | An outline connection records curriculum alignment; group participation or project functionality alone does not establish individual mastery or college credit. |
 
-## A Capstone That Continues Across Three Trimesters
+## System Work - A Capstone That Continues Across Three Trimesters
 
 Students enter CSA having built a community or nonprofit project in the prior
 year's APCSP course. CSA extends that experience into sustained, system-level
@@ -59,7 +55,7 @@ and extend, rather than projects discarded at a sprint's end.
 | **CSA2 - Trimester 2** | Beginning with Sprint 4, strengthen CS112 foundations and connect the CS112/CS113 outlines to the evolving project; introduce AP-aligned searching, sorting, and analysis as scheduled. | CodeRunner competence, tested feature extensions, and explanations of revised design choices. |
 | **DS2 - Trimester 3** | Extend the project through differentiated CS112/CS113 implementation layers or the ML/AI pathway. | Selected structure or algorithm implementations, correctness and efficiency evidence, presentations, and reflection. |
 
-## Sprint Teams and Feature Portfolios
+## System Options - Sprint Teams and Feature Portfolios
 
 Choose or continue a team role. Every student maintains an individual curriculum
 success plan, with team support. Some capstone features are live and others are
@@ -73,7 +69,18 @@ been integrated.
 | **[Communication / Design]({{ site.baseurl }}/capstone/submissions/)** | UX, SASS, announcements, calendar, group/individual direct messages, and microblogging. | Design an interactive hub, connect its interface to services, and test both successful and failed user interactions. |
 | **[AI / Assignments]({{ site.baseurl }}/capstone/submissions/)** | Student/teacher dashboards, student-success insights, articulation evidence, analytics, and AI grading. | Plan the assignment and data flow; manage submitters, validation, feedback, requirement mapping, and histories. Explain class/year archiving and restart administration. |
 
-## Team Plan and Beginning-to-End Contribution
+## Ideate = Communication and Wayfinding
+
+Teacher and peer review support improvement. Keep a personal review ticket or
+blog that links your team issues, code, tests, and feedback.
+
+| Wayfinding | What to Make Visible |
+| --- | --- |
+| **Temporal** | Compare progress and completed work with the calendar, announcements, and agreed timeline. |
+| **Social** | Communicate your role and dependencies; support teammates inside and outside class. |
+| **Analytical** | Use rubric feedback and artifacts to explain what you know, what improved, and what still needs work. Activity counts alone do not demonstrate competence. |
+
+## Prototype - Team Plan and Beginning-to-End Contribution
 
 Create a team issue connecting ideation, design, development, integration,
 testing, and retrospective. A feature needs an explicit handoff path, not just
@@ -86,21 +93,10 @@ an isolated implementation.
 | **Implementation** | Identify your code and explain how it supports the feature's function and purpose. |
 | **Integration** | Link the integration pull request and explain dependencies, contracts, and how your change fits the shared system. |
 | **Validation** | Demonstrate normal, boundary, and failure cases, including the integrated Web result rather than only an isolated method. |
-| **Feedback and Revision** | Record feedback received, and the changes made or planned. Explain remaining limitations. |
+| **N@tM, Feedback and Revision** | Record feedback received, and the changes made or planned. Explain remaining limitations. |
 | **Maintenance Handoff** | Document operation, setup, tests, and extension points for a future maintainer. |
 
-## Communication and Wayfinding
-
-Teacher and peer review support improvement. Keep a personal review ticket or
-blog that links your team issues, code, tests, and feedback.
-
-| Wayfinding | What to Make Visible |
-| --- | --- |
-| **Temporal** | Compare progress and completed work with the calendar, announcements, and agreed timeline. |
-| **Social** | Communicate your role and dependencies; support teammates inside and outside class. |
-| **Analytical** | Use rubric feedback and artifacts to explain what you know, what improved, and what still needs work. Activity counts alone do not demonstrate competence. |
-
-## Demonstration and Reflection
+## Test - Demonstration and Reflection
 
 Before beginning Sprint 4, every team completes **two mentor reviews and a
 community N@tM presentation**. Focus each review on the project, a working
@@ -113,7 +109,7 @@ demonstration, and a discussion of **how it is made**.
 | **Mentor and Community Feedback** | Connect the two mentor reviews and N@tM feedback to completed or planned revisions. |
 | **Continued Development** | This mentor-review and community-presentation cycle continues throughout the year as the capstone evolves. Carry forward feedback and next-iteration plans. |
 
-## Curriculum Connections for Review
+## Retrospective - Curriculum Connections for Review
 
 Use these references to plan and review evidence, not to claim skills that have
 not yet been implemented and demonstrated. Formal alignment starts in Sprint 4;
