@@ -1,0 +1,294 @@
+// Page-scoped styles for /profile/v2 (_layouts/profile-v2.html).
+//
+// This page's JavaScript is copied verbatim from the original /profile page
+// and is NOT edited here. Several class names below are read directly by
+// that JS (classList.add/remove/toggle, querySelector) — they keep their
+// original literal names on purpose, each marked below. Renaming any of
+// them breaks the page's show/hide and state-color behavior even though it
+// would still look fine in a static screenshot.
+
+// Responsive 2-col -> 1-col form grid. No grammar component collapses on
+// mobile today, so this stays page-scoped rather than becoming new grammar.
+.ocs__profile-settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+
+    @media (max-width: $breakpoint-mobile) {
+        grid-template-columns: 1fr;
+    }
+
+    .ocs__input {
+        width: 100%;
+    }
+}
+
+.ocs__profile-settings-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.ocs__profile-settings-link {
+    font-size: 0.875rem;
+    color: var(--pref-accent-color);
+    text-decoration: underline;
+
+    &:hover {
+        color: var(--pref-text-color);
+    }
+}
+
+.ocs__profile-settings-flex-row {
+    display: flex;
+    align-items: center;
+}
+
+.ocs__profile-settings-toggle-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.ocs__profile-settings-toggle-text {
+    margin-left: 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+// JS hook: querySelector('.dot') animates this on change (course-navigation
+// style, not Tailwind) — keep the literal class name "dot".
+#profileSettingsForm .dot {
+    background: var(--pref-bg-color);
+
+    &.translate-x-3 {
+        // Same partial-travel transform as the original page (a pre-existing
+        // cosmetic bug, preserved intentionally — not part of this restyle).
+        transform: translateX(0.75rem);
+    }
+}
+
+// JS hook: classList.add('bg-blue-600') on the (visually hidden) checkbox
+// itself when checked. Currently a no-op today since the checkbox is
+// sr-only; kept defined for parity with the original page.
+#kasmChangeInput.bg-blue-600 {
+    background-color: var(--pref-accent-color);
+}
+
+.ocs__profile-settings-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.ocs__profile-settings-header-title {
+    margin-bottom: 0;
+}
+
+.ocs__profile-settings-placeholder {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+// JS hook: webcamOverlay / captureCanvas are shown/hidden by toggling this
+// exact class name — this IS the show/hide mechanism, not just styling.
+.hidden {
+    display: none;
+}
+
+.ocs__profile-settings-webcam-card {
+    position: relative;
+    width: 100%;
+    max-width: 28rem;
+    background: var(--panel);
+    border: 1px solid var(--ui-border);
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.ocs__profile-settings-webcam-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid var(--ui-border);
+}
+
+.ocs__profile-settings-webcam-card-title {
+    margin: 0;
+    color: var(--pref-text-color);
+    font-weight: 600;
+}
+
+.ocs__profile-settings-close-btn {
+    border: none;
+    color: var(--text-muted);
+
+    &:hover {
+        color: var(--pref-text-color);
+    }
+}
+
+.ocs__profile-settings-webcam-frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    // A camera viewfinder letterbox is content, not a themed surface --
+    // literal black is intentional here, same as the original page.
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+}
+
+.ocs__profile-settings-scanner-frame {
+    position: absolute;
+    inset: 0;
+    border: 2px solid color-mix(in srgb, var(--pref-accent-color) 30%, transparent);
+    pointer-events: none;
+}
+
+.ocs__profile-settings-scanner-corner {
+    position: absolute;
+    width: 2rem;
+    height: 2rem;
+    border-color: var(--pref-accent-color);
+
+    &.top-left {
+        top: 0;
+        left: 0;
+        border-top: 2px solid;
+        border-left: 2px solid;
+    }
+
+    &.top-right {
+        top: 0;
+        right: 0;
+        border-top: 2px solid;
+        border-right: 2px solid;
+    }
+
+    &.bottom-left {
+        bottom: 0;
+        left: 0;
+        border-bottom: 2px solid;
+        border-left: 2px solid;
+    }
+
+    &.bottom-right {
+        bottom: 0;
+        right: 0;
+        border-bottom: 2px solid;
+        border-right: 2px solid;
+    }
+}
+
+.ocs__profile-settings-webcam-card-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+}
+
+.ocs__profile-settings-capture-btn {
+    width: 100%;
+    justify-content: center;
+}
+
+.ocs__profile-settings-scanner-status {
+    margin: 0;
+
+    // JS hook: classList.add/remove these exact names on #scannerStatus.
+    &.text-red-400 {
+        color: var(--red, #f87171);
+    }
+
+    &.text-green-400 {
+        color: var(--green, #4ade80);
+    }
+
+    &.text-gray-400 {
+        color: var(--text-muted);
+    }
+}
+
+.ocs__profile-settings-flex-row-gap {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.ocs__profile-settings-registration-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ocs__profile-settings-status-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+
+    // JS hook: classList.add/remove these exact names on #regStatusDot.
+    &.bg-gray-600 {
+        background: var(--text-muted);
+    }
+
+    &.bg-green-500 {
+        background: var(--green, #22c55e);
+    }
+}
+
+.ocs__profile-settings-save-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+// JS hook: checkForChanges()/saveChanges() swap this literal class set in
+// and out to toggle the save button's disabled/enabled look.
+.ocs__profile-settings-save-btn {
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    border: none;
+    transition: all 0.3s ease;
+
+    &.bg-neutral-300 {
+        background: var(--panel-mid, var(--panel));
+    }
+
+    &.text-gray-500,
+    &.text-neutral-500 {
+        color: var(--text-muted);
+    }
+
+    &.cursor-not-allowed {
+        cursor: not-allowed;
+    }
+
+    &.bg-indigo-500 {
+        background: var(--pref-accent-color);
+    }
+
+    &.text-white {
+        color: #fff;
+    }
+
+    &.bg-indigo-500:hover {
+        background: color-mix(in srgb, var(--pref-accent-color) 85%, black);
+    }
+}
