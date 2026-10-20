@@ -63,6 +63,9 @@ show_reading_time: false
 
 <script type="module">
     import { javaURI, pythonURI, fetchOptions, GOOGLE_CLIENT_ID } from '{{site.baseurl}}/assets/js/api/config.js';
+    // Same rule as Spring's Person.checkPassword(). Flask saves the reset first and Spring is
+    // synced after, so a password Spring rejects would leave the two with different passwords.
+    import { SPRING_PASSWORD_RULES, meetsSpringPasswordRules, attachPasswordChecklist } from '{{site.baseurl}}/assets/js/api/passwordRules.js';
 
     // ---- Support topic navigation ----
     window.openSupportTopic = function(topic) {
@@ -95,6 +98,8 @@ show_reading_time: false
         document.getElementById('resetUid').value = '';
         document.getElementById('resetNewPassword').value = '';
         document.getElementById('resetConfirmPassword').value = '';
+        // Setting .value doesn't fire 'input', so refresh the checklist and match message by hand.
+        document.getElementById('resetNewPassword').dispatchEvent(new Event('input'));
         document.getElementById('reset-message').textContent = '';
         document.getElementById('reset-oauth-status').innerHTML = '';
         document.getElementById('reset-ticket-row').style.display = 'none';
@@ -225,18 +230,6 @@ show_reading_time: false
         });
     }
 
-    // Mirrors Person.checkPassword() in Spring, same as the signup form in login.md.
-    // Flask saves the reset first and Spring is synced after, so a password Spring
-    // rejects would leave the two backends with different passwords.
-    const SPRING_PASSWORD_RULES = 'Password needs 8+ characters with an uppercase letter, a lowercase letter, a number, and one of ` ~ ! @ # $ % ^ & * ( )';
-    function meetsSpringPasswordRules(password) {
-        return password.length >= 8
-            && /[A-Z]/.test(password)
-            && /[a-z]/.test(password)
-            && /[0-9]/.test(password)
-            && /[`~!@#$%^&*()]/.test(password);
-    }
-
     function validateResetForm() {
         const password = document.getElementById('resetNewPassword').value;
         const confirmPassword = document.getElementById('resetConfirmPassword').value;
@@ -347,6 +340,7 @@ show_reading_time: false
     window.addEventListener('load', function() {
         const resetPasswordField = document.getElementById('resetNewPassword');
         const resetConfirmPasswordField = document.getElementById('resetConfirmPassword');
+        attachPasswordChecklist(resetPasswordField);
         if (resetPasswordField && resetConfirmPasswordField) {
             resetPasswordField.addEventListener('input', validateResetForm);
             resetConfirmPasswordField.addEventListener('input', validateResetForm);
