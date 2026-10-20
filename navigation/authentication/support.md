@@ -225,6 +225,18 @@ show_reading_time: false
         });
     }
 
+    // Mirrors Person.checkPassword() in Spring, same as the signup form in login.md.
+    // Flask saves the reset first and Spring is synced after, so a password Spring
+    // rejects would leave the two backends with different passwords.
+    const SPRING_PASSWORD_RULES = 'Password needs 8+ characters with an uppercase letter, a lowercase letter, a number, and one of ` ~ ! @ # $ % ^ & * ( )';
+    function meetsSpringPasswordRules(password) {
+        return password.length >= 8
+            && /[A-Z]/.test(password)
+            && /[a-z]/.test(password)
+            && /[0-9]/.test(password)
+            && /[`~!@#$%^&*()]/.test(password);
+    }
+
     function validateResetForm() {
         const password = document.getElementById('resetNewPassword').value;
         const confirmPassword = document.getElementById('resetConfirmPassword').value;
@@ -239,10 +251,10 @@ show_reading_time: false
             return true;
         }
 
-        if (password.length < 8) {
+        if (!meetsSpringPasswordRules(password)) {
             confirmField.classList.add('password-length');
             messageDiv.classList.add('error');
-            messageDiv.textContent = '✗ Passwords must be at least 8 characters long';
+            messageDiv.textContent = `✗ ${SPRING_PASSWORD_RULES}`;
             return false;
         }
 
@@ -264,9 +276,9 @@ show_reading_time: false
         const confirmPassword = document.getElementById('resetConfirmPassword').value;
         const validationMessage = document.getElementById('reset-password-validation-message');
 
-        if (password.length < 8) {
+        if (!meetsSpringPasswordRules(password)) {
             validationMessage.classList.add('error');
-            validationMessage.textContent = 'Password must be at least 8 characters long.';
+            validationMessage.textContent = SPRING_PASSWORD_RULES;
             return;
         }
         if (password !== confirmPassword) {
