@@ -100,6 +100,7 @@ images/projects/
 /_data/csp.yml
 /_data/csse.yml
 /_data/csh.yml
+/_data/sprint-intro/
 /navigation/course.md
 /navigation/blog.md
 /assets/js/course-entry.js
@@ -108,6 +109,7 @@ images/projects/
 /assets/js/lesson-completion-bigsix.js
 /assets/js/lessonbase.js
 /assets/js/lessonbasecapture.js
+/assets/js/blogs/
 /assets/js/chat/calendar/
 /_sass/open-coding/lesson-player.scss
 /_sass/open-coding/blogs.scss
@@ -120,6 +122,9 @@ _projects/*/*/Makefile
 # Except the template itself (single source of truth)
 !_projects/_template/Makefile
 # Existing versioned overrides remain tracked; force-add any new intentional override.
+
+# Personal omake notebook list (created by ./omake on first run)
+omake_notebooks.txt
 
 # Project pages (deployed from _projects/ at build time to _posts/)
 _posts/projects/
