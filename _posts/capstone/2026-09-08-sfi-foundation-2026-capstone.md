@@ -59,36 +59,6 @@ permalink: /capstone/sfi-foundation/
 
 ---
 
-
-## Project hub
-
-Follow priorities, owners, progress, and review evidence on our SFI Foundation board. Teachers, product owners, mentors, and business partners can use the same link to follow the work. Use this page's **Microblog** button for updates and discussion; keep decisions, acceptance criteria, and delivery evidence in the linked GitHub issue.
-
-<div class="ocs__links ocs__links--wide">
-    <a class="ocs__btn" href="https://github.com/orgs/SFI-Foundation/projects/1" target="_blank" rel="noopener noreferrer">Open SFI Kanban</a>
-    <a class="ocs__btn" href="https://github.com/ruhaanb622/pages/issues/new?template=sfi-quick-issue.md">Create Quick Issue</a>
-    <a class="ocs__btn" href="https://github.com/ruhaanb622/pages/issues/new?template=sfi-formal-issue.md">Create Formal Issue</a>
-</div>
-
-### Issue and Kanban lifecycle
-
-| Stage | Required work | Exit gate |
-| --- | --- | --- |
-| Parking Lot (Backlog) | Review success with teacher, product owners, mentors, or business partners. Review empathy evidence and a Point of View (POV), explore How Might We (HMW) ideas, and design a solution with acceptance criteria. | The solution is sufficiently understood and actionable for prioritization. |
-| ToDo | Assess priority with a weight and identify an accountable owner. | The issue is prioritized, owned, and ready to start. |
-| In Progress | Prototype/code, unit test, and create and link a PR. | Development evidence is complete. |
-| In Review | Deploy, system test, present, and obtain acceptance. | The solution meets its acceptance criteria. |
-| Done | Retain the accepted outcome and evidence in the issue, Key Commits, and PR history. | Accepted outcome delivered. |
-
-### Choose the right issue
-
-- **Quick Issue:** non-invasive prototypes, bugs, revisions, small improvements, and well-understood tasks. Start in ToDo or In Progress and include only applicable artifacts, commits, PRs, and testing.
-- **Formal Issue:** new features, user-facing changes, research, and substantial projects. Capture design, planning, implementation, and testing evidence as the issue moves through the lifecycle.
-
-Add each issue to the [SFI Foundation project](https://github.com/orgs/SFI-Foundation/projects/1), set its status, and link the implementation PR. Priority weights and assignments are assessed by the team during planning.
-
----
-
 ## Core experience
 
 > Four connected parts of the user journey, from finding a standard to returning to saved gear later.
