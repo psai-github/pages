@@ -57,6 +57,7 @@ select {
 @import "profile-v2";
 @import "dashboard-v2";
 @import "analytics-dashboard-v2";
+@import "calendar-v2";
 
 // Shared by every ocs__<page>-v2 partial above: several of them toggle the
 // literal class "hidden" from JS (a Tailwind-style utility, not a grammar
