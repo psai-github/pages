@@ -23,6 +23,7 @@ import {
   forgetPairedSessionId,
 } from '../services/ToolchainApi.js';
 import { TOOLCHAIN_TRAIL_SETTINGS } from '../data/toolchainTrailSettings.js';
+import { copyToClipboard } from '../services/clipboard.js';
 
 const { pollIntervalMs: POLL_INTERVAL_MS, silentAgentHintMs: SILENT_AGENT_HINT_MS } = TOOLCHAIN_TRAIL_SETTINGS;
 export default class StationVerificationTrial {
@@ -33,7 +34,8 @@ export default class StationVerificationTrial {
    * @param {string} opts.station.name - in-world display name (e.g. "Terminal Town Gate")
    * @param {string} opts.station.skill - real-world skill label (e.g. "Shell fundamentals and package management")
    * @param {string} opts.station.narrativeHook - 1-2 sentence flavor text shown before the terminal
-   * @param {string[]} opts.station.instructions - ordered list of real-world steps to show the student
+   * @param {Array<string|{text: string, commands: string[]}>} opts.station.instructions - ordered real-world
+   *   steps; a step with commands shows each one with its own Copy button
    * @param {RegExp} opts.station.expectedCommandPattern - pattern the mock terminal checks input against
    * @param {string} opts.station.exampleCommand - a valid example command (shown as a hint)
    * @param {string} opts.station.funFact - fun fact shown by the NPC popup on success (level owns the popup, not this trial)
@@ -339,9 +341,16 @@ export default class StationVerificationTrial {
           font-size: 12px;
           color: #cbd5e1;
         }
-        .svt-cmd code {
-          display: block;
-          margin-top: 3px;
+        .svt-cmdrow {
+          display: flex;
+          gap: 6px;
+          align-items: stretch;
+          margin-top: 4px;
+        }
+        .svt-cmdrow code {
+          flex: 1;
+          min-width: 0;
+          font-size: 12px;
           color: #fbbf24;
           background: #000;
           border: 1px solid rgba(34, 211, 238, 0.4);
@@ -350,6 +359,19 @@ export default class StationVerificationTrial {
           white-space: pre-wrap;
           word-break: break-all;
         }
+        .svt-copy {
+          flex: none;
+          border: 1px solid #7dd3fc;
+          background: rgba(56, 189, 248, 0.12);
+          color: #e0f2fe;
+          border-radius: 6px;
+          padding: 0 10px;
+          cursor: pointer;
+          font-family: inherit;
+          font-size: 11px;
+          font-weight: bold;
+        }
+        .svt-copy:hover { background: rgba(56, 189, 248, 0.25); }
         .svt-agent-steps {
           margin: 6px 0 0;
           padding-left: 18px;
@@ -408,7 +430,7 @@ export default class StationVerificationTrial {
           <div class="svt-panel">
             <h4>MISSION BRIEFING</h4>
             <ol class="svt-steps">
-              ${instructions.map((step) => `<li>${this._escape(step)}</li>`).join('')}
+              ${instructions.map((step) => `<li>${this._renderStep(step)}</li>`).join('')}
             </ol>
             <div class="svt-verify"><strong>FINAL STEP, VERIFY:</strong> the Toolchain agent on your computer runs the real commands and reports them to the server. Start it once and leave it open for the whole trail.</div>
           </div>
@@ -423,7 +445,7 @@ export default class StationVerificationTrial {
               <ol class="svt-agent-steps">
                 <li>Open a terminal and <code>cd</code> into your pages repository.</li>
                 <li>Run the agent:
-                  ${agentCommands(this.os).map((item) => `<div class="svt-cmd">${this._escape(item.label)}<code>${this._escape(item.command)}</code></div>`).join('')}
+                  ${agentCommands(this.os).map((item) => `<div class="svt-cmd">${this._escape(item.label)}${this._commandRow(item.command)}</div>`).join('')}
                 </li>
                 <li>Paste the code below when it asks (it stays hidden while you type).</li>
                 <li>Leave that window open. Do your setup work in a second terminal.</li>
@@ -484,6 +506,11 @@ export default class StationVerificationTrial {
     this.getCodeBtn = this.overlay.querySelector('#svt-get-code');
     this.getCodeBtn.onclick = () => this._startAgentSession();
     this.overlay.querySelector('#svt-copy-code').onclick = () => this._copyCode();
+    // Every command's Copy button copies the command shown right next to it.
+    this.overlay.addEventListener('click', (event) => {
+      const copyButton = event.target.closest('.svt-copy');
+      if (copyButton) copyToClipboard(copyButton.previousElementSibling.textContent, copyButton);
+    });
     this.checkAgainBtn = this.overlay.querySelector('#svt-check-again');
     this.checkAgainBtn.onclick = () => this._askAgentToCheck(this.session.sessionId);
     this.overlay.querySelector('#svt-new-agent').onclick = () => {
@@ -661,12 +688,8 @@ export default class StationVerificationTrial {
   async _copyCode() {
     const codeEl = this.overlay?.querySelector('#svt-code');
     if (!codeEl?.value) return;
-    try {
-      await navigator.clipboard.writeText(codeEl.value);
-      this.overlay.querySelector('#svt-copy-code').textContent = 'Copied';
-    } catch (_) {
-      codeEl.select(); // clipboard blocked; leave it selected for Ctrl/Cmd+C
-    }
+    const copied = await copyToClipboard(codeEl.value, this.overlay.querySelector('#svt-copy-code'));
+    if (!copied) codeEl.select(); // clipboard blocked; leave it selected for Ctrl/Cmd+C
   }
 
   _showPasteFallback() {
@@ -750,6 +773,17 @@ export default class StationVerificationTrial {
 
   destroy() {
     this._close(false);
+  }
+
+  /** A step is plain text, or { text, commands } with a Copy button per command. */
+  _renderStep(step) {
+    if (typeof step === 'string') return this._escape(step);
+    return this._escape(step.text) + (step.commands || []).map((command) => this._commandRow(command)).join('');
+  }
+
+  _commandRow(command) {
+    return `<div class="svt-cmdrow"><code>${this._escape(command)}</code>`
+      + `<button type="button" class="svt-copy" aria-label="Copy command">Copy</button></div>`;
   }
 
   _escape(value = '') {
