@@ -266,26 +266,30 @@ it the board's link and it builds itself from that board:
 - `url` (required): a public board owned by an organization
   (`github.com/orgs/...`). The page reads it from GitHub's REST API without
   signing in; GitHub keeps a personal board's cards for signed-in users.
-- `filter` (optional): a single-select field, such as `Team`. Each option becomes
-  a filter button. An option named Everyone or All is for shared cards, which
-  show under every button.
+- `filter` (optional): a single-select field, such as `Team`. Each option that
+  has cards becomes a filter button. An option named Everyone or All is for
+  shared cards, which show under every button.
 - `title` (optional): a heading to use instead of the board's own name.
 
-Everything else comes from the board. Each status is sorted into Backlog, To do,
-In progress, In review or Done by its name, so "Todo", "To Do" and "Ready" all
-work and "Blocked" counts as in progress; columns that aren't work, like "Team
-Map", are left out. Cards show their number, a `People` field or the assignees,
-and once done, a `Shipped` date or the day they closed. The board keeps a copy
-for 10 minutes, because visitors without a token share 60 GitHub requests an
-hour per network, and keeps showing that copy, with a note, when GitHub doesn't
-answer.
+Everything else comes from the board, so any board works as it is. Columns
+follow the board's own order: familiar names share a stage's column ("Todo",
+"To Do" and "Ready" are all To do, "Blocked" is In progress), any other column
+keeps its own name, and cards with no status get a "No status" column, as on
+GitHub. A Backlog column starts hidden behind a toggle, and so does No status on
+a board that has a Backlog of its own. Only UGRC-CSA's note columns ("Team Map",
+"Reflections") are left out. Cards show their number, a `People` field or the
+assignees, and once done, a `Shipped` date or the day they closed. The board
+keeps a copy for 10 minutes, because visitors without a token share 60 GitHub
+requests an hour per network, and keeps showing that copy, with a note, when
+GitHub doesn't answer.
 
 Kanban classes (`assets/js/kanban-board.js` builds them):
 
 - `ocs__kanban-board`: the stage columns, side by side. A column is at least
   11.5rem wide (or the whole board on a phone); past that the board scrolls sideways.
-- `ocs__kanban-column`: one stage. Its `data-stage` colors the line across its
-  top, with more accent the closer the stage is to done.
+- `ocs__kanban-column`: one column. Its `data-stage` colors the line across its
+  top, with more accent the closer the stage is to done; a column of the board's
+  own name gets backlog's quiet line.
 - `ocs__kanban-item`: a card, with `ocs__kanban-kicker`, `ocs__kanban-name` and
   `ocs__kanban-note` for its three lines.
 

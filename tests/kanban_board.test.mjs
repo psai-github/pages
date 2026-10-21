@@ -123,7 +123,14 @@ test('a board keeps its work cards with links, groups, people and shipped dates'
     assert.deepEqual(pull.people, ['Wick2009']);
     assert.equal(pull.shipped, null);
 
-    assert.deepEqual(board.groups, ['Chat + Calendar', 'SASS', 'DMs']);
+    // Columns follow the board's Status options in order; Team Map and
+    // Reflections are left out, and no card is missing a status.
+    assert.deepEqual(board.columns.map((c) => c.label), ['Backlog', 'To do', 'In progress', 'In review', 'Done']);
+    assert.deepEqual(board.columns.map((c) => c.toggle), [true, false, false, false, false]);
+    assert.equal(issue.column, 'done');
+
+    // DMs has no card on this board, so it gets no filter button.
+    assert.deepEqual(board.groups, ['Chat + Calendar', 'SASS']);
     assert.deepEqual(board.shared, ['Everyone']);
     // The hidden Team Map card changed last, but it isn't on the embed.
     assert.equal(board.updated, '2026-10-15T16:49:43Z');
@@ -141,13 +148,57 @@ test('a card links only to github.com; any other address opens it on the board i
     assert.equal(card.url, `${BOARD_URL}?pane=issue&itemId=108`);
 });
 
-test('cards with no status go to the backlog, and an empty board has no cards', () => {
+// GitHub's default board: Todo / In Progress / Done and nothing else.
+const MINIMAL_FIELDS = [
+    { id: 1, name: 'Title', data_type: 'title' },
+    { id: 3, name: 'Status', data_type: 'single_select', options: ['Todo', 'In Progress', 'Done'].map(option) },
+];
+
+test('cards with no status get a No status column, open unless the board has its own Backlog', () => {
     const noStatus = item(107, 'DraftIssue', draft('Idea'), [statusValue(null)], '2026-10-14T05:00:00Z');
-    assert.equal(normalizeBoard({ project: PROJECT, fields: FIELDS, items: [noStatus] }, { url: BOARD_URL }).cards[0].stage, 'backlog');
+
+    // A minimal board has nowhere else to put them, so they show first, like GitHub's "No Status".
+    const minimal = normalizeBoard({ project: PROJECT, fields: MINIMAL_FIELDS, items: [noStatus] }, { url: BOARD_URL });
+    assert.deepEqual(minimal.columns.map((c) => c.label), ['No status', 'To do', 'In progress', 'Done']);
+    assert.equal(minimal.columns[0].toggle, false);
+    assert.equal(minimal.cards[0].column, 'none');
+
+    // A board with a Backlog column keeps them behind the Backlog toggle with it.
+    const withBacklog = normalizeBoard({ project: PROJECT, fields: FIELDS, items: [noStatus] }, { url: BOARD_URL });
+    assert.equal(withBacklog.columns[0].label, 'No status');
+    assert.equal(withBacklog.columns[0].toggle, true);
 
     const empty = normalizeBoard({ project: PROJECT, fields: FIELDS, items: [] }, { filterName: 'Team', url: BOARD_URL });
     assert.deepEqual(empty.cards, []);
     assert.equal(empty.updated, null);
+    assert.equal(empty.columns.some((c) => c.key === 'none'), false);
+});
+
+test('a status the stages don\'t know keeps a column of its own name, in the board\'s order', () => {
+    const fields = [{ id: 3, name: 'Status', data_type: 'single_select', options: ['Todo', 'In progress', 'Done', 'Ground 0'].map(option) }];
+    const items = [
+        item(301, 'DraftIssue', draft('Set up the rig'), [statusValue('Todo')], '2026-10-14T00:00:00Z'),
+        item(302, 'DraftIssue', draft('Anvay - Ground 0'), [statusValue('Ground 0')], '2026-10-14T00:00:00Z'),
+        // A status the board no longer lists (its option was deleted) still shows, at the end.
+        item(303, 'DraftIssue', draft('Old idea'), [statusValue('Parking lot')], '2026-10-14T00:00:00Z'),
+    ];
+    const board = normalizeBoard({ project: PROJECT, fields, items }, { url: BOARD_URL });
+    // No In review column: this board doesn't have one.
+    assert.deepEqual(board.columns.map((c) => c.label), ['To do', 'In progress', 'Done', 'Ground 0', 'Parking lot']);
+    assert.equal(board.cards.length, 3);
+    const ground = board.cards.find((c) => c.title === 'Anvay - Ground 0');
+    assert.equal(ground.column, 'status:Ground 0');
+    assert.equal(ground.stage, null);
+});
+
+test('only filter options that have cards become buttons', () => {
+    const squads = { id: 4, name: 'Team', data_type: 'single_select', options: ['Squad 1', 'Squad 2', 'Squad 3'].map(option) };
+    const fields = [...MINIMAL_FIELDS, squads];
+    const unassigned = [item(401, 'DraftIssue', draft('Sprint 1 review'), [statusValue('Done')], '2026-10-14T00:00:00Z')];
+    assert.deepEqual(normalizeBoard({ project: PROJECT, fields, items: unassigned }, { filterName: 'Team', url: BOARD_URL }).groups, []);
+
+    const one = [...unassigned, item(402, 'DraftIssue', draft('Showcase'), [statusValue('Todo'), { id: 4, name: 'Team', data_type: 'single_select', value: option('Squad 2') }], '2026-10-14T00:00:00Z')];
+    assert.deepEqual(normalizeBoard({ project: PROJECT, fields, items: one }, { filterName: 'Team', url: BOARD_URL }).groups, ['Squad 2']);
 });
 
 test('without a filter there are no groups to choose from', () => {
@@ -168,14 +219,14 @@ test('a team filter shows that team\'s cards plus the cards the whole team share
 
 test('the done column lists the most recently shipped work first; other columns keep the board\'s order', () => {
     const cards = [
-        { title: 'Old', stage: 'done', shipped: '2026-09-30' },
-        { title: 'Undated', stage: 'done', shipped: null },
-        { title: 'Next', stage: 'todo', shipped: null },
-        { title: 'New', stage: 'done', shipped: '2026-10-12' },
-        { title: 'Later', stage: 'todo', shipped: null },
+        { title: 'Old', column: 'done', stage: 'done', shipped: '2026-09-30' },
+        { title: 'Undated', column: 'done', stage: 'done', shipped: null },
+        { title: 'Next', column: 'todo', stage: 'todo', shipped: null },
+        { title: 'New', column: 'done', stage: 'done', shipped: '2026-10-12' },
+        { title: 'Later', column: 'todo', stage: 'todo', shipped: null },
     ];
-    assert.deepEqual(columnCards(cards, 'done').map((c) => c.title), ['New', 'Old', 'Undated']);
-    assert.deepEqual(columnCards(cards, 'todo').map((c) => c.title), ['Next', 'Later']);
+    assert.deepEqual(columnCards(cards, { key: 'done', stage: 'done' }).map((c) => c.title), ['New', 'Old', 'Undated']);
+    assert.deepEqual(columnCards(cards, { key: 'todo', stage: 'todo' }).map((c) => c.title), ['Next', 'Later']);
 });
 
 /* ── Fetching ────────────────────────────────────────────────────────── */

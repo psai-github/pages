@@ -13,8 +13,9 @@
 // doesn't answer, the last copy stays up with a note saying so.
 //
 // Every board names its columns its own way ("Todo", "📋 To Do", "Ready"), so
-// cards are sorted into five shared stages by name. Columns that aren't work,
-// like a "Team Map" or "Reflections" column, are left out.
+// familiar names are grouped into five shared stages; any other column keeps
+// its own name, and cards with no status get a "No status" column. Only
+// UGRC-CSA's note columns ("Team Map", "Reflections") are left out.
 //
 // The filters, counts and backlog toggle are existing OCS elements
 // (ocs__links, ocs__btn, ocs__status-pill, ocs__toggle); the columns and cards
@@ -47,7 +48,8 @@ const STAGE_RULES = [
   ['backlog', /backlog|idea|planning|icebox|someday|triage|\bnew\b/i],
 ];
 
-// The stage a status belongs to, or null for a column that isn't work.
+// The stage a status belongs to, or null when its name isn't a familiar one
+// (that column then keeps its own name).
 export function stageOf(status) {
   if (!status) return 'backlog';   // GitHub's "No Status" column
   const rule = STAGE_RULES.find(([, pattern]) => pattern.test(status));
@@ -104,6 +106,12 @@ export function pickFields(fields, filterName) {
 // a filter of its own, and its cards show under every group.
 const SHARED = /^(everyone|all|whole team|shared)$/i;
 
+// Columns that hold notes about the team rather than work (UGRC-CSA's
+// "📌 Team Map" and "🪞 Reflections") are left off the embed.
+const HIDDEN = /team map|reflection/i;
+
+const LABELS = Object.fromEntries(STAGES.map((stage) => [stage.key, stage.label]));
+
 function valueOf(item, field) {
   if (!field) return null;
   return (item.fields || []).find((f) => f.id === field.id)?.value ?? null;
@@ -111,16 +119,53 @@ function valueOf(item, field) {
 
 const dayOf = (iso) => (iso ? String(iso).slice(0, 10) : null);
 
-// The board as the embed draws it: work cards only, each with just what is
-// shown. GitHub's own payload (card bodies and all) is never kept.
+// The board as the embed draws it: its columns and its work cards, each card
+// with just what is shown. GitHub's own payload (card bodies and all) is
+// never kept.
+//
+// Columns follow the board's Status options, in the board's order. Statuses
+// with a familiar name share their stage's column ("Todo" and "Ready" are both
+// To do), so a board shows only the stages it has; any other status keeps a
+// column of its own name, so no card goes missing. Cards with no status get a
+// "No status" column first, as on GitHub. Backlog columns start hidden behind
+// a toggle, and so does No status on a board that has a Backlog of its own.
 export function normalizeBoard({ project, fields, items }, { filterName = '', url } = {}) {
   const picked = pickFields(fields, filterName);
+  const columns = [];
+  const columnOf = new Map();   // status name → its column, or null when hidden
+  const columnFor = (status) => {
+    if (!columnOf.has(status)) {
+      let column = null;
+      if (!HIDDEN.test(status)) {
+        const stage = stageOf(status);
+        const key = stage || `status:${status}`;
+        column = columns.find((c) => c.key === key);
+        if (!column) {
+          column = { key, label: stage ? LABELS[stage] : status, stage, toggle: stage === 'backlog' };
+          columns.push(column);
+        }
+      }
+      columnOf.set(status, column);
+    }
+    return columnOf.get(status);
+  };
+  (picked.status?.options || []).forEach(columnFor);
+  const hasBacklog = columns.some((c) => c.stage === 'backlog');
+  let noStatus = null;
+
   const cards = [];
   let updated = null;
   for (const item of items) {
     const status = optionName(valueOf(item, picked.status));
-    const stage = stageOf(status);
-    if (!stage) continue;
+    let column;
+    if (status) {
+      column = columnFor(status);
+    } else {
+      noStatus = noStatus || { key: 'none', label: 'No status', stage: 'backlog', toggle: hasBacklog };
+      column = noStatus;
+    }
+    if (!column) continue;
+    const { stage } = column;
     const content = item.content || {};
     const draft = item.content_type === 'DraftIssue';
     const people = [
@@ -137,19 +182,26 @@ export function normalizeBoard({ project, fields, items }, { filterName = '', ur
       number: draft ? null : (content.number ?? null),
       stage,
       status,
+      column: column.key,
       group: optionName(valueOf(item, picked.group)),
       people,
       shipped: dayOf(valueOf(item, picked.shipped)) || (stage === 'done' ? dayOf(content.merged_at || content.closed_at) : null),
     });
     if (!updated || item.updated_at > updated) updated = item.updated_at;
   }
+  if (noStatus) columns.unshift(noStatus);
+
+  // A filter button for each option some card has; an option nobody has
+  // picked would only ever show an empty board.
   const options = picked.group?.options || [];
+  const used = new Set(cards.map((card) => card.group));
   return {
     title: project?.title || 'Project board',
     url,
     filterName: picked.group?.name || '',
-    groups: options.filter((name) => !SHARED.test(name)),
+    groups: options.filter((name) => !SHARED.test(name) && used.has(name)),
     shared: options.filter((name) => SHARED.test(name)),
+    columns,
     cards,
     updated,
   };
@@ -260,12 +312,12 @@ export function filterCards(board, group) {
   return board.cards.filter((card) => card.group === group || board.shared.includes(card.group));
 }
 
-// One column: done work most recently shipped first (undated last), every
-// other stage in the board's own order.
-export function columnCards(cards, stage) {
-  const column = cards.filter((card) => card.stage === stage);
-  if (stage === 'done') column.sort((a, b) => (b.shipped || '').localeCompare(a.shipped || ''));
-  return column;
+// One column's cards: done work most recently shipped first (undated last),
+// every other column in the board's own order.
+export function columnCards(cards, column) {
+  const list = cards.filter((card) => card.column === column.key);
+  if (column.stage === 'done') list.sort((a, b) => (b.shipped || '').localeCompare(a.shipped || ''));
+  return list;
 }
 
 /* ── Drawing ─────────────────────────────────────────────────────────── */
@@ -348,7 +400,8 @@ function boardView(section) {
         row.appendChild(button);
       });
     }
-    const backlog = cards.filter((card) => card.stage === 'backlog').length;
+    const toggled = new Set(board.columns.filter((column) => column.toggle).map((column) => column.key));
+    const backlog = cards.filter((card) => toggled.has(card.column)).length;
     if (backlog) {
       const toggle = el('label', 'ocs__toggle');
       const input = el('input', 'ocs__toggle-input');
@@ -367,29 +420,30 @@ function boardView(section) {
     return row.childElementCount ? [row] : [];
   }
 
-  // One column: the stage's name and count over its first PER_COLUMN cards,
-  // then a "+N more" pill that opens the rest. data-stage picks the color of
-  // the line across its top.
-  function column(stage, cards, showGroup) {
-    const list = columnCards(cards, stage.key);
+  // One column: its name and count over its first PER_COLUMN cards, then a
+  // "+N more" pill that opens the rest. data-stage picks the color of the line
+  // across its top; a column of the board's own (no stage) gets the plain one.
+  function column(col, cards, showGroup) {
+    const list = columnCards(cards, col);
+    const index = board.columns.indexOf(col);
     const item = el('li', 'ocs__kanban-column');
-    item.dataset.stage = stage.key;
+    if (col.stage) item.dataset.stage = col.stage;
     const heading = el('div');
-    heading.append(el('strong', '', stage.label), ' ', statusPill('neutral', String(list.length)));
+    heading.append(el('strong', '', col.label), ' ', statusPill('neutral', String(list.length)));
     item.appendChild(heading);
     if (!list.length) item.appendChild(el('div', 'ocs__text', 'Nothing here'));
-    const open = state.open.has(stage.key);
+    const open = state.open.has(col.key);
     (open ? list : list.slice(0, PER_COLUMN)).forEach((card) => item.appendChild(cardLink(card, showGroup)));
     if (list.length > PER_COLUMN) {
       const more = el('a', 'ocs__status-pill ocs__status-pill--neutral', open ? 'Show less' : `+${list.length - PER_COLUMN} more`);
       more.href = '#';
-      more.dataset.stageToggle = stage.key;
+      more.dataset.columnToggle = String(index);
       more.setAttribute('aria-expanded', String(open));
       more.addEventListener('click', (e) => {
         e.preventDefault();
-        if (open) state.open.delete(stage.key);
-        else state.open.add(stage.key);
-        renderAndFocus(`[data-stage-toggle="${stage.key}"]`);
+        if (open) state.open.delete(col.key);
+        else state.open.add(col.key);
+        renderAndFocus(`[data-column-toggle="${index}"]`);
       });
       // ocs__keypoint keeps the pill its own width instead of the column's.
       const row = el('div', 'ocs__keypoint');
@@ -401,10 +455,11 @@ function boardView(section) {
 
   function render() {
     const cards = filterCards(board, state.group);
-    const stages = STAGES.filter((stage) => state.backlog || stage.key !== 'backlog');
     const showGroup = state.group === 'all' && board.groups.length > 0;
     const columns = el('ul', 'ocs__kanban-board');
-    stages.forEach((stage) => columns.appendChild(column(stage, cards, showGroup)));
+    board.columns
+      .filter((col) => state.backlog || !col.toggle)
+      .forEach((col) => columns.appendChild(column(col, cards, showGroup)));
     const body = el('div', 'ocs__keypoints');
     body.append(...controls(cards), columns);
     mount.replaceChildren(body);
@@ -464,7 +519,7 @@ async function mountBoard(section) {
     return;
   }
   const filterName = section.dataset.filter || '';
-  const key = `ocs-kanban:v1:${ref.apiPath}:${filterName}`;
+  const key = `ocs-kanban:v2:${ref.apiPath}:${filterName}`;
   const view = boardView(section);
   let entry = readEntry(key);
   if (entry?.board) view.show(entry.board);
