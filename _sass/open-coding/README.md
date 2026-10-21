@@ -326,7 +326,7 @@ Submissions all use this for their tab bars.
 
 How a page shows/hides the modal (a `hidden`/`open` class, an
 `aria-hidden` attribute) is up to the page — this only styles the chrome.
-The backdrop sits above the site header. See [`elements/modals`](elements/modals).
+See [`elements/modals`](elements/modals).
 Dashboard and Analytics Dashboard use the plain card+close shape; Calendar
 and Profile's face scanner use the full header/actions shape.
 

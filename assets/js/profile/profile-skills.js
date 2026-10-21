@@ -1,4 +1,4 @@
-// The skill check-in on /profile/v2: four 1-5 ratings for one project, added to the
+// The skill check-in on /profile/v2: four 1-6 ratings for one project, added to the
 // student's Skill Passport.
 import { pythonURI, fetchOptions } from '../api/config.js';
 

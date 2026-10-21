@@ -1,18 +1,18 @@
 // The account form on /profile/v2: fills in the student's details, enables Save only
 // when a field really changed, and saves only those fields.
-import { javaURI, pythonURI, fetchOptions } from '../api/config.js';
+import { javaURI, pythonURI } from '../api/config.js';
+import { postUpdate, putUpdate } from '../api/profile.js';
 import { getUserData } from '../aesthetihawk/profile/getUserData.js';
 import { ACCOUNT_FIELDS, changedFields } from './profile-model.js';
 
 // Flask and Spring each keep a copy of the profile, so a field is saved to both.
 async function saveField(key, value) {
-    const body = JSON.stringify({ [key]: value });
-    const responses = await Promise.all([
-        fetch(`${pythonURI}/api/user`, { ...fetchOptions, method: 'PUT', body }),
-        fetch(`${javaURI}/api/person/update`, { ...fetchOptions, method: 'POST', body }),
+    const body = { [key]: value };
+    const [flaskSaved, springSaved] = await Promise.all([
+        putUpdate({ URL: `${pythonURI}/api/user`, body }),
+        postUpdate({ URL: `${javaURI}/api/person/update`, body }),
     ]);
-    const failed = responses.find(response => !response.ok);
-    if (failed) throw new Error(`the server answered ${failed.status}`);
+    if (!flaskSaved || !springSaved) throw new Error(`${flaskSaved ? 'Spring' : 'Flask'} didn't accept it`);
 }
 
 // Resolves with the loaded details, or null when the student isn't signed in.
@@ -20,7 +20,7 @@ export async function initAccountForm({ form, saveButton, status, onSaved }) {
     const inputFor = field => document.getElementById(field.inputId);
     const readValues = () => Object.fromEntries(ACCOUNT_FIELDS.map(field => [field.key, inputFor(field).value]));
     // The values the page loaded. Compared only after they arrive: comparing against the
-    // still-empty fields made every field look edited, so Save re-sent the User ID and signed students out.
+    // still-empty fields made every field look edited, so Save re-sent all of them, the User ID included.
     let loaded = null;
     const pending = () => (loaded ? changedFields(loaded, readValues()) : []);
 
