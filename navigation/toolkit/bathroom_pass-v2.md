@@ -77,7 +77,7 @@ active_tab: bathroom_pass
                                 <h3 id="idName" class="ocs__bathroompass-v2-id-name">Loading...</h3>
                             </div>
                         </div>
-                        <div class="ocs__bathroompass-v2-button-row">
+                        <div class="ocs__links">
                             <button id="confirmIdBtn" class="ocs__btn accent fill medium ocs__bathroompass-v2-flex-btn">Confirm</button>
                             <button id="notMeBtn" class="ocs__btn medium ocs__bathroompass-v2-flex-btn">Not Me</button>
                         </div>
@@ -89,7 +89,7 @@ active_tab: bathroom_pass
         <!-- Sidebar Queue Section -->
         <div class="ocs__bathroompass-v2-queue-col">
             <div class="ocs__card ocs__bathroompass-v2-queue-card">
-                <div class="ocs__bathroompass-v2-card-header">
+                <div class="ocs__card-header">
                     <h2 class="ocs__bathroompass-v2-queue-title">
                         <span class="ocs__bathroompass-v2-queue-icon">
                             <svg class="ocs__btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
@@ -115,7 +115,7 @@ active_tab: bathroom_pass
         <div class="ocs__bathroompass-v2-bottom-row">
             <!-- Matching Threshold -->
             <div class="ocs__card">
-                <div class="ocs__bathroompass-v2-card-header">
+                <div class="ocs__card-header">
                     <h3 class="ocs__bathroompass-v2-card-title">Matching Threshold</h3>
                     <span id="thresholdValue" class="ocs__bathroompass-v2-threshold-value">0.40</span>
                 </div>
@@ -149,7 +149,7 @@ active_tab: bathroom_pass
                         <input type="text" id="emergencyName" placeholder="Enter student name manually..."
                                class="ocs__input ocs__bathroompass-v2-override-input"
                                autocomplete="off">
-                        <div class="ocs__bathroompass-v2-button-row">
+                        <div class="ocs__links">
                             <button id="emergencyCheckInBtn" class="ocs__btn accent fill medium">
                                 Check In
                             </button>

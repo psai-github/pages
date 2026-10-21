@@ -269,11 +269,8 @@
     font-weight: 700;
 }
 
-.ocs__bathroompass-v2-button-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-}
+// .ocs__links (elements/buttons) now covers this page's button rows
+// instead of a page-scoped duplicate.
 
 .ocs__bathroompass-v2-flex-btn {
     flex: 1;
@@ -283,12 +280,8 @@
     height: 100%;
 }
 
-.ocs__bathroompass-v2-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-}
+// .ocs__card-header (elements/capstone) now covers this page's card
+// headers instead of a page-scoped duplicate.
 
 .ocs__bathroompass-v2-queue-title {
     display: flex;
@@ -419,12 +412,7 @@
 
 // JS hook: classList.add/remove("hidden") is the show/hide mechanism for
 // #scanCanvas, #scanLine, #cooldownOverlay, #idOverlay, and
-// #emergencySuggestions. Declared LAST on purpose: several classes above
-// (.ocs__bathroompass-v2-overlay, .ocs__bathroompass-v2-id-card) also set
-// `display`, and since both are single-class selectors of equal
-// specificity, source order decides which `display` wins when an element
-// carries both — this must stay last so .hidden's display:none always
-// wins.
-.hidden {
-    display: none;
-}
+// #emergencySuggestions. The rule itself now lives once, globally, at the
+// end of _main.scss (after every page partial, so it still always wins
+// over this page's own display-setting classes like
+// .ocs__bathroompass-v2-overlay and .ocs__bathroompass-v2-id-card).
