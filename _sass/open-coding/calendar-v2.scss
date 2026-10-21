@@ -1,0 +1,262 @@
+// Page-scoped styles for /student/calendar/v2 (_projects/systems/calendar/index-v2.md).
+//
+// SHELL ONLY: this converts the page chrome (tab bars, chips, filter toolbar
+// fields, and the 3 modals' outer frame) to ocs__ grammar. The Issues/Kanban/
+// Threads deep content, the Create/Edit issue form, and FullCalendar's own
+// theme overrides are intentionally left on the project's existing
+// _projects/systems/calendar/sass/main.scss styling -- see the PR description
+// for the full "what was left out" list.
+//
+// This page's JavaScript is copied verbatim from the original /student/calendar
+// page and is NOT edited here. Classes below marked "JS-coupled" are read
+// directly by that script (classList.add/remove/toggle, querySelector,
+// aria-hidden attribute checks) and keep their original literal names on
+// purpose -- every new rule here is written as a compound selector anchored
+// on a new ocs__calendar-v2-* class so it never restyles those literal
+// classes on the original page, which also loads this same compiled
+// stylesheet (project SCSS is global, not page-scoped).
+
+.ocs__calendar-v2-page {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+// ===========================
+// Tab bars (dashboard tabs + issues subtabs share this look)
+// ===========================
+// `active` and `dashboard-tab-btn`/`issues-subtab-btn` are JS-coupled
+// (classList.toggle + querySelectorAll) -- kept literal on the elements,
+// restyled only via the paired ocs__calendar-v2-tab-btn class.
+
+.ocs__calendar-v2-tabs {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px;
+    margin: 0 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--ui-border);
+    background: var(--panel);
+}
+
+.ocs__calendar-v2-tab-btn {
+    appearance: none;
+    border: 1px solid transparent;
+    min-height: 34px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+
+    &:hover {
+        color: var(--pref-text-color);
+        background: var(--panel-mid);
+    }
+
+    &:focus-visible {
+        outline: none;
+        border-color: var(--pref-accent-color);
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
+    }
+
+    &.active {
+        color: var(--pref-bg-color);
+        border-color: var(--pref-accent-color);
+        background: var(--pref-accent-color);
+    }
+}
+
+// ===========================
+// Source filter chips
+// ===========================
+// `active` and `calendar-source-chip` are JS-coupled (same mechanism as the
+// tab bar above) -- kept literal, restyled via the paired chip class.
+
+.ocs__calendar-v2-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 12px;
+}
+
+.ocs__calendar-v2-chip {
+    border: 1px solid var(--ui-border);
+    background: var(--panel);
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+
+    &:hover {
+        color: var(--pref-text-color);
+        border-color: var(--pref-accent-color);
+    }
+
+    &.active {
+        color: var(--pref-bg-color);
+        border-color: var(--pref-accent-color);
+        background: var(--pref-accent-color);
+    }
+}
+
+// ===========================
+// Panels
+// ===========================
+// `dashboard-panel`/`hidden` are JS-coupled (classList.toggle, keyed off
+// the literal string "hidden") -- see the bare .hidden rule at the bottom
+// of this file, declared last on purpose.
+
+.ocs__calendar-v2-panel {
+    margin-top: 8px;
+}
+
+.ocs__calendar-v2-auth-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(220, 38, 38, 0.4);
+    background: rgba(220, 38, 38, 0.12);
+    color: var(--text);
+}
+
+.ocs__calendar-v2-cs-pathway-title {
+    margin-bottom: 6px;
+}
+
+.ocs__calendar-v2-panel-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.ocs__calendar-v2-btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+// ===========================
+// Modals (event / issue / reply)
+// ===========================
+// `open` (classList, event+issue modal) and the aria-hidden attribute
+// mechanism (reply modal only, no classList toggle) are JS-coupled and kept
+// literal/verbatim -- restyled only via these paired classes, never via the
+// bare .calendar-event-modal / .issue-modal / .reply-modal selectors so the
+// original page's modal styling (same global stylesheet) is untouched.
+// `.reply-modal-content` is also JS-coupled (querySelector, click-outside
+// detection) and kept literal on purpose.
+
+.ocs__calendar-v2-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.55);
+
+    &.open {
+        display: flex;
+    }
+}
+
+.ocs__calendar-v2-reply-modal {
+    z-index: 10001; // stacks above the issue modal, same as the original
+
+    // Shown when aria-hidden is false -- no classList toggle on this modal.
+    &:not([aria-hidden="true"]) {
+        display: flex;
+    }
+}
+
+.ocs__calendar-v2-modal-content {
+    position: relative;
+    width: min(760px, 95vw);
+    max-height: 90vh;
+    overflow: auto;
+    margin-bottom: 0; // override ocs__card's default margin-bottom inside a modal overlay
+}
+
+.ocs__calendar-v2-reply-modal .ocs__calendar-v2-modal-content {
+    width: min(600px, 95vw);
+    max-height: 85vh;
+}
+
+// The event modal's close control is a direct child of the content card
+// (no header wrapper, matching the original structure) so it floats
+// top-right; the issue/reply modals' close buttons sit inside
+// .ocs__calendar-v2-modal-header instead, so this selector only matches
+// the event modal's case.
+.ocs__calendar-v2-modal-content > .ocs__calendar-v2-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+}
+
+.ocs__calendar-v2-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--ui-border);
+}
+
+.ocs__calendar-v2-modal-title {
+    margin: 0;
+}
+
+.ocs__calendar-v2-modal-close {
+    border: 0;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.18s ease;
+
+    &:hover {
+        color: var(--pref-accent-color);
+    }
+}
+
+.ocs__calendar-v2-modal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--ui-border);
+}
+
+// `hidden` is a Tailwind-utility-style class this page relies on for many
+// JS-toggled elements (panels, subpanels, modal buttons). Tailwind's CDN
+// script JIT-generates the same rule per page, but this declares it
+// explicitly as a safety net -- same convention as every prior page in this
+// series. Must stay last: a class that sets `display` declared after this
+// would win the cascade and defeat `hidden`.
+.hidden {
+    display: none;
+}
