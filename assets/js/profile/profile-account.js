@@ -48,8 +48,10 @@ export async function initAccountForm({ form, saveButton, status, onSaved }) {
         const values = readValues();
         saveButton.disabled = true;
         status.textContent = 'Saving…';
+        // The User ID goes last: the session may stop working once it changes.
+        const ordered = [...fields.filter(field => !field.signsOut), ...fields.filter(field => field.signsOut)];
         try {
-            for (const field of fields) {
+            for (const field of ordered) {
                 const value = values[field.key].trim();
                 await saveField(field.key, value);
                 loaded[field.key] = value;

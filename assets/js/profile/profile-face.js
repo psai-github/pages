@@ -18,11 +18,19 @@ export async function initFaceRegistration({ pill, openButton, modal, video, can
         captureButton.disabled = true;
         status.textContent = 'Asking for your camera…';
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const opened = await navigator.mediaDevices.getUserMedia({ video: true });
+            // Closed while the browser was still asking for the camera: turn it straight off.
+            if (modal.classList.contains('hidden')) {
+                opened.getTracks().forEach(track => track.stop());
+                return;
+            }
+            stream = opened;
+            video.addEventListener('loadedmetadata', () => {
+                status.textContent = 'Camera on. Center your face, then press Capture.';
+                captureButton.disabled = false;
+                captureButton.focus();
+            }, { once: true });
             video.srcObject = stream;
-            status.textContent = 'Camera on. Center your face, then press Capture.';
-            captureButton.disabled = false;
-            captureButton.focus();
         } catch (error) {
             console.error('Camera error:', error);
             status.textContent = "Couldn't open your camera. Allow camera access for this site, then try again.";
@@ -40,6 +48,10 @@ export async function initFaceRegistration({ pill, openButton, modal, video, can
     async function capture() {
         if (!uid) {
             status.textContent = "Your account didn't load. Refresh the page and try again.";
+            return;
+        }
+        if (!video.videoWidth || !video.videoHeight) {
+            status.textContent = 'The camera is still starting. Try again in a moment.';
             return;
         }
         canvas.width = video.videoWidth;

@@ -77,23 +77,31 @@ export async function initClasses({ list, form, select, status, courses, onChang
         addButton.disabled = remaining.length === 0;
     }
 
+    // One change at a time: overlapping requests could leave Spring's groups on a stale list.
+    let busy = false;
     async function change(request) {
+        if (busy) return;
+        busy = true;
+        select.disabled = true;
+        addButton.disabled = true;
+        list.querySelectorAll('[data-remove-class]').forEach(button => { button.disabled = true; });
         showStatus('Saving…');
         try {
             classes = await request();
+            onChange?.(classes);
+            try {
+                await syncClassGroupMemberships(classes);
+                showStatus('Saved');
+            } catch (error) {
+                console.error('Class saved but group membership sync failed:', error);
+                showStatus(`Your classes were saved, but the course groups didn't update: ${error.message}`);
+            }
         } catch (error) {
             console.error('Error updating classes:', error);
             showStatus(`Couldn't update your classes: ${error.message}.`);
-            return;
-        }
-        render();
-        onChange?.(classes);
-        try {
-            await syncClassGroupMemberships(classes);
-            showStatus('Saved');
-        } catch (error) {
-            console.error('Class saved but group membership sync failed:', error);
-            showStatus(`Your classes were saved, but the course groups didn't update: ${error.message}`);
+        } finally {
+            busy = false;
+            render();
         }
     }
 
