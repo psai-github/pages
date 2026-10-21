@@ -22,83 +22,12 @@
     gap: 1.5rem;
 }
 
-.ocs__submissions-v2-tabbar {
-    position: relative;
-    border-bottom: 1px solid var(--ui-border);
-}
-
-.ocs__submissions-v2-tabbar-list {
-    display: flex;
-    flex-wrap: wrap;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-// JS hook: querySelectorAll('.tab-btn') finds these; classList
-// add/remove("active", "text-blue-500", "border-blue-500") marks the
-// active tab across all 3 tabs.
-.ocs__submissions-v2-tab-btn {
-    display: inline-block;
-    padding: 1rem;
-    border: none;
-    border-bottom: 2px solid transparent;
-    background: transparent;
-    color: var(--text-muted);
-    font: inherit;
-    cursor: pointer;
-
-    &:hover {
-        color: var(--pref-text-color);
-        border-color: color-mix(in srgb, var(--pref-text-color) 24%, transparent);
-    }
-
-    &.active.text-blue-500 {
-        color: var(--pref-accent-color);
-    }
-
-    &.active.border-blue-500 {
-        border-color: var(--pref-accent-color);
-    }
-}
-
-.ocs__submissions-v2-tab-underline {
-    background: var(--pref-accent-color);
-}
-
-.ocs__submissions-v2-tab-content-container {
-    position: relative;
-    min-height: 400px;
-}
-
-// JS hook: querySelectorAll('.tab-content') finds these; classList
-// add/remove("hidden", "block") switches the visible pane (also used by
-// the included creator-dashboard.html's own tab-content element).
-.ocs__submissions-v2-tab-content {
-    padding: 1.5rem 0;
-    color: var(--pref-text-color);
-}
-
-.ocs__submissions-v2-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 400px;
-    text-align: center;
-}
-
-.ocs__submissions-v2-spinner {
-    width: 2rem;
-    height: 2rem;
-    margin: 0 auto 1rem;
-    border: 3px solid color-mix(in srgb, var(--pref-text-color) 16%, transparent);
-    border-bottom-color: var(--pref-accent-color);
-    border-radius: 50%;
-    animation: ocs__submissions-v2-spin 0.75s linear infinite;
-}
-
-@keyframes ocs__submissions-v2-spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
+// .ocs__tabs / -list / -btn / -underline / -panels / -panel (elements/tabs)
+// now cover the tab bar instead of a page-scoped duplicate. The compound
+// JS-coupled selectors (.active.text-blue-500 etc., keyed off
+// querySelectorAll('.tab-btn') / ('.tab-content'), also used by the
+// included creator-dashboard.html's own tab-content element) live there
+// too.
+//
+// .ocs__loading / .ocs__spinner (elements/loaders) now cover both loading
+// spinners instead of a page-scoped duplicate.

@@ -6,37 +6,37 @@ active_tab: submissions
 
 <div class="ocs__submissions-v2-page">
     <div class="ocs__submissions-v2-stack">
-        <div class="ocs__submissions-v2-tabbar">
-            <ul class="ocs__submissions-v2-tabbar-list" id="tab-bar">
+        <div class="ocs__tabs">
+            <ul class="ocs__tabs-list" id="tab-bar">
                 <li>
-                    <button id="tab-my-submissions" class="tab-btn active ocs__submissions-v2-tab-btn">
+                    <button id="tab-my-submissions" class="tab-btn active ocs__tabs-btn">
                         My Submissions
                     </button>
                 </li>
                 <li>
-                    <button id="tab-created-assignments" class="tab-btn ocs__submissions-v2-tab-btn">
+                    <button id="tab-created-assignments" class="tab-btn ocs__tabs-btn">
                         Assignments You Created
                     </button>
                 </li>
                 <li>
-                    <button id="tab-all-submissions" class="tab-btn ocs__submissions-v2-tab-btn" style="display: none;">
+                    <button id="tab-all-submissions" class="tab-btn ocs__tabs-btn" style="display: none;">
                         All Submissions
                     </button>
                 </li>
             </ul>
             <!-- sliding underline indicator -->
-            <div id="tab-underline" class="ocs__submissions-v2-tab-underline"
+            <div id="tab-underline" class="ocs__tabs-underline"
                 style="position:absolute;bottom:0;left:0;height:2px;width:0;transition:all 0.3s cubic-bezier(.4,0,.2,1);border-radius:2px;">
             </div>
         </div>
 
         <!-- tab content container -->
-        <div id="tab-content-container" class="ocs__submissions-v2-tab-content-container">
+        <div id="tab-content-container" class="ocs__tabs-panels">
 
             <!-- My Submissions tab content -->
-            <div id="tab-content-my-submissions" class="tab-content block ocs__submissions-v2-tab-content">
-                <div id="my-submissions-loading" class="ocs__submissions-v2-loading">
-                    <div class="ocs__submissions-v2-spinner"></div>
+            <div id="tab-content-my-submissions" class="tab-content block ocs__tabs-panel">
+                <div id="my-submissions-loading" class="ocs__loading">
+                    <div class="ocs__spinner"></div>
                     <p class="ocs__text">Loading submissions...</p>
                 </div>
                 <div id="my-submissions-container" class="ocs__table-wrap"></div>
@@ -98,8 +98,8 @@ active_tab: submissions
                     </div>
                 </div>
 
-                <div id="all-submissions-loading" class="ocs__submissions-v2-loading">
-                    <div class="ocs__submissions-v2-spinner"></div>
+                <div id="all-submissions-loading" class="ocs__loading">
+                    <div class="ocs__spinner"></div>
                     <p class="ocs__text">Loading submissions...</p>
                 </div>
                 <div id="all-submissions-container" class="ocs__admin-assignment-list"></div>
