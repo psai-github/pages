@@ -111,12 +111,9 @@
     font-weight: 500;
 }
 
-.ocs__analytics-label {
-    display: block;
-    margin-bottom: 0.25rem;
-    color: var(--text-muted);
-    font-size: 0.875rem;
-}
+// .ocs__label and .ocs__grid--col2 now come from the shared grammar
+// (elements/forms/labels, elements/grids) instead of being duplicated
+// here.
 
 .ocs__analytics-full-width {
     width: 100%;
@@ -126,16 +123,6 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-}
-
-.ocs__analytics-two-col-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 2rem;
-
-    @media (max-width: $breakpoint-mobile) {
-        grid-template-columns: 1fr;
-    }
 }
 
 // Loading spinner used on the OCS Analytics placeholder and the Skill

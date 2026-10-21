@@ -148,7 +148,7 @@ active_tab: analytics
             <!-- Grade Predictor tab content -->
             <div id="tab-content-grade" class="tab-content hidden ocs__analytics-tab-content">
                 <h2 class="ocs__section-title ocs__analytics-page-title">Grade Predictor</h2>
-                <div class="ocs__analytics-two-col-grid">
+                <div class="ocs__grid--col2">
                     <!-- Left: Technical analytics -->
                     <div class="ocs__card ocs__analytics-flex-card">
                         <h3 class="ocs__analytics-card-heading ocs__analytics-heading-blue">Technical Analytics</h3>
@@ -185,59 +185,59 @@ score += gists * 0.5
                         <p class="ocs__text ocs__analytics-card-desc">
                             Adjust each slider to reflect your self-assessment or teacher's assessment for each skill (1 = lowest, 5 = highest).
                         </p>
-                        <form id="smart-grade-form" class="ocs__analytics-two-col-grid ocs__analytics-slider-form">
+                        <form id="smart-grade-form" class="ocs__grid--col2 ocs__analytics-slider-form">
                             <div>
-                                <label for="slider-attendance" class="ocs__analytics-label">Attendance</label>
+                                <label for="slider-attendance" class="ocs__label">Attendance</label>
                                 <input type="range" id="slider-attendance" name="attendance" min="1" max="5" value="4" class="ocs__analytics-full-width" />
                                 <span class="ocs__analytics-fineprint">Value: <span id="val-attendance">4</span></span>
                             </div>
                             <div>
-                                <label for="slider-work_habits" class="ocs__analytics-label">Work Habits</label>
+                                <label for="slider-work_habits" class="ocs__label">Work Habits</label>
                                 <input type="range" id="slider-work_habits" name="work_habits" min="1" max="5" value="5" class="ocs__analytics-full-width" />
                                 <span class="ocs__analytics-fineprint">Value: <span id="val-work_habits">5</span></span>
                             </div>
                             <div>
-                                <label for="slider-behavior" class="ocs__analytics-label">Behavior</label>
+                                <label for="slider-behavior" class="ocs__label">Behavior</label>
                                 <input type="range" id="slider-behavior" name="behavior" min="1" max="5" value="4" class="ocs__analytics-full-width" />
                                 <span class="ocs__analytics-fineprint">Value: <span id="val-behavior">4</span></span>
                             </div>
                             <div>
-                                <label for="slider-timeliness" class="ocs__analytics-label">Timeliness</label>
+                                <label for="slider-timeliness" class="ocs__label">Timeliness</label>
                                 <input type="range" id="slider-timeliness" name="timeliness" min="1" max="5" value="5" class="ocs__analytics-full-width" />
                                 <span class="ocs__analytics-fineprint">Value: <span id="val-timeliness">5</span></span>
                             </div>
                             <div>
-                                <label for="slider-tech_sense" class="ocs__analytics-label">Tech Sense</label>
+                                <label for="slider-tech_sense" class="ocs__label">Tech Sense</label>
                                 <input type="range" id="slider-tech_sense" name="tech_sense" min="1" max="5" value="4" class="ocs__analytics-full-width" />
                                 <span class="ocs__analytics-fineprint">Value: <span id="val-tech_sense">4</span></span>
                             </div>
                             <div>
-                                <label for="slider-tech_talk" class="ocs__analytics-label">Tech Talk</label>
+                                <label for="slider-tech_talk" class="ocs__label">Tech Talk</label>
                                 <input type="range" id="slider-tech_talk" name="tech_talk" min="1" max="5" value="4" class="ocs__analytics-full-width" />
                                 <span class="ocs__analytics-fineprint">Value: <span id="val-tech_talk">4</span></span>
                             </div>
                             <div>
-                                <label for="slider-tech_growth" class="ocs__analytics-label">Tech Growth</label>
+                                <label for="slider-tech_growth" class="ocs__label">Tech Growth</label>
                                 <input type="range" id="slider-tech_growth" name="tech_growth" min="1" max="5" value="5" class="ocs__analytics-full-width" />
                                 <span class="ocs__analytics-fineprint">Value: <span id="val-tech_growth">5</span></span>
                             </div>
                             <div>
-                                <label for="slider-advocacy" class="ocs__analytics-label">Advocacy</label>
+                                <label for="slider-advocacy" class="ocs__label">Advocacy</label>
                                 <input type="range" id="slider-advocacy" name="advocacy" min="1" max="5" value="4" class="ocs__analytics-full-width" />
                                 <span class="ocs__analytics-fineprint">Value: <span id="val-advocacy">4</span></span>
                             </div>
                             <div>
-                                <label for="slider-communication" class="ocs__analytics-label">Communication</label>
+                                <label for="slider-communication" class="ocs__label">Communication</label>
                                 <input type="range" id="slider-communication" name="communication" min="1" max="5" value="5" class="ocs__analytics-full-width" />
                                 <span class="ocs__analytics-fineprint">Value: <span id="val-communication">5</span></span>
                             </div>
                             <div>
-                                <label for="slider-integrity" class="ocs__analytics-label">Integrity</label>
+                                <label for="slider-integrity" class="ocs__label">Integrity</label>
                                 <input type="range" id="slider-integrity" name="integrity" min="1" max="5" value="5" class="ocs__analytics-full-width" />
                                 <span class="ocs__analytics-fineprint">Value: <span id="val-integrity">5</span></span>
                             </div>
                             <div>
-                                <label for="slider-organization" class="ocs__analytics-label">Organization</label>
+                                <label for="slider-organization" class="ocs__label">Organization</label>
                                 <input type="range" id="slider-organization" name="organization" min="1" max="5" value="4" class="ocs__analytics-full-width" />
                                 <span class="ocs__analytics-fineprint">Value: <span id="val-organization">4</span></span>
                             </div>
@@ -311,7 +311,7 @@ score += gists * 0.5
                 <!-- charts -->
                 <div id="passport-charts" class="hidden">
                     <!-- current skills -->
-                    <div class="ocs__analytics-two-col-grid ocs__analytics-card-spaced-sm">
+                    <div class="ocs__grid--col2 ocs__analytics-card-spaced-sm">
                         <div class="ocs__card">
                             <h3 class="ocs__analytics-eyebrow ocs__analytics-card-spaced-sm">Current Skills</h3>
                             <div id="chart-radar"></div>
