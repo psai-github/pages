@@ -98,12 +98,8 @@
     background-color: var(--pref-accent-color);
 }
 
-.ocs__profile-settings-header-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-}
+// .ocs__card-header (elements/capstone) now covers this row instead of a
+// page-scoped duplicate.
 
 .ocs__profile-settings-header-title {
     margin-bottom: 0;
@@ -132,14 +128,11 @@
     background: rgba(0, 0, 0, 0.8);
 }
 
-// JS hook: webcamOverlay is shown/hidden by toggling this exact class name —
-// this IS the show/hide mechanism, not just styling. Declared AFTER
-// .ocs__profile-settings-webcam-overlay on purpose: both are single-class
-// selectors of equal specificity, so source order decides which `display`
-// wins when both classes are present — this must stay last.
-.hidden {
-    display: none;
-}
+// JS hook: webcamOverlay is shown/hidden by toggling the literal class
+// "hidden" -- this IS the show/hide mechanism, not just styling. The rule
+// itself now lives once, globally, at the end of _main.scss (after every
+// page partial, so it still always wins over this page's own
+// display-setting classes like .ocs__profile-settings-webcam-overlay).
 
 .ocs__profile-settings-webcam-card {
     position: relative;
