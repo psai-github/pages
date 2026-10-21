@@ -109,17 +109,17 @@ active_tab: profile
 
     <div class="ocs__card">
         <h2 class="ocs__section-title">Facial Registration</h2>
-        <div id="facialRegistrationContainer" class="space-y-4">
+        <div id="facialRegistrationContainer" class="ocs__profile-settings-stack">
             <p class="ocs__text">Register your face to use the Bathroom Pass system. Your data will be
                 stored securely and used only for identification.</p>
 
             <div id="webcamOverlay"
-                class="hidden fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-4">
+                class="hidden ocs__profile-settings-webcam-overlay">
                 <div class="ocs__profile-settings-webcam-card">
                     <div class="ocs__profile-settings-webcam-card-header">
                         <h3 class="ocs__profile-settings-webcam-card-title">Face Scanner</h3>
                         <button type="button" onclick="closeScanner()" class="ocs__btn ocs__btn--icon small ocs__profile-settings-close-btn">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="ocs__btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -127,7 +127,7 @@ active_tab: profile
                     </div>
                     <div class="ocs__profile-settings-webcam-frame">
                         <video id="webcamControl" autoplay playsinline></video>
-                        <canvas id="captureCanvas" class="hidden"></canvas>
+                        <canvas id="captureCanvas" hidden></canvas>
                         <!-- Scanner Effect -->
                         <div class="ocs__profile-settings-scanner-frame">
                             <div class="ocs__profile-settings-scanner-corner top-left"></div>
@@ -139,7 +139,7 @@ active_tab: profile
                     <div class="ocs__profile-settings-webcam-card-footer">
                         <button type="button" id="captureFaceBtn" onclick="captureAndSaveFace()"
                             class="ocs__btn accent fill medium ocs__btn--icon ocs__profile-settings-capture-btn">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="ocs__btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -155,7 +155,7 @@ active_tab: profile
             <div class="ocs__profile-settings-flex-row-gap">
                 <button type="button" onclick="openScanner()"
                     class="ocs__btn accent medium ocs__btn--icon">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="ocs__btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
