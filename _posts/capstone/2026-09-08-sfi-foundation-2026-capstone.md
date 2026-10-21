@@ -28,6 +28,12 @@ permalink: /capstone/sfi-foundation/
     </div>
 </div>
 
+<!-- Sprint Board: live from the team's GitHub project, like Communication Systems -->
+{% assign sfi_data = site.data.sfi_foundation %}
+{% if sfi_data.Board %}
+{% include ocs_kanban_board.html url=sfi_data.Board.url %}
+{% endif %}
+
 <br>
 
 <div class="ocs__links ocs__links--wide">
@@ -57,8 +63,6 @@ permalink: /capstone/sfi-foundation/
 ## Project hub
 
 Follow priorities, owners, progress, and review evidence on our SFI Foundation board. Teachers, product owners, mentors, and business partners can use the same link to follow the work. Use this page's **Microblog** button for updates and discussion; keep decisions, acceptance criteria, and delivery evidence in the linked GitHub issue.
-
-{% include ocs_kanban_board.html url="https://github.com/orgs/SFI-Foundation/projects/1" title="SFI Foundation · Project board" %}
 
 <div class="ocs__links ocs__links--wide">
     <a class="ocs__btn" href="https://github.com/orgs/SFI-Foundation/projects/1" target="_blank" rel="noopener noreferrer">Open SFI Kanban</a>
