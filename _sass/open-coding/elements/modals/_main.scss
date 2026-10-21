@@ -30,6 +30,16 @@
   border: 1px solid var(--ui-border);
 }
 
+// Pages pair this with .ocs__card for the panel look; .ocs__card's own
+// margin-bottom doesn't belong on a modal dialog. Compounded with
+// .ocs__card so this reliably outranks its bottom margin regardless of
+// SCSS import order (ocs__card is compiled in a separate, later-loading
+// stylesheet entry point, _sass/minima/custom-styles.scss, so a
+// same-specificity bare override here isn't reliable).
+.ocs__card.ocs__modal-card {
+  margin-bottom: 0;
+}
+
 // Positioning only -- pair with ocs__btn ocs__btn--icon (small) for the
 // visual close-button treatment.
 .ocs__modal-close {
