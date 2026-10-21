@@ -18,12 +18,14 @@ import {
   getToolchainSession,
   requestStationCheck,
   agentCommands,
+  usesLocalBackend,
   loadPairedSessionId,
   savePairedSessionId,
   forgetPairedSessionId,
 } from '../services/ToolchainApi.js';
 import { TOOLCHAIN_TRAIL_SETTINGS } from '../data/toolchainTrailSettings.js';
 import { copyToClipboard } from '../services/clipboard.js';
+import { fixStepsFor, STUCK_HELP } from '../data/toolchainTrailFixes.js';
 
 const { pollIntervalMs: POLL_INTERVAL_MS, silentAgentHintMs: SILENT_AGENT_HINT_MS } = TOOLCHAIN_TRAIL_SETTINGS;
 export default class StationVerificationTrial {
@@ -359,6 +361,13 @@ export default class StationVerificationTrial {
           white-space: pre-wrap;
           word-break: break-all;
         }
+        .svt-fix {
+          margin: 6px 0 2px;
+          padding-left: 18px;
+          font-size: 12px;
+          color: #e2e8f0;
+        }
+        .svt-fix li { margin: 4px 0; }
         .svt-copy {
           flex: none;
           border: 1px solid #7dd3fc;
@@ -583,7 +592,7 @@ export default class StationVerificationTrial {
       if (!this.overlay) return;
       console.warn('[StationVerificationTrial] could not start an agent session:', error);
       this.getCodeBtn.disabled = false;
-      this._setAgentStatus('err', `${error.message}. Sign in and try again, or use the practice check below.`);
+      this._showStuckHelp(this._startFailureHelp(error), error.message);
       this._showPasteFallback();
       return;
     }
@@ -741,12 +750,41 @@ export default class StationVerificationTrial {
   }
   _renderChecks(checks = [], target = this.checksEl) {
     if (!target) return;
-    target.innerHTML = checks.map((c) => `
+    target.innerHTML = checks.map((c) => {
+      // A failed check shows its exact fix commands; the server's one-line hint is the fallback.
+      const fixSteps = c.passed ? '' : this._renderFixSteps(c.id);
+      const hint = !c.passed && !fixSteps && c.detail ? `<span class="svt-check-detail">${this._escape(c.detail)}</span>` : '';
+      return `
       <div class="svt-check ${c.passed ? 'pass' : 'fail'}">
         ${c.passed ? '✓' : '✗'} ${this._escape(c.label)}
-        ${!c.passed && c.detail ? `<span class="svt-check-detail">${this._escape(c.detail)}</span>` : ''}
-      </div>
-    `).join('');
+        ${hint}${fixSteps}
+      </div>`;
+    }).join('');
+  }
+
+  /** The exact commands that fix a failed check on this student's OS (see data/toolchainTrailFixes.js). */
+  _renderFixSteps(checkId) {
+    const steps = fixStepsFor(checkId, this.os, agentCommands(this.os)[0].command);
+    if (steps.length === 0) return '';
+    return `<ol class="svt-fix">${steps.map((step) => `<li>${this._renderStep(step)}</li>`).join('')}</ol>`;
+  }
+
+  /** Which help to show when no pairing code could be made. */
+  _startFailureHelp(error) {
+    if (error?.status === 401) return STUCK_HELP.notSignedIn;
+    const unreachable = error instanceof TypeError; // fetch got no answer at all
+    if (unreachable) return usesLocalBackend() ? STUCK_HELP.localBackendDown : STUCK_HELP.serverUnreachable;
+    return null; // a server error: its own message is the best help
+  }
+
+  _showStuckHelp(help, fallbackMessage) {
+    if (!help) {
+      this._setAgentStatus('err', `${fallbackMessage}. Try again, or use the practice check below.`);
+      return;
+    }
+    const [summary, ...steps] = help;
+    this._setAgentStatus('err', summary);
+    this.agentChecksEl.innerHTML = `<ol class="svt-fix">${steps.map((step) => `<li>${this._renderStep(step)}</li>`).join('')}</ol>`;
   }
 
   _appendLog(line) {

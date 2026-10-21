@@ -57,7 +57,9 @@ export async function startToolchainSession(stationId) {
     body: JSON.stringify({ stationId }),
   });
   if (!response.ok) {
-    throw new Error(await readError(response, 'Starting the station failed'));
+    const error = new Error(await readError(response, 'Starting the station failed'));
+    error.status = response.status; // 401 means the student isn't signed in
+    throw error;
   }
   const body = await response.json();
   if (typeof body?.sessionId !== 'string' || typeof body?.pairingCode !== 'string') {
@@ -102,9 +104,14 @@ export async function requestStationCheck(sessionId, stationId) {
   return response.json();
 }
 
+/** True when the game talks to a backend running on this computer (local development). */
+export function usesLocalBackend() {
+  return javaURI.startsWith('http://localhost');
+}
+
 /** The command a student runs for their OS, from inside their pages repository. */
 export function agentCommands(os) {
-  const local = javaURI.startsWith('http://localhost') ? ` --server ${javaURI}` : '';
+  const local = usesLocalBackend() ? ` --server ${javaURI}` : '';
   if (os === 'windows') {
     return [
       { label: 'Ubuntu (WSL) terminal', command: `python3 scripts/toolchain_agent.py${local}` },
