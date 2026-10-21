@@ -92,7 +92,7 @@ active_tab: calendar
 
 <section id="dashboard-panel-issues" class="ocs__calendar-v2-panel dashboard-panel hidden" role="tabpanel" aria-label="Issues Panel">
     <div id="calendar-issues-panel" class="ocs__card ocs__calendar-v2-issues-panel calendar-issues-panel">
-        <div class="ocs__calendar-v2-panel-header calendar-issues-header">
+        <div class="ocs__card-header ocs__calendar-v2-panel-header calendar-issues-header">
             <div>
                 <h2 class="ocs__section-title calendar-issues-title">Issues</h2>
                 <p class="ocs__text calendar-issues-subtitle">GitHub-inspired issue tracking synced with calendar dates and event context.</p>
@@ -226,7 +226,7 @@ active_tab: calendar
 
 <section id="dashboard-panel-threads" class="ocs__calendar-v2-panel dashboard-panel hidden" role="tabpanel" aria-label="Message Threads Panel">
     <div id="calendar-threads-panel" class="ocs__card ocs__calendar-v2-issues-panel calendar-issues-panel">
-        <div class="ocs__calendar-v2-panel-header calendar-issues-header">
+        <div class="ocs__card-header ocs__calendar-v2-panel-header calendar-issues-header">
             <div>
                 <h2 class="ocs__section-title calendar-issues-title">Issue Threads</h2>
                 <p class="ocs__text calendar-issues-subtitle">Replies, suggestions, and follow-ups attached directly to issues.</p>
@@ -256,11 +256,11 @@ active_tab: calendar
     </div>
 </section>
 <!-- Modal -->
-<div id="eventModal" class="ocs__calendar-v2-modal calendar-event-modal">
-    <div class="ocs__card ocs__calendar-v2-modal-content calendar-event-modal-content modal-content">
-        <span class="ocs__calendar-v2-modal-close calendar-event-modal-close" id="closeModal">&times;</span>
+<div id="eventModal" class="ocs__modal ocs__calendar-v2-modal calendar-event-modal">
+    <div class="ocs__card ocs__modal-card ocs__calendar-v2-modal-content calendar-event-modal-content modal-content">
+        <span class="ocs__modal-close ocs__calendar-v2-modal-close calendar-event-modal-close" id="closeModal">&times;</span>
         <div class="calendar-event-modal-body">
-            <h2 id="eventTitle" class="ocs__section-title ocs__calendar-v2-modal-title calendar-event-modal-title"></h2>
+            <h2 id="eventTitle" class="ocs__section-title ocs__modal-title calendar-event-modal-title"></h2>
             <label for="editEventType" class="calendar-event-modal-label">Type:</label>
             <select id="editEventType" disabled class="calendar-event-modal-field">
                 <option value="event">Event</option>
@@ -294,7 +294,7 @@ active_tab: calendar
                 <!-- Options populated dynamically from user's groups -->
             </select>
         </div>
-        <div class="ocs__calendar-v2-modal-actions calendar-event-modal-actions modal-actions">
+        <div class="ocs__modal-actions calendar-event-modal-actions modal-actions">
             <button id="saveButton" class="calendar-event-modal-button primary hidden">Save Changes</button>
             <button id="makeBreakButton" class="calendar-event-modal-button warning hidden">Make Break</button>
             <button id="deleteButton" class="calendar-event-modal-button danger">Delete Event</button>
@@ -303,10 +303,10 @@ active_tab: calendar
     </div>
 </div>
 
-<div id="issueModal" class="ocs__calendar-v2-modal issue-modal" aria-hidden="true" role="dialog" aria-label="Issue Details">
-    <div class="ocs__card ocs__calendar-v2-modal-content issue-modal-content">
-        <div class="ocs__calendar-v2-modal-header issue-modal-header">
-            <h3 id="issue-modal-title" class="ocs__calendar-v2-modal-title issue-modal-title">Issue</h3>
+<div id="issueModal" class="ocs__modal ocs__calendar-v2-modal issue-modal" aria-hidden="true" role="dialog" aria-label="Issue Details">
+    <div class="ocs__card ocs__modal-card ocs__calendar-v2-modal-content issue-modal-content">
+        <div class="ocs__modal-header issue-modal-header">
+            <h3 id="issue-modal-title" class="ocs__modal-title issue-modal-title">Issue</h3>
             <button id="issue-modal-close" class="ocs__calendar-v2-modal-close issue-modal-close" type="button" aria-label="Close Issue Modal">&times;</button>
         </div>
         <div id="issue-modal-meta" class="issue-modal-meta"></div>
@@ -324,7 +324,7 @@ active_tab: calendar
                 <button id="issue-comment-submit" type="button" class="calendar-issue-action-btn primary">Post Reply</button>
             </div>
         </div>
-        <div class="ocs__calendar-v2-modal-actions issue-modal-actions">
+        <div class="ocs__modal-actions issue-modal-actions">
             <button id="issue-modal-copy-link" type="button" class="calendar-issue-action-btn secondary">Copy Link</button>
             <button id="issue-modal-star" type="button" class="calendar-issue-action-btn secondary">Star</button>
             <button id="issue-modal-edit" type="button" class="calendar-issue-action-btn secondary">Edit</button>
@@ -334,15 +334,15 @@ active_tab: calendar
 </div>
 
 <!-- Reply Modal (for nested replies) -->
-<div id="replyModal" class="ocs__calendar-v2-modal ocs__calendar-v2-reply-modal reply-modal" aria-hidden="true" role="dialog" aria-label="Reply to Comment">
-    <div class="ocs__card ocs__calendar-v2-modal-content reply-modal-content">
-        <div class="ocs__calendar-v2-modal-header reply-modal-header">
-            <h4 id="reply-modal-title" class="ocs__calendar-v2-modal-title">Reply</h4>
+<div id="replyModal" class="ocs__modal ocs__calendar-v2-modal ocs__calendar-v2-reply-modal reply-modal" aria-hidden="true" role="dialog" aria-label="Reply to Comment">
+    <div class="ocs__card ocs__modal-card ocs__calendar-v2-modal-content reply-modal-content">
+        <div class="ocs__modal-header reply-modal-header">
+            <h4 id="reply-modal-title" class="ocs__modal-title">Reply</h4>
             <button id="reply-modal-close" class="ocs__calendar-v2-modal-close reply-modal-close" type="button" aria-label="Close Reply Modal">&times;</button>
         </div>
         <div id="reply-parent-preview" class="reply-parent-preview"></div>
         <textarea id="reply-modal-text" placeholder="Write your reply"></textarea>
-        <div class="ocs__calendar-v2-modal-actions reply-modal-actions">
+        <div class="ocs__modal-actions reply-modal-actions">
             <button id="reply-modal-submit" class="calendar-issue-action-btn primary" type="button">Post Reply</button>
             <button id="reply-modal-cancel" class="calendar-issue-action-btn secondary" type="button">Cancel</button>
         </div>
