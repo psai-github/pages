@@ -13,10 +13,10 @@ active_tab: profile
     <div class="ocs__card">
         <h2 class="ocs__section-title">Personal Information</h2>
 
-        <div class="ocs__profile-settings-grid">
+        <div class="ocs__grid--col2">
             <!-- Full Name -->
             <div>
-                <label for="nameChangeInput" class="ocs__profile-settings-label">Full
+                <label for="nameChangeInput" class="ocs__label">Full
                     Name</label>
                 <input type="text" id="nameChangeInput" name="fullName"
                     class="ocs__input"
@@ -25,7 +25,7 @@ active_tab: profile
 
             <!-- User ID -->
             <div>
-                <label for="uidChangeInput" class="ocs__profile-settings-label">User
+                <label for="uidChangeInput" class="ocs__label">User
                     ID</label>
                 <input type="text" id="uidChangeInput" name="userId"
                     class="ocs__input"
@@ -34,31 +34,16 @@ active_tab: profile
 
             <!-- Email -->
             <div>
-                <label for="emailChangeInput" class="ocs__profile-settings-label">Email
+                <label for="emailChangeInput" class="ocs__label">Email
                     Address</label>
                 <input type="email" id="emailChangeInput" name="new-email"
                     class="ocs__input"
                     value="" onchange="checkForChanges()" autocomplete="off">
             </div>
 
-            <!-- Kasm Server Toggle -->
-            <div class="ocs__profile-settings-flex-row">
-                <label for="kasmChangeInput" class="ocs__profile-settings-toggle-label">
-                    <div class="ocs__profile-settings-toggle-wrap">
-                        <input type="checkbox" id="kasmChangeInput" class="ocs__profile-settings-sr-only" onchange="checkForChanges()">
-                        <div class="ocs__profile-settings-toggle-track"></div>
-                        <div class="dot ocs__profile-settings-toggle-knob">
-                        </div>
-                    </div>
-                    <div class="ocs__profile-settings-toggle-text">
-                        Enable Kasm Server
-                    </div>
-                </label>
-            </div>
-
             <!-- Password Change -->
             <div>
-                <label class="ocs__profile-settings-label">Password</label>
+                <label class="ocs__label">Password</label>
                 <a href="{{ site.baseurl }}/support?topic=reset" class="ocs__profile-settings-link">Forgot your password?</a>
             </div>
         </div>
@@ -68,10 +53,10 @@ active_tab: profile
     <div class="ocs__card">
         <h2 class="ocs__section-title">School Information</h2>
 
-        <div class="ocs__profile-settings-grid">
+        <div class="ocs__grid--col2">
             <!-- High School Selection -->
             <div>
-                <label for="schoolChangeInput" class="ocs__profile-settings-label">High School</label>
+                <label for="schoolChangeInput" class="ocs__label">High School</label>
                 <select id="schoolChangeInput" name="school"
                     class="ocs__input"
                     onchange="checkForChanges()">
@@ -88,7 +73,7 @@ active_tab: profile
 
             <!-- Student ID -->
             <div>
-                <label for="sidChangeInput" class="ocs__profile-settings-label">Student
+                <label for="sidChangeInput" class="ocs__label">Student
                     ID (7 digits)</label>
                 <input type="text" id="sidChangeInput" name="studentId"
                     class="ocs__input"
