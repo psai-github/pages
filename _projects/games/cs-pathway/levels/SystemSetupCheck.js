@@ -5,6 +5,7 @@
 // sending fails) they paste it, and pasted reports are only shown, not saved.
 import { getReportUploadCommand, getSystemSetupConfig, parseSystemSetupReport } from '../model/systemSetupReport.js';
 import { fetchLatestSetupReport, requestReportUploadUrl } from '../services/SetupReportApi.js';
+import { copyToClipboard } from '../services/clipboard.js';
 
 const REPORT_POLL_INTERVAL_MS = 4000;
 
@@ -66,7 +67,7 @@ class SystemSetupCheck {
     this.command = config.command;
     this.overlay.querySelector('.cs-pathway-system-check__command code').textContent = config.command;
     this.overlay.querySelector('.cs-pathway-system-check__close').addEventListener('click', () => this.close());
-    this.overlay.querySelector('.cs-pathway-system-check__copy').addEventListener('click', (event) => this.copyCommand(event.currentTarget));
+    this.overlay.querySelector('.cs-pathway-system-check__copy').addEventListener('click', (event) => copyToClipboard(this.command, event.currentTarget));
     this.overlay.querySelector('.cs-pathway-system-check__submit').addEventListener('click', () => this.showResults());
     this.overlay.addEventListener('click', (event) => {
       if (event.target === this.overlay) this.close();
@@ -79,16 +80,6 @@ class SystemSetupCheck {
     document.body.appendChild(this.overlay);
     this.overlay.querySelector('textarea').focus();
     this.startAutomaticReport();
-  }
-
-  async copyCommand(copyButton) {
-    try {
-      await navigator.clipboard.writeText(this.command);
-      copyButton.textContent = 'Copied!';
-    } catch (error) {
-      console.warn('[SystemSetupCheck] clipboard unavailable:', error);
-      copyButton.textContent = 'Select and copy it';
-    }
   }
 
   // Switches to the command that uploads its report, then watches for it.
