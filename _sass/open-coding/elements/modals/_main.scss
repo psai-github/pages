@@ -34,8 +34,8 @@
 // margin-bottom doesn't belong on a modal dialog. Compounded with
 // .ocs__card so this reliably outranks its bottom margin regardless of
 // SCSS import order (ocs__card is compiled in a separate, later-loading
-// stylesheet entry point, so a same-specificity bare override here isn't
-// reliable).
+// stylesheet entry point, _sass/minima/custom-styles.scss, so a
+// same-specificity bare override here isn't reliable).
 .ocs__card.ocs__modal-card {
   margin-bottom: 0;
 }
