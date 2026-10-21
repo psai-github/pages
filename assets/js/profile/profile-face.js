@@ -13,14 +13,16 @@ export async function initFaceRegistration({ pill, openButton, modal, video, can
         onChange?.(isRegistered);
     }
 
+    let openCount = 0;
     async function open() {
+        const attempt = ++openCount;
         modal.classList.remove('hidden');
         captureButton.disabled = true;
         status.textContent = 'Asking for your camera…';
         try {
             const opened = await navigator.mediaDevices.getUserMedia({ video: true });
-            // Closed while the browser was still asking for the camera: turn it straight off.
-            if (modal.classList.contains('hidden')) {
+            // Closed (or closed and reopened) while the browser was still asking: turn this camera straight off.
+            if (attempt !== openCount || modal.classList.contains('hidden')) {
                 opened.getTracks().forEach(track => track.stop());
                 return;
             }
