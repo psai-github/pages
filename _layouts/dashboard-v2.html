@@ -36,7 +36,7 @@ active_tab: dashboard
                     <div class="ocs__dashboard-modal-card">
                         <button id="admin-eval-modal-close" class="ocs__btn ocs__btn--icon small ocs__dashboard-modal-close">&times;</button>
                         <h3 id="admin-eval-modal-title" class="ocs__section-title"></h3>
-                        <form id="admin-eval-form" class="ocs__dashboard-two-col-grid">
+                        <form id="admin-eval-form" class="ocs__grid--col2">
                             <!-- Sliders will be injected here -->
                         </form>
                         <button id="admin-eval-update-btn" class="ocs__btn accent fill medium">Update</button>
@@ -65,7 +65,7 @@ active_tab: dashboard
                     <p class="ocs__text ocs__dashboard-card-desc">Translate the entire site into your preferred language. Use "Save All" below to apply, or "Reset" to return to English.</p>
                     <div class="ocs__dashboard-column">
                         <div>
-                            <label class="ocs__dashboard-label">Site Language</label>
+                            <label class="ocs__label">Site Language</label>
                             <select id="pref-language" class="ocs__input ocs__dashboard-full-width">
                                 <option value="">Default (English - No Translation)</option>
                                 <option value="es">🇪🇸 Spanish (Español)</option>
@@ -104,28 +104,28 @@ active_tab: dashboard
                         </div>
                     </div>
                     <p class="ocs__text ocs__dashboard-card-desc">Configure text-to-speech settings. Select text on any page and use the TTS button in the sidebar to hear it read aloud.</p>
-                    <div class="ocs__dashboard-two-col-grid">
+                    <div class="ocs__grid--col2">
                         <div>
-                            <label class="ocs__dashboard-label">Voice</label>
+                            <label class="ocs__label">Voice</label>
                             <select id="pref-tts-voice" class="ocs__input ocs__dashboard-full-width">
                                 <option value="">Loading voices...</option>
                             </select>
                         </div>
                         <div>
-                            <label class="ocs__dashboard-label">Speed: <span id="tts-rate-label">1.0</span>x</label>
+                            <label class="ocs__label">Speed: <span id="tts-rate-label">1.0</span>x</label>
                             <input type="range" id="pref-tts-rate" min="0.5" max="2" step="0.1" value="1" class="ocs__dashboard-full-width" />
                         </div>
                         <div>
-                            <label class="ocs__dashboard-label">Pitch: <span id="tts-pitch-label">1.0</span></label>
+                            <label class="ocs__label">Pitch: <span id="tts-pitch-label">1.0</span></label>
                             <input type="range" id="pref-tts-pitch" min="0.5" max="2" step="0.1" value="1" class="ocs__dashboard-full-width" />
                         </div>
                         <div>
-                            <label class="ocs__dashboard-label">Volume: <span id="tts-volume-label">100</span>%</label>
+                            <label class="ocs__label">Volume: <span id="tts-volume-label">100</span>%</label>
                             <input type="range" id="pref-tts-volume" min="0" max="1" step="0.1" value="1" class="ocs__dashboard-full-width" />
                         </div>
                     </div>
                     <div class="ocs__dashboard-card-spaced">
-                        <label class="ocs__dashboard-label">Test Text</label>
+                        <label class="ocs__label">Test Text</label>
                         <input type="text" id="tts-test-text" class="ocs__input ocs__dashboard-full-width" value="Hello! This is a test of the text-to-speech feature." placeholder="Enter text to test..." />
                     </div>
                     <p class="ocs__text ocs__dashboard-fineprint ocs__dashboard-card-spaced-sm">Uses your browser's built-in speech synthesis. Available voices depend on your operating system.</p>
@@ -147,7 +147,7 @@ active_tab: dashboard
                     <p class="ocs__text ocs__dashboard-card-desc">Use your webcam and head movement to drive an on-screen cursor, from <a href="https://aadibhat09.github.io/NodCursor/" target="_blank" rel="noopener noreferrer" class="ocs__dashboard-link">NodCursor</a>. This uses MediaPipe from CDN.</p>
 
                     <div>
-                        <label class="ocs__dashboard-label">Sensitivity: <span id="head-tracking-sensitivity-label">0.45</span></label>
+                        <label class="ocs__label">Sensitivity: <span id="head-tracking-sensitivity-label">0.45</span></label>
                         <input type="range" id="pref-head-tracking-sensitivity" min="0.10" max="0.90" step="0.05" value="0.45" class="ocs__dashboard-full-width" />
                     </div>
 
@@ -172,7 +172,7 @@ active_tab: dashboard
                     <p id="head-tracking-status" class="ocs__text ocs__dashboard-card-spaced-sm"></p>
                 </div>
 
-                <div class="ocs__dashboard-two-col-grid ocs__dashboard-card-spaced">
+                <div class="ocs__grid--col2 ocs__dashboard-card-spaced">
                     <!-- Column 1: Text (font size, font family only) -->
                     <div class="ocs__dashboard-card">
                         <div class="ocs__dashboard-card-header">
@@ -181,12 +181,12 @@ active_tab: dashboard
                         </div>
                         <div class="ocs__dashboard-column">
                             <div>
-                                <label class="ocs__dashboard-label">Font size: <span id="font-size-label">14</span>px</label>
+                                <label class="ocs__label">Font size: <span id="font-size-label">14</span>px</label>
                                 <input type="range" id="pref-font-size" min="12" max="22" value="14" class="ocs__dashboard-full-width" />
                             </div>
 
                             <div>
-                                <label class="ocs__dashboard-label">Font family</label>
+                                <label class="ocs__label">Font family</label>
                                 <select id="pref-font-family" class="ocs__input ocs__dashboard-full-width">
                                     <option value="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial">Inter / System</option>
                                     <option value="Roboto, system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial">Roboto</option>
@@ -199,7 +199,7 @@ active_tab: dashboard
                             </div>
 
                             <div>
-                                <label class="ocs__dashboard-label">Text color</label>
+                                <label class="ocs__label">Text color</label>
                                 <input type="color" id="pref-text-color" value="#F0F0F0" class="ocs__dashboard-color-input" />
                             </div>
                         </div>
@@ -213,22 +213,22 @@ active_tab: dashboard
                         </div>
                         <div class="ocs__dashboard-column">
                             <div>
-                                <label class="ocs__dashboard-label">Background color</label>
+                                <label class="ocs__label">Background color</label>
                                 <input type="color" id="pref-bg-color" value="#121212" class="ocs__dashboard-color-input" />
                             </div>
 
                             <div>
-                                <label class="ocs__dashboard-label">Accent color</label>
+                                <label class="ocs__label">Accent color</label>
                                 <input type="color" id="pref-accent-color" value="#4CAFEF" class="ocs__dashboard-color-input" />
                             </div>
 
                             <div>
-                                <label class="ocs__dashboard-label">Selection highlight color</label>
+                                <label class="ocs__label">Selection highlight color</label>
                                 <input type="color" id="pref-selection-color" value="#4CAFEF" class="ocs__dashboard-color-input" />
                             </div>
 
                             <div>
-                                <label class="ocs__dashboard-label">Button style</label>
+                                <label class="ocs__label">Button style</label>
                                 <select id="pref-button-style" class="ocs__input ocs__dashboard-full-width">
                                     <option value="rounded">Rounded (Default)</option>
                                     <option value="square">Square</option>
@@ -251,7 +251,7 @@ active_tab: dashboard
                 </div>
 
                 <!-- Themes Section -->
-                <div class="ocs__dashboard-two-col-grid ocs__dashboard-card-spaced">
+                <div class="ocs__grid--col2 ocs__dashboard-card-spaced">
                     <!-- Preset Themes -->
                     <div class="ocs__dashboard-card">
                         <h3 class="ocs__dashboard-card-title ocs__dashboard-card-spaced-sm">Preset Themes</h3>
@@ -278,7 +278,7 @@ active_tab: dashboard
                     </div>
 
                     <div id="ask-ai-dropdown" class="hidden ocs__dashboard-card-spaced-sm">
-                        <label class="ocs__dashboard-label ocs__dashboard-block-label">Describe the style you want (e.g. "modern, playful, cool blues")</label>
+                        <label class="ocs__label ocs__dashboard-block-label">Describe the style you want (e.g. "modern, playful, cool blues")</label>
                         <textarea id="ask-ai-prompt" class="ocs__input ocs__dashboard-full-width ocs__dashboard-textarea" rows="4"
                         placeholder="Describe colors, tones, fonts, mood, and any words like 'modern', 'playful', 'professional', etc."></textarea>
 

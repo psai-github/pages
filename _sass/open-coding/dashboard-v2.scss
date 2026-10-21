@@ -130,22 +130,9 @@
     gap: 1rem;
 }
 
-.ocs__dashboard-two-col-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem;
-
-    @media (max-width: $breakpoint-mobile) {
-        grid-template-columns: 1fr;
-    }
-}
-
-.ocs__dashboard-label {
-    display: block;
-    margin-bottom: 0.25rem;
-    color: var(--text-muted);
-    font-size: 0.875rem;
-}
+// .ocs__grid--col2 (grid) and .ocs__label (label) now come from the
+// shared grammar (elements/grids, elements/forms/labels) instead of
+// being duplicated here.
 
 .ocs__dashboard-block-label {
     margin-bottom: 0.5rem;
