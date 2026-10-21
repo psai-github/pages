@@ -356,10 +356,14 @@ Everything else comes from the board, so any board works as it is. Columns
 follow the board's own order: familiar names share a stage's column ("Todo",
 "To Do" and "Ready" are all To do, "Blocked" is In progress), any other column
 keeps its own name, and cards with no status get a "No status" column, as on
-GitHub. A Backlog column starts hidden behind a toggle, and so does No status on
-a board that has a Backlog of its own. Only UGRC-CSA's note columns ("Team Map",
+GitHub. The backlog keeps the board's own name (the OCS issue lifecycle calls it
+"Parking Lot") and starts hidden behind a toggle, and so does No status on a
+board that has a backlog of its own. Only UGRC-CSA's note columns ("Team Map",
 "Reflections") are left out. Cards show their number, a `People` field or the
-assignees, and once done, a `Shipped` date or the day they closed. The board
+assignees, and once done, a `Shipped` date or the day they closed. Under that is
+the evidence for the column's exit gate: how many boxes of the card's checklist
+are ticked (`☑ 3/4`), and the pull requests linked to its issue (`PR #123`,
+marked merged, draft or closed). Both are in the accent once complete. The board
 keeps a copy for 10 minutes, because visitors without a token share 60 GitHub
 requests an hour per network, and keeps showing that copy, with a note, when
 GitHub doesn't answer.
@@ -372,7 +376,8 @@ Kanban classes (`assets/js/kanban-board.js` builds them):
   top, with more accent the closer the stage is to done; a column of the board's
   own name gets backlog's quiet line.
 - `ocs__kanban-item`: a card, with `ocs__kanban-kicker`, `ocs__kanban-name` and
-  `ocs__kanban-note` for its three lines.
+  `ocs__kanban-note` for its three lines, and `ocs__kanban-evidence` for its row
+  of evidence pills.
 
 The names avoid the suffixes `_sass/capstone/infograph.scss` restyles (`-card`,
 `-title` and others), so the board looks the same inside a capstone's
