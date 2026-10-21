@@ -54,7 +54,6 @@ select {
     background-color: $background;
 }
 @import "profile-gist-connection";
-@import "profile-v2";
 @import "submissions-v2";
 
 // Shared by every ocs__<page>-v2 partial above: several of them toggle the

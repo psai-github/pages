@@ -9,7 +9,8 @@
 .ocs__modal {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  // Above the site header, which the calendar styles give z-index 1000.
+  z-index: $z-modal;
   display: flex;
   align-items: center;
   justify-content: center;
