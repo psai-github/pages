@@ -12,15 +12,21 @@ How it fits together (one-time device pairing, once for the whole trail):
      without echoing, like a password.
   3. The agent exchanges the code for an agent token that only works for that
      student's trail session. The token is kept in memory, never written to disk.
-  4. The agent stays open. Each time the game asks for a station to be checked,
-     the agent runs that station's real commands and sends the results with
-     "Authorization: Bearer <agent-token>". The backend decides pass/fail.
-  5. The game polls the backend and updates the quest when the station is verified.
+  4. The agent then keeps running in the background, so the student can keep
+     using the same terminal to install tools. Each time the game asks for a
+     station to be checked, the agent runs that station's real commands and
+     sends the results with "Authorization: Bearer <agent-token>". The backend
+     decides pass/fail.
+  5. Before each check the agent re-reads the PATH a new terminal would get, so
+     tools installed after it started are found without restarting it.
+  6. The game polls the backend and updates the quest when the station is verified.
 
 Usage (run it from inside your cloned pages repository):
     macOS / Linux / WSL:  python3 scripts/toolchain_agent.py
     Windows (PowerShell): py scripts\\toolchain_agent.py
     Local backend:        python3 scripts/toolchain_agent.py --server http://localhost:8585
+    Stop the agent:       python3 scripts/toolchain_agent.py --stop
+    Keep it in this window instead of the background: add --foreground
 
 The check ids below must match ToolchainStations.java in blueprint-spring.
 """
@@ -30,6 +36,7 @@ import getpass
 import json
 import os
 import platform
+import secrets
 import shutil
 import ssl
 import subprocess
@@ -46,6 +53,13 @@ COMMAND_TIMEOUT_SECONDS = 30
 MAX_OUTPUT_LENGTH = 4000  # the backend keeps at most this much per check
 REQUEST_TIMEOUT_SECONDS = 20
 DEFAULT_POLL_SECONDS = 2.0  # how often the agent asks which station the game wants checked; --poll-seconds overrides
+LOGIN_SHELL_TIMEOUT_SECONDS = 15
+# Holds the id of the one background agent that should be running. Starting a new
+# agent rewrites it and --stop deletes it; an agent that finds a different id exits.
+# Nothing is killed by process id, so a stale file can never stop an unrelated program.
+RUN_FILE = Path.home() / ".toolchain-agent-run"
+LOG_FILE = Path.home() / ".toolchain-agent.log"
+PATH_MARKER = "__TOOLCHAIN_TRAIL_PATH__"
 
 # (exit code, combined stdout + stderr)
 CommandResult = Tuple[int, str]
@@ -222,6 +236,55 @@ def request_json(method: str, url: str, body: Optional[Dict], token: Optional[st
         raise AgentError(f"Could not reach {url}: {error.reason}") from None
 
 
+def login_shell_path() -> Optional[str]:
+    """The PATH a brand-new terminal would get, or None if it can't be read."""
+    if platform.system() == "Windows":
+        return windows_registry_path()
+    shell = os.environ.get("SHELL") or "/bin/sh"
+    # Load the startup files a new terminal window does: macOS Terminal opens login
+    # shells (.zprofile and .zshrc), Linux terminals open interactive ones (.bashrc).
+    flags = "-ilc" if platform.system() == "Darwin" else "-ic"
+    try:
+        completed = subprocess.run([shell, flags, f'printf "%s%s" "{PATH_MARKER}" "$PATH"'],
+                                   capture_output=True, text=True, errors="replace",
+                                   stdin=subprocess.DEVNULL, timeout=LOGIN_SHELL_TIMEOUT_SECONDS)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    _, marker, path = completed.stdout.rpartition(PATH_MARKER)
+    return path.strip() if marker and path.strip() else None
+
+
+def windows_registry_path() -> Optional[str]:
+    """System PATH plus user PATH, as Windows hands them to a new terminal."""
+    import winreg  # Windows only
+    keys = [(winreg.HKEY_LOCAL_MACHINE, r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"),
+            (winreg.HKEY_CURRENT_USER, "Environment")]
+    parts = []
+    for root, name in keys:
+        try:
+            with winreg.OpenKey(root, name) as key:
+                parts.append(os.path.expandvars(winreg.QueryValueEx(key, "Path")[0]))
+        except OSError:
+            continue
+    return os.pathsep.join(parts) or None
+
+
+def merge_path(fresh: str, current: str) -> str:
+    """Fresh entries first, then any current ones they don't already include."""
+    merged: List[str] = []
+    for entry in fresh.split(os.pathsep) + current.split(os.pathsep):
+        if entry and entry not in merged:
+            merged.append(entry)
+    return os.pathsep.join(merged)
+
+
+def refresh_path() -> None:
+    """Pick up tools installed since the agent started, without restarting it."""
+    fresh = login_shell_path()
+    if fresh:
+        os.environ["PATH"] = merge_path(fresh, os.environ.get("PATH", ""))
+
+
 def print_results(view: Dict) -> None:
     for check in view.get("checks") or []:
         mark = "PASS" if check.get("passed") else "FAIL"
@@ -233,6 +296,7 @@ def print_results(view: Dict) -> None:
 def check_station(server: str, session_id: str, token: str, station_id: str, os_name: str, repo: Path) -> None:
     """Run one station's commands, send them, and print what the server decided."""
     print(f"\nChecking {station_id}...")
+    refresh_path()
     evidence = collect_evidence(station_id, repo)
     try:
         view = post_json(f"{server}/api/toolchain/sessions/{session_id}/results",
@@ -248,16 +312,20 @@ def check_station(server: str, session_id: str, token: str, station_id: str, os_
     else:
         print("  Fix the FAIL items, then click Check again in the game.")
         if any(item["exitCode"] == 127 for item in evidence):
-            print("  (Just installed something? Restart this agent so it sees your new PATH,"
-                  " then use Pair a new agent in the game.)")
+            print("  (A command was not found. Install it, then click Check again;"
+                  " the agent finds newly installed tools on its own.)")
 
 
 def serve(server: str, session_id: str, token: str, os_name: str, repo: Path,
-          poll_seconds: float = DEFAULT_POLL_SECONDS, sleep: Callable[[float], None] = time.sleep) -> int:
-    """Wait for check requests from the game until the token expires or the student presses Ctrl+C."""
+          poll_seconds: float = DEFAULT_POLL_SECONDS, sleep: Callable[[float], None] = time.sleep,
+          still_wanted: Callable[[], bool] = lambda: True) -> int:
+    """Wait for check requests from the game until the token expires or the agent is stopped."""
     last_request = None
     offline = False
     while True:
+        if not still_wanted():  # --stop was run, or a newer agent took over
+            print("Agent stopped.")
+            return 0
         try:
             view = get_json(f"{server}/api/toolchain/sessions/{session_id}/next", token=token)
             if offline:
@@ -287,6 +355,59 @@ def serve(server: str, session_id: str, token: str, os_name: str, repo: Path,
         sleep(poll_seconds)
 
 
+def stop_command() -> str:
+    python = "py" if platform.system() == "Windows" else "python3"
+    return f"{python} scripts/toolchain_agent.py --stop"
+
+
+def is_current_run(run_id: str) -> bool:
+    try:
+        return RUN_FILE.read_text().strip() == run_id
+    except OSError:
+        return False
+
+
+def stop_background_agent() -> bool:
+    """Tell a background agent to exit. True if one was registered."""
+    try:
+        RUN_FILE.unlink()
+        return True
+    except FileNotFoundError:
+        return False
+
+
+def start_in_background(server: str, paired: Dict, repo: Path, poll_seconds: float) -> None:
+    """Hand the pairing to a detached copy of this agent so the terminal is free again."""
+    run_id = secrets.token_hex(16)
+    RUN_FILE.write_text(run_id)  # any older background agent sees this and exits
+    detach: Dict = {"start_new_session": True}  # survives closing the terminal window
+    if platform.system() == "Windows":
+        detach = {"creationflags": subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP}
+    with open(LOG_FILE, "a", encoding="utf-8") as log:
+        child = subprocess.Popen(
+            [sys.executable, str(Path(__file__).resolve()), "--serve-paired",
+             "--server", server, "--repo", str(repo), "--poll-seconds", str(poll_seconds)],
+            stdin=subprocess.PIPE, stdout=log, stderr=subprocess.STDOUT, **detach)
+    # The token travels over a pipe, never on the command line or on disk.
+    child.stdin.write(json.dumps({"runId": run_id, "sessionId": paired["sessionId"],
+                                  "agentToken": paired["agentToken"]}).encode("utf-8"))
+    child.stdin.close()
+
+
+def serve_paired(server: str, repo: Path, poll_seconds: float) -> int:
+    """The background agent: read the pairing from the parent, then serve until stopped."""
+    sys.stdout.reconfigure(line_buffering=True)  # so the log file updates as it goes
+    handoff = json.loads(sys.stdin.read())
+    run_id = handoff["runId"]
+    print(f"\n--- Toolchain Trail agent started {time.strftime('%Y-%m-%d %H:%M:%S')} ---")
+    try:
+        return serve(server, handoff["sessionId"], handoff["agentToken"], detect_os(), repo,
+                     poll_seconds=poll_seconds, still_wanted=lambda: is_current_run(run_id))
+    finally:
+        if is_current_run(run_id):
+            stop_background_agent()
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Pair with Toolchain Trail and verify stations as you play.")
     parser.add_argument("--server", default=os.environ.get("TOOLCHAIN_SERVER", DEFAULT_SERVER),
@@ -295,21 +416,38 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--poll-seconds", type=float,
                         default=float(os.environ.get("TOOLCHAIN_POLL_SECONDS", DEFAULT_POLL_SECONDS)),
                         help=f"how often to ask the server for the next station (default {DEFAULT_POLL_SECONDS:g})")
+    parser.add_argument("--foreground", action="store_true",
+                        help="keep the agent in this window (Ctrl+C stops it) instead of the background")
+    parser.add_argument("--stop", action="store_true", help="stop the background agent")
+    parser.add_argument("--serve-paired", action="store_true", help=argparse.SUPPRESS)  # used by the background copy
     args = parser.parse_args(argv)
+    repo = Path(args.repo).resolve()
+
+    if args.stop:
+        print("Stopping the background agent." if stop_background_agent() else "No background agent is running.")
+        return 0
 
     os_name = detect_os()
     try:
         server = require_safe_server(args.server)
+        if args.serve_paired:
+            return serve_paired(server, repo, args.poll_seconds)
         print(f"Toolchain Trail agent ({os_name}). Paste the pairing code from the game.")
         code = getpass.getpass("Pairing code (hidden): ").strip()
         if not code:
             raise AgentError("No pairing code entered.")
 
         paired = post_json(f"{server}/api/toolchain/pair", {"pairingCode": code})
-        print("Paired! Leave this window open while you play Toolchain Trail.")
-        print("Do your setup work in a second terminal window. Press Ctrl+C here to stop the agent.")
-        return serve(server, paired["sessionId"], paired["agentToken"], os_name, Path(args.repo).resolve(),
-                     poll_seconds=args.poll_seconds)
+        if args.foreground:
+            stop_background_agent()  # one agent at a time
+            print("Paired! Leave this window open while you play. Press Ctrl+C to stop the agent.")
+            return serve(server, paired["sessionId"], paired["agentToken"], os_name, repo,
+                         poll_seconds=args.poll_seconds)
+        start_in_background(server, paired, repo, args.poll_seconds)
+        print("Paired! The agent is now running in the background for the rest of Toolchain Trail.")
+        print("Keep using this terminal: run your install commands here, then click Check again in the game.")
+        print(f"The agent's messages go to {LOG_FILE}. To stop it: {stop_command()}")
+        return 0
     except AgentError as error:
         print(f"Error: {error}", file=sys.stderr)
         return 2

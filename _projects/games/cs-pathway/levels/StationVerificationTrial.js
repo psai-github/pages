@@ -441,7 +441,7 @@ export default class StationVerificationTrial {
             <ol class="svt-steps">
               ${instructions.map((step) => `<li>${this._renderStep(step)}</li>`).join('')}
             </ol>
-            <div class="svt-verify"><strong>FINAL STEP, VERIFY:</strong> the Toolchain agent on your computer runs the real commands and reports them to the server. Start it once and leave it open for the whole trail.</div>
+            <div class="svt-verify"><strong>FINAL STEP, VERIFY:</strong> the Toolchain agent on your computer runs the real commands and reports them to the server. Start it once; it keeps running in the background for the whole trail.</div>
           </div>
 
           <div class="svt-panel" id="svt-agent-panel">
@@ -457,7 +457,7 @@ export default class StationVerificationTrial {
                   ${agentCommands(this.os).map((item) => `<div class="svt-cmd">${this._escape(item.label)}${this._commandRow(item.command)}</div>`).join('')}
                 </li>
                 <li>Paste the code below when it asks (it stays hidden while you type).</li>
-                <li>Leave that window open. Do your setup work in a second terminal.</li>
+                <li>The agent then runs in the background until you finish the trail, so keep using the same terminal for your setup commands.</li>
               </ol>
               <div class="svt-code">
                 <input id="svt-code" type="text" readonly spellcheck="false" aria-label="Pairing code">
@@ -633,15 +633,15 @@ export default class StationVerificationTrial {
         if (this.checkingSince === null) {
           // Just paired: the agent is already running this station's checks.
           this.checkingSince = Date.now();
-          this._stopCountdown('Code used. The agent is paired; keep its window open.');
+          this._stopCountdown('Code used. The agent is paired and running in the background.');
           this._show('#svt-new-agent', true);
         }
         this._setAgentStatus('pending', Date.now() - this.checkingSince > SILENT_AGENT_HINT_MS
-          ? 'No answer from your agent yet. Is its window still open? If you closed it, use Pair a new agent.'
+          ? 'No answer from your agent yet. If you stopped it or restarted your computer, use Pair a new agent.'
           : 'Your agent is running the checks...');
         break;
       case 'FAILED': {
-        this._stopCountdown('Code used. The agent is paired; keep its window open.');
+        this._stopCountdown('Code used. The agent is paired and running in the background.');
         const checks = view.checks || [];
         const passed = checks.filter((c) => c.passed).length;
         this._renderChecks(checks, this.agentChecksEl);
