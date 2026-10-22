@@ -161,6 +161,14 @@ class RemovedProjectCleanupTest < Minitest::Test
     ENV["GIT_CEILING_DIRECTORIES"] = ceiling
   end
 
+  def test_removes_nothing_when_git_lists_no_project_source
+    git("rm", "-q", "-r", "--cached", "_projects")
+    FileUtils.rm_rf(File.join(@workspace, "_projects"))
+    write("_posts/projects/messages/2026-09-12-dm.md")
+    refute_empty clean, "Says why nothing was cleaned"
+    assert exist?("_posts/projects/messages/2026-09-12-dm.md")
+  end
+
   def test_make_build_and_clean_remove_a_deleted_projects_post
     FileUtils.cp(File.join(ROOT, "Makefile"), @workspace)
     FileUtils.mkdir_p(File.join(@workspace, "scripts"))

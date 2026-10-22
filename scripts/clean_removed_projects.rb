@@ -30,6 +30,12 @@ module RemovedProjectCleaner
     paths = stale_paths(workspace, current)
     return if caches.empty? && paths.empty?
 
+    # With no source at all, every project would look deleted: a wrong folder or a broken checkout.
+    if current.empty?
+      out.puts "⚠ git lists no source under _projects/, so files left by deleted projects stay: #{workspace}"
+      return
+    end
+
     tracked = git_files(workspace).to_set
     owned = owned_outputs(workspace, current)
     out.puts "🧹 Removing files built by projects whose source is gone from _projects/:"
