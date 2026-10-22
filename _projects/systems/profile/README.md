@@ -8,6 +8,45 @@ is built only from the OCS grammar (`_sass/open-coding/elements/`, documented in
 See [Profile architecture](docs/ARCHITECTURE.md) for how the page fits together,
 the backend endpoints each part calls, and how it's tested.
 
+## Flask only or Flask + Spring
+
+The OCS kit runs with Flask only or with Flask and Spring, depending on the features
+a site needs. `spring` in `_config.yml` says which:
+
+- `spring: false` is OCS for Business: Flask only, with single login.
+- `spring: true` is OCS for Education: Flask and Spring, with dual login. This site
+  uses it.
+
+Each backend keeps its own sign-in. Single login signs in to Flask alone
+(`POST /api/authenticate`). Dual login, the login page's `loginBoth`, signs in to
+Flask and to Spring (`POST /authenticate`) at the same time. If the Spring sign-in
+fails, the login page says that DMs, calendar and announcements won't work and offers
+Continue anyway.
+
+What Profile does in each:
+
+| | Flask only | Flask + Spring |
+|---|---|---|
+| Login | single: Flask | dual: Flask and Spring |
+| Account Save | each changed field to Flask (`PUT /api/user`) | to Flask and to Spring (`POST /api/person/update`) |
+| Classes | saved in Flask | saved in Flask, then Spring's course groups updated |
+| Persona and Skill check-in | saved in Flask | saved in Flask |
+| Face ID and GitHub Gist cards | left out | shown; both save in Spring |
+| Setup list | Classes, Persona | Classes, Persona, Face ID, GitHub |
+
+The setting covers sign-in and Profile. Sign-up still creates the account in Flask and
+then tries Spring, and other pages that use Spring, such as DMs, the calendar and
+announcements, don't read the setting.
+
+### Try it
+
+- Flask + Spring: keep `spring: true` and run `make`. Run Flask on `localhost:8587` and
+  Spring on `localhost:8585`, sign in, and open `/profile`.
+- Flask only: set `spring: false` and run `make`. Run Flask on `localhost:8587`, sign
+  in, and open `/profile`. There's no Face ID or Gist card, and Save sends each field to
+  Flask only.
+- Open `/systems/profile/architecture/` for the architecture document.
+
 ## Files
 
 | Source | Published to | What it is |
@@ -26,8 +65,9 @@ published copies. Edit the sources here.
 
 The layout's starter script imports the shared helpers (`assets/js/api/config.js`
 and `assets/js/api/profile.js`) with `{{ site.baseurl }}` and passes them to
-`initProfilePage(api)`. The Gist include does the same for `javaURI`. The modules
-import each other only with `./` paths, so moving this folder can't break them.
+`initProfilePage(api)`, `springEnabled` included. The Gist include does the same for
+`javaURI`. The modules import each other only with `./` paths, so moving this folder
+can't break them.
 
 ## Tests
 

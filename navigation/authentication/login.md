@@ -120,7 +120,7 @@ show_reading_time: false
 </div>
 
 <script type="module">
-    import { login, pythonURI, javaURI, fetchOptions, GOOGLE_CLIENT_ID } from '{{site.baseurl}}/assets/js/api/config.js';
+    import { login, pythonURI, javaURI, fetchOptions, GOOGLE_CLIENT_ID, springEnabled } from '{{site.baseurl}}/assets/js/api/config.js';
     import { SPRING_PASSWORD_RULES, meetsSpringPasswordRules, attachPasswordChecklist } from '{{site.baseurl}}/assets/js/api/passwordRules.js';
 
     let signupFormData = {};
@@ -377,6 +377,11 @@ show_reading_time: false
 
     // Function to handle both Python and Java login simultaneously
     window.loginBoth = function () {
+        // A Flask-only site (spring: false in _config.yml) signs in to Flask alone.
+        if (!springEnabled) {
+            window.pythonLogin(() => { window.location.href = '{{site.baseurl}}/profile'; });
+            return;
+        }
         // Wrap both logins in Promises and only redirect after both finish
         let javaPromise = new Promise((resolve) => {
             window.javaLogin(resolve);
