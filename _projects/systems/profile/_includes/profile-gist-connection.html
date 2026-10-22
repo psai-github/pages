@@ -34,6 +34,7 @@
     Disconnect removes the token from OCS; revoke it separately in GitHub settings.</p>
 </section>
 <script type="module">
+  import { javaURI } from '{{ site.baseurl }}/assets/js/api/config.js';
   import { initGistConnection } from '{{ site.baseurl }}/assets/js/profile/gist-connection.js';
-  initGistConnection(document.querySelector('.gist-connection'));
+  initGistConnection(document.querySelector('.gist-connection'), { javaURI });
 </script>

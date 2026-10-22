@@ -1,4 +1,4 @@
-// Pure helpers for the profile settings page (_layouts/profile-v2.html).
+// Pure helpers for the profile settings page (/profile).
 // No DOM and no network here, so `node --test tests/profile_model.test.mjs` covers them.
 
 // The fields the account form's Save button covers, and what saving each one does.

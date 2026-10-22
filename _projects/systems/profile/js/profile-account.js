@@ -1,12 +1,9 @@
-// The account form on /profile/v2: fills in the student's details, enables Save only
+// The account form on /profile: fills in the student's details, enables Save only
 // when a field really changed, and saves only those fields.
-import { javaURI, pythonURI } from '../api/config.js';
-import { postUpdate, putUpdate } from '../api/profile.js';
-import { getUserData } from '../aesthetihawk/profile/getUserData.js';
 import { ACCOUNT_FIELDS, changedFields } from './profile-model.js';
 
 // Flask and Spring each keep a copy of the profile, so a field is saved to both.
-async function saveField(key, value) {
+async function saveField({ pythonURI, javaURI, putUpdate, postUpdate }, key, value) {
     const body = { [key]: value };
     const [flaskSaved, springSaved] = await Promise.all([
         putUpdate({ URL: `${pythonURI}/api/user`, body }),
@@ -15,8 +12,21 @@ async function saveField(key, value) {
     if (!flaskSaved || !springSaved) throw new Error(`${flaskSaved ? 'Spring' : 'Flask'} didn't accept it`);
 }
 
+// The student's details from Flask's /api/id, or null when they can't be loaded.
+async function loadAccount({ pythonURI, fetchOptions }) {
+    try {
+        const response = await fetch(`${pythonURI}/api/id`, fetchOptions);
+        if (!response.ok) throw new Error(`the server answered ${response.status}`);
+        const { name, uid, email, sid, school } = await response.json();
+        return { name, uid, email, sid, school };
+    } catch (error) {
+        console.error('Error loading the account:', error);
+        return null;
+    }
+}
+
 // Resolves with the loaded details, or null when the student isn't signed in.
-export async function initAccountForm({ form, saveButton, status, onSaved }) {
+export async function initAccountForm({ api, form, saveButton, status, onSaved }) {
     const inputFor = field => document.getElementById(field.inputId);
     const readValues = () => Object.fromEntries(ACCOUNT_FIELDS.map(field => [field.key, inputFor(field).value]));
     // The values the page loaded. Compared only after they arrive: comparing against the
@@ -53,7 +63,7 @@ export async function initAccountForm({ form, saveButton, status, onSaved }) {
         try {
             for (const field of ordered) {
                 const value = values[field.key].trim();
-                await saveField(field.key, value);
+                await saveField(api, field.key, value);
                 loaded[field.key] = value;
             }
         } catch (error) {
@@ -68,12 +78,11 @@ export async function initAccountForm({ form, saveButton, status, onSaved }) {
         else if (fields.some(field => field.reloadsPage)) window.location.reload();
     });
 
-    const [name, uid, email, sid, , school] = await getUserData();
-    if (!uid) {
+    const found = await loadAccount(api);
+    if (!found?.uid) {
         status.textContent = "Couldn't load your account. Are you signed in?";
         return null;
     }
-    const found = { name, uid, email, sid, school };
     for (const field of ACCOUNT_FIELDS) inputFor(field).value = found[field.key] ?? '';
     // Read back from the inputs: a school that isn't in the list leaves the select empty.
     loaded = readValues();
