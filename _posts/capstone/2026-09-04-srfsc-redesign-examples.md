@@ -11,6 +11,8 @@ year: "2026-2027"
  
 > The SRFSC homepage can be more direct and action-focused. The strongest example is to make the mission, volunteer path, and urgent neighborhood context visible immediately.
 
+{% include ocs_kanban_board.html url="https://github.com/orgs/SRFSC-Organization/projects/1" title="SRFSC Project Board" %}
+
 <!-- markdownlint-disable MD033 MD010 MD012 -->
 <div class="ocs__grid ocs__grid--standard cols-2" style="margin-bottom: 1.5rem;">
     <div class="ocs__grid-cell ocs__grid-cell--header">Strengths vs Improvement</div>
