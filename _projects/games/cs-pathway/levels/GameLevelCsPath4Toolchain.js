@@ -237,6 +237,9 @@ class GameLevelCsPath4Toolchain {
      * Section: failure lock (persisted so a refresh doesn't clear it).
      * Shape: { stationId, line, source, at } or null.
      */
+    // localStorage: the lock survives refreshes AND closing the browser, so a
+    // student can't escape it by leaving. It clears when the failing station
+    // is verified with clean output, or with the Reset Toolchain Trail button.
     this.failureState = null;
     try {
       const raw = localStorage.getItem(FAILURE_STORAGE_KEY);
@@ -1343,11 +1346,6 @@ class GameLevelCsPath4Toolchain {
     this.profilePanelView.ensureMounted();
     this._recomputeStationStates(false);
 
-    // Debug: proves this version of the file is the one running, and lets you
-    // inspect the level from the browser console as window.__toolchainTrail.
-    console.info('[Toolchain Trail] failure lock v6 loaded');
-    window.__toolchainTrail = this;
-
     // Restore the failure warning if the student refreshed while locked.
     if (this.failureState) this._showFailureBanner();
 
@@ -1386,7 +1384,6 @@ class GameLevelCsPath4Toolchain {
     // kind of box the Practice Check (offline) panel uses.
     this._onTerminalPaste = (event) => {
       const text = event.clipboardData?.getData('text') || '';
-      console.info(`[Toolchain Trail] paste seen (${text.length} chars), panel open: ${!!this._stationTrialOpen}`);
       checkText(text, event.composedPath?.() || [event.target]);
     };
     document.addEventListener('paste', this._onTerminalPaste, true);
@@ -1727,13 +1724,13 @@ class GameLevelCsPath4Toolchain {
       el.className = 'tt-fail-banner';
       el.setAttribute('role', 'alert');
       el.style.cssText = `
-        position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
-        z-index: 2147483000; pointer-events: none;
-        width: min(640px, 92vw); box-sizing: border-box;
+        position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+        z-index: 100030; pointer-events: none;
+        width: 320px; box-sizing: border-box;
         background: linear-gradient(180deg, #ff1744 0%, #b00020 100%);
-        border: 3px solid #ffcdd2; border-radius: 10px;
+        border: 2px solid #ffcdd2; border-radius: 8px;
         color: #ffffff; font-family: "Courier New", monospace;
-        padding: 16px 20px; text-align: center; line-height: 1.5;
+        font-size: 11px; padding: 8px 12px; text-align: center; line-height: 1.35;
       `;
       document.body.appendChild(el);
       this._failureBannerEl = el;
@@ -1744,7 +1741,7 @@ class GameLevelCsPath4Toolchain {
 
     const title = document.createElement('div');
     title.textContent = '⚠ TERMINAL ERROR DETECTED ⚠';
-    title.style.cssText = 'font-size:1.35em;font-weight:900;letter-spacing:1px;margin-bottom:6px;';
+    title.style.cssText = 'font-size:1.25em;font-weight:900;letter-spacing:0.5px;margin-bottom:3px;';
 
     const where = document.createElement('div');
     where.textContent = this.failureState.source === 'setup-report'
@@ -1756,18 +1753,18 @@ class GameLevelCsPath4Toolchain {
     const errLine = document.createElement('code');
     errLine.textContent = this.failureState.line || '(error output)';
     errLine.style.cssText = `
-      display:block;margin:8px auto;padding:6px 10px;max-width:100%;
-      background:rgba(0,0,0,0.45);border-radius:6px;color:#ffeb3b;
-      font-size:0.85em;overflow-wrap:anywhere;
+      display:block;margin:5px auto;padding:3px 6px;max-width:100%;
+      background:rgba(0,0,0,0.45);border-radius:4px;color:#ffeb3b;
+      font-size:0.9em;overflow-wrap:anywhere;
     `;
 
     const grade = document.createElement('div');
     grade.textContent = `ALL OTHER STATIONS ARE LOCKED. If you don't fix this, you will get a ${FAILURE_GRADE} and FAIL.`;
-    grade.style.cssText = 'font-size:1.15em;font-weight:900;margin-top:4px;';
+    grade.style.cssText = 'font-size:1.05em;font-weight:900;margin-top:2px;';
 
     const fix = document.createElement('div');
     fix.textContent = `Reopen ${station.name}, fix the error, and paste a clean output to unlock the trail.`;
-    fix.style.cssText = 'font-size:0.85em;margin-top:6px;opacity:0.95;';
+    fix.style.cssText = 'font-size:0.9em;margin-top:3px;opacity:0.95;';
 
     el.append(title, where, errLine, grade, fix);
     this._positionFailureBanner();
@@ -1779,6 +1776,29 @@ class GameLevelCsPath4Toolchain {
     const el = this._failureBannerEl;
     if (!el) return;
     el.style.display = this._stationTrialOpen ? 'none' : 'block';
+    if (this._stationTrialOpen) return;
+
+    // Center it inside the road loop (the empty middle of the station ring),
+    // converted from game coordinates to screen coordinates.
+    const container = this.gameEnv?.container || document.body;
+    const rect = container.getBoundingClientRect();
+    const scale = container.offsetWidth ? rect.width / container.offsetWidth : 1;
+    let cx = this.gameEnv.innerWidth / 2;
+    let cy = this.gameEnv.innerHeight / 2;
+    let innerW = this.gameEnv.innerWidth * 0.5;
+    try {
+      const pts = this._roadLoop().points;
+      const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
+      const minX = Math.min(...xs), maxX = Math.max(...xs);
+      const minY = Math.min(...ys), maxY = Math.max(...ys);
+      cx = (minX + maxX) / 2;
+      cy = (minY + maxY) / 2;
+      innerW = (maxX - minX) * 0.7;
+    } catch (err) { /* fall back to the map center */ }
+
+    el.style.left = `${rect.left + cx * scale}px`;
+    el.style.top = `${rect.top + cy * scale}px`;
+    el.style.width = `${Math.max(220, Math.min(320, innerW * scale))}px`;
   }
 
   _hideFailureBanner() {
@@ -1845,7 +1865,6 @@ class GameLevelCsPath4Toolchain {
 
   destroy() {
     console.log(`[${this.logPrefix}] tearing down level...`);
-    if (window.__toolchainTrail === this) delete window.__toolchainTrail;
     this.scoreboard?.destroy();
     this._barrierCanvas?.remove();
     this.macSetupCheck?.destroy();
