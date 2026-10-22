@@ -87,7 +87,7 @@ class ServerTest(unittest.TestCase):
 class ServeTest(unittest.TestCase):
     """The agent stays open and checks each station the game asks about, once per request."""
 
-    def run_serve(self, next_views, post=None):
+    def run_serve(self, next_views, post=None, still_wanted=lambda: True):
         views = iter(next_views)
         posts = []
 
@@ -108,10 +108,11 @@ class ServeTest(unittest.TestCase):
         with mock.patch.object(toolchain_agent, "get_json", side_effect=fake_get), \
                 mock.patch.object(toolchain_agent, "post_json", side_effect=fake_post), \
                 mock.patch.object(toolchain_agent, "run_command", side_effect=fake_runner({"code --version": (0, "1.94.2")})), \
+                mock.patch.object(toolchain_agent, "refresh_path") as self.refresh_path, \
                 redirect_stdout(io.StringIO()) as out:
             try:
                 code = toolchain_agent.serve("http://localhost:8585", "abc", "secret-token", "linux", Path("."),
-                                             sleep=stop_after_views)
+                                             sleep=stop_after_views, still_wanted=still_wanted)
             except StopIteration:
                 code = None
         return code, posts, out.getvalue()
@@ -142,6 +143,18 @@ class ServeTest(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("Pair a new agent", out)
 
+    def test_path_is_refreshed_before_each_check(self):
+        self.run_serve([{"status": "CHECKING", "stationId": "editor-isle-tower", "requestedAt": 1},
+                        {"status": "CHECKING", "stationId": "editor-isle-tower", "requestedAt": 2}])
+        self.assertEqual(self.refresh_path.call_count, 2)
+
+    def test_stops_when_no_longer_wanted(self):
+        wanted = iter([True, False])
+        code, posts, out = self.run_serve([{"status": "CHECKING", "stationId": "editor-isle-tower", "requestedAt": 1}],
+                                          still_wanted=lambda: next(wanted))
+        self.assertEqual((code, len(posts)), (0, 1))
+        self.assertIn("Agent stopped", out)
+
     def test_results_for_a_station_the_game_left_are_skipped(self):
         def moved_on(_body):
             raise toolchain_agent.AgentError("different station", 409)
@@ -160,8 +173,10 @@ class MainFlowTest(unittest.TestCase):
         with mock.patch.object(toolchain_agent.getpass, "getpass", return_value="  the-code  "), \
                 mock.patch.object(toolchain_agent, "post_json", side_effect=fake_post), \
                 mock.patch.object(toolchain_agent, "serve", return_value=0) as serve, \
+                mock.patch.object(toolchain_agent, "stop_background_agent") as stop_background, \
                 redirect_stdout(io.StringIO()) as out:
-            self.assertEqual(toolchain_agent.main(["--server", "http://localhost:8585"]), 0)
+            self.assertEqual(toolchain_agent.main(["--server", "http://localhost:8585", "--foreground"]), 0)
+        stop_background.assert_called_once()  # one agent at a time
 
         self.assertEqual(calls, [("http://localhost:8585/api/toolchain/pair", {"pairingCode": "the-code"}, None)])
         self.assertEqual(serve.call_args.args[:4], ("http://localhost:8585", "abc", "secret-token", toolchain_agent.detect_os()))
@@ -169,14 +184,19 @@ class MainFlowTest(unittest.TestCase):
         self.assertNotIn("the-code", out.getvalue())
         self.assertEqual(serve.call_args.kwargs["poll_seconds"], toolchain_agent.DEFAULT_POLL_SECONDS)
 
-    def test_poll_interval_comes_from_the_command_line(self):
+    def test_by_default_the_agent_moves_to_the_background_and_frees_the_terminal(self):
+        paired = {"sessionId": "abc", "stationId": "x", "agentToken": "secret-token"}
         with mock.patch.object(toolchain_agent.getpass, "getpass", return_value="the-code"), \
-                mock.patch.object(toolchain_agent, "post_json",
-                                  return_value={"sessionId": "abc", "stationId": "x", "agentToken": "t"}), \
-                mock.patch.object(toolchain_agent, "serve", return_value=0) as serve, \
-                redirect_stdout(io.StringIO()):
-            toolchain_agent.main(["--server", "http://localhost:8585", "--poll-seconds", "5"])
-        self.assertEqual(serve.call_args.kwargs["poll_seconds"], 5.0)
+                mock.patch.object(toolchain_agent, "post_json", return_value=paired), \
+                mock.patch.object(toolchain_agent, "serve") as serve, \
+                mock.patch.object(toolchain_agent, "start_in_background") as background, \
+                redirect_stdout(io.StringIO()) as out:
+            code = toolchain_agent.main(["--server", "http://localhost:8585", "--poll-seconds", "5"])
+        self.assertEqual(code, 0)
+        serve.assert_not_called()
+        self.assertEqual(background.call_args.args, ("http://localhost:8585", paired, Path(".").resolve(), 5.0))
+        self.assertIn("Keep using this terminal", out.getvalue())
+        self.assertNotIn("secret-token", out.getvalue())
 
     def test_rejected_code_prints_the_server_message(self):
         error = toolchain_agent.AgentError("Pairing code is invalid, expired, or already used", 401)
@@ -185,6 +205,65 @@ class MainFlowTest(unittest.TestCase):
                 redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()) as err:
             self.assertEqual(toolchain_agent.main([]), 2)
         self.assertIn("already used", err.getvalue())
+
+
+class BackgroundAgentTest(unittest.TestCase):
+    """One background agent at a time, stopped through a run file rather than by killing a process id."""
+
+    def setUp(self):
+        folder = tempfile.TemporaryDirectory()
+        self.addCleanup(folder.cleanup)
+        run_file = mock.patch.object(toolchain_agent, "RUN_FILE", Path(folder.name) / "run")
+        log_file = mock.patch.object(toolchain_agent, "LOG_FILE", Path(folder.name) / "log")
+        run_file.start(), log_file.start()
+        self.addCleanup(run_file.stop), self.addCleanup(log_file.stop)
+
+    def test_the_token_goes_to_the_background_copy_over_a_pipe(self):
+        paired = {"sessionId": "abc", "agentToken": "secret-token"}
+        with mock.patch.object(toolchain_agent.subprocess, "Popen") as popen:
+            toolchain_agent.start_in_background("http://localhost:8585", paired, Path("/repo"), 2.0)
+        command = popen.call_args.args[0]
+        self.assertIn("--serve-paired", command)
+        self.assertNotIn("secret-token", " ".join(command))
+        handoff = json.loads(popen.return_value.stdin.write.call_args.args[0])
+        self.assertEqual((handoff["sessionId"], handoff["agentToken"]), ("abc", "secret-token"))
+        self.assertTrue(toolchain_agent.is_current_run(handoff["runId"]))
+
+    def test_a_newer_agent_takes_over_and_stop_ends_it(self):
+        with mock.patch.object(toolchain_agent.subprocess, "Popen") as popen:
+            toolchain_agent.start_in_background("http://localhost:8585", {"sessionId": "a", "agentToken": "t"}, Path("."), 2.0)
+            first = json.loads(popen.return_value.stdin.write.call_args.args[0])["runId"]
+            toolchain_agent.start_in_background("http://localhost:8585", {"sessionId": "b", "agentToken": "t"}, Path("."), 2.0)
+            second = json.loads(popen.return_value.stdin.write.call_args.args[0])["runId"]
+        self.assertFalse(toolchain_agent.is_current_run(first))
+        self.assertTrue(toolchain_agent.is_current_run(second))
+
+        with redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(toolchain_agent.main(["--stop"]), 0)
+        self.assertIn("Stopping", out.getvalue())
+        self.assertFalse(toolchain_agent.is_current_run(second))
+
+
+class PathRefreshTest(unittest.TestCase):
+    def test_fresh_entries_come_first_without_duplicates(self):
+        sep = toolchain_agent.os.pathsep
+        merged = toolchain_agent.merge_path(sep.join(["/opt/homebrew/bin", "/usr/bin"]), sep.join(["/usr/bin", "/bin"]))
+        self.assertEqual(merged.split(sep), ["/opt/homebrew/bin", "/usr/bin", "/bin"])
+
+    def test_reads_the_path_after_the_marker_and_ignores_startup_noise(self):
+        output = "Welcome to zsh!\n" + toolchain_agent.PATH_MARKER + "/new/bin:/usr/bin"
+        completed = mock.Mock(stdout=output)
+        with mock.patch.object(toolchain_agent.platform, "system", return_value="Darwin"), \
+                mock.patch.object(toolchain_agent.subprocess, "run", return_value=completed):
+            self.assertEqual(toolchain_agent.login_shell_path(), "/new/bin:/usr/bin")
+            self.assertEqual(toolchain_agent.subprocess.run.call_args.args[0][1], "-ilc")  # macOS Terminal opens login shells
+
+    def test_a_broken_shell_leaves_the_path_alone(self):
+        with mock.patch.object(toolchain_agent.platform, "system", return_value="Linux"), \
+                mock.patch.object(toolchain_agent.subprocess, "run", side_effect=OSError("no shell")), \
+                mock.patch.dict(toolchain_agent.os.environ, {"PATH": "/usr/bin"}):
+            toolchain_agent.refresh_path()
+            self.assertEqual(toolchain_agent.os.environ["PATH"], "/usr/bin")
 
 
 if __name__ == "__main__":

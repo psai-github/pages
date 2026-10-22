@@ -18,11 +18,14 @@ import {
   getToolchainSession,
   requestStationCheck,
   agentCommands,
+  usesLocalBackend,
   loadPairedSessionId,
   savePairedSessionId,
   forgetPairedSessionId,
 } from '../services/ToolchainApi.js';
 import { TOOLCHAIN_TRAIL_SETTINGS } from '../data/toolchainTrailSettings.js';
+import { copyToClipboard } from '../services/clipboard.js';
+import { fixStepsFor, STUCK_HELP } from '../data/toolchainTrailFixes.js';
 
 const { pollIntervalMs: POLL_INTERVAL_MS, silentAgentHintMs: SILENT_AGENT_HINT_MS } = TOOLCHAIN_TRAIL_SETTINGS;
 export default class StationVerificationTrial {
@@ -33,7 +36,8 @@ export default class StationVerificationTrial {
    * @param {string} opts.station.name - in-world display name (e.g. "Terminal Town Gate")
    * @param {string} opts.station.skill - real-world skill label (e.g. "Shell fundamentals and package management")
    * @param {string} opts.station.narrativeHook - 1-2 sentence flavor text shown before the terminal
-   * @param {string[]} opts.station.instructions - ordered list of real-world steps to show the student
+   * @param {Array<string|{text: string, commands: string[]}>} opts.station.instructions - ordered real-world
+   *   steps; a step with commands shows each one with its own Copy button
    * @param {RegExp} opts.station.expectedCommandPattern - pattern the mock terminal checks input against
    * @param {string} opts.station.exampleCommand - a valid example command (shown as a hint)
    * @param {string} opts.station.funFact - fun fact shown by the NPC popup on success (level owns the popup, not this trial)
@@ -339,9 +343,16 @@ export default class StationVerificationTrial {
           font-size: 12px;
           color: #cbd5e1;
         }
-        .svt-cmd code {
-          display: block;
-          margin-top: 3px;
+        .svt-cmdrow {
+          display: flex;
+          gap: 6px;
+          align-items: stretch;
+          margin-top: 4px;
+        }
+        .svt-cmdrow code {
+          flex: 1;
+          min-width: 0;
+          font-size: 12px;
           color: #fbbf24;
           background: #000;
           border: 1px solid rgba(34, 211, 238, 0.4);
@@ -350,6 +361,26 @@ export default class StationVerificationTrial {
           white-space: pre-wrap;
           word-break: break-all;
         }
+        .svt-fix {
+          margin: 6px 0 2px;
+          padding-left: 18px;
+          font-size: 12px;
+          color: #e2e8f0;
+        }
+        .svt-fix li { margin: 4px 0; }
+        .svt-copy {
+          flex: none;
+          border: 1px solid #7dd3fc;
+          background: rgba(56, 189, 248, 0.12);
+          color: #e0f2fe;
+          border-radius: 6px;
+          padding: 0 10px;
+          cursor: pointer;
+          font-family: inherit;
+          font-size: 11px;
+          font-weight: bold;
+        }
+        .svt-copy:hover { background: rgba(56, 189, 248, 0.25); }
         .svt-agent-steps {
           margin: 6px 0 0;
           padding-left: 18px;
@@ -408,9 +439,9 @@ export default class StationVerificationTrial {
           <div class="svt-panel">
             <h4>MISSION BRIEFING</h4>
             <ol class="svt-steps">
-              ${instructions.map((step) => `<li>${this._escape(step)}</li>`).join('')}
+              ${instructions.map((step) => `<li>${this._renderStep(step)}</li>`).join('')}
             </ol>
-            <div class="svt-verify"><strong>FINAL STEP, VERIFY:</strong> the Toolchain agent on your computer runs the real commands and reports them to the server. Start it once and leave it open for the whole trail.</div>
+            <div class="svt-verify"><strong>FINAL STEP, VERIFY:</strong> the Toolchain agent on your computer runs the real commands and reports them to the server. Start it once; it keeps running in the background for the whole trail.</div>
           </div>
 
           <div class="svt-panel" id="svt-agent-panel">
@@ -423,10 +454,10 @@ export default class StationVerificationTrial {
               <ol class="svt-agent-steps">
                 <li>Open a terminal and <code>cd</code> into your pages repository.</li>
                 <li>Run the agent:
-                  ${agentCommands(this.os).map((item) => `<div class="svt-cmd">${this._escape(item.label)}<code>${this._escape(item.command)}</code></div>`).join('')}
+                  ${agentCommands(this.os).map((item) => `<div class="svt-cmd">${this._escape(item.label)}${this._commandRow(item.command)}</div>`).join('')}
                 </li>
                 <li>Paste the code below when it asks (it stays hidden while you type).</li>
-                <li>Leave that window open. Do your setup work in a second terminal.</li>
+                <li>The agent then runs in the background until you finish the trail, so keep using the same terminal for your setup commands.</li>
               </ol>
               <div class="svt-code">
                 <input id="svt-code" type="text" readonly spellcheck="false" aria-label="Pairing code">
@@ -484,6 +515,11 @@ export default class StationVerificationTrial {
     this.getCodeBtn = this.overlay.querySelector('#svt-get-code');
     this.getCodeBtn.onclick = () => this._startAgentSession();
     this.overlay.querySelector('#svt-copy-code').onclick = () => this._copyCode();
+    // Every command's Copy button copies the command shown right next to it.
+    this.overlay.addEventListener('click', (event) => {
+      const copyButton = event.target.closest('.svt-copy');
+      if (copyButton) copyToClipboard(copyButton.previousElementSibling.textContent, copyButton);
+    });
     this.checkAgainBtn = this.overlay.querySelector('#svt-check-again');
     this.checkAgainBtn.onclick = () => this._askAgentToCheck(this.session.sessionId);
     this.overlay.querySelector('#svt-new-agent').onclick = () => {
@@ -556,7 +592,7 @@ export default class StationVerificationTrial {
       if (!this.overlay) return;
       console.warn('[StationVerificationTrial] could not start an agent session:', error);
       this.getCodeBtn.disabled = false;
-      this._setAgentStatus('err', `${error.message}. Sign in and try again, or use the practice check below.`);
+      this._showStuckHelp(this._startFailureHelp(error), error.message);
       this._showPasteFallback();
       return;
     }
@@ -597,15 +633,15 @@ export default class StationVerificationTrial {
         if (this.checkingSince === null) {
           // Just paired: the agent is already running this station's checks.
           this.checkingSince = Date.now();
-          this._stopCountdown('Code used. The agent is paired; keep its window open.');
+          this._stopCountdown('Code used. The agent is paired and running in the background.');
           this._show('#svt-new-agent', true);
         }
         this._setAgentStatus('pending', Date.now() - this.checkingSince > SILENT_AGENT_HINT_MS
-          ? 'No answer from your agent yet. Is its window still open? If you closed it, use Pair a new agent.'
+          ? 'No answer from your agent yet. If you stopped it or restarted your computer, use Pair a new agent.'
           : 'Your agent is running the checks...');
         break;
       case 'FAILED': {
-        this._stopCountdown('Code used. The agent is paired; keep its window open.');
+        this._stopCountdown('Code used. The agent is paired and running in the background.');
         const checks = view.checks || [];
         const passed = checks.filter((c) => c.passed).length;
         this._renderChecks(checks, this.agentChecksEl);
@@ -661,12 +697,8 @@ export default class StationVerificationTrial {
   async _copyCode() {
     const codeEl = this.overlay?.querySelector('#svt-code');
     if (!codeEl?.value) return;
-    try {
-      await navigator.clipboard.writeText(codeEl.value);
-      this.overlay.querySelector('#svt-copy-code').textContent = 'Copied';
-    } catch (_) {
-      codeEl.select(); // clipboard blocked; leave it selected for Ctrl/Cmd+C
-    }
+    const copied = await copyToClipboard(codeEl.value, this.overlay.querySelector('#svt-copy-code'));
+    if (!copied) codeEl.select(); // clipboard blocked; leave it selected for Ctrl/Cmd+C
   }
 
   _showPasteFallback() {
@@ -718,12 +750,41 @@ export default class StationVerificationTrial {
   }
   _renderChecks(checks = [], target = this.checksEl) {
     if (!target) return;
-    target.innerHTML = checks.map((c) => `
+    target.innerHTML = checks.map((c) => {
+      // A failed check shows its exact fix commands; the server's one-line hint is the fallback.
+      const fixSteps = c.passed ? '' : this._renderFixSteps(c.id);
+      const hint = !c.passed && !fixSteps && c.detail ? `<span class="svt-check-detail">${this._escape(c.detail)}</span>` : '';
+      return `
       <div class="svt-check ${c.passed ? 'pass' : 'fail'}">
         ${c.passed ? '✓' : '✗'} ${this._escape(c.label)}
-        ${!c.passed && c.detail ? `<span class="svt-check-detail">${this._escape(c.detail)}</span>` : ''}
-      </div>
-    `).join('');
+        ${hint}${fixSteps}
+      </div>`;
+    }).join('');
+  }
+
+  /** The exact commands that fix a failed check on this student's OS (see data/toolchainTrailFixes.js). */
+  _renderFixSteps(checkId) {
+    const steps = fixStepsFor(checkId, this.os, agentCommands(this.os)[0].command);
+    if (steps.length === 0) return '';
+    return `<ol class="svt-fix">${steps.map((step) => `<li>${this._renderStep(step)}</li>`).join('')}</ol>`;
+  }
+
+  /** Which help to show when no pairing code could be made. */
+  _startFailureHelp(error) {
+    if (error?.status === 401) return STUCK_HELP.notSignedIn;
+    const unreachable = error instanceof TypeError; // fetch got no answer at all
+    if (unreachable) return usesLocalBackend() ? STUCK_HELP.localBackendDown : STUCK_HELP.serverUnreachable;
+    return null; // a server error: its own message is the best help
+  }
+
+  _showStuckHelp(help, fallbackMessage) {
+    if (!help) {
+      this._setAgentStatus('err', `${fallbackMessage}. Try again, or use the practice check below.`);
+      return;
+    }
+    const [summary, ...steps] = help;
+    this._setAgentStatus('err', summary);
+    this.agentChecksEl.innerHTML = `<ol class="svt-fix">${steps.map((step) => `<li>${this._renderStep(step)}</li>`).join('')}</ol>`;
   }
 
   _appendLog(line) {
@@ -750,6 +811,17 @@ export default class StationVerificationTrial {
 
   destroy() {
     this._close(false);
+  }
+
+  /** A step is plain text, or { text, commands } with a Copy button per command. */
+  _renderStep(step) {
+    if (typeof step === 'string') return this._escape(step);
+    return this._escape(step.text) + (step.commands || []).map((command) => this._commandRow(command)).join('');
+  }
+
+  _commandRow(command) {
+    return `<div class="svt-cmdrow"><code>${this._escape(command)}</code>`
+      + `<button type="button" class="svt-copy" aria-label="Copy command">Copy</button></div>`;
   }
 
   _escape(value = '') {

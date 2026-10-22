@@ -9,6 +9,7 @@
 // shown, not saved. Styles: sass/setup-check.scss.
 import { parseVerifyToolsOutput } from '../model/verifyToolsReport.js';
 import { fetchLatestSetupReport, requestReportUploadUrl } from '../services/SetupReportApi.js';
+import { copyToClipboard } from '../services/clipboard.js';
 
 const VERIFY_SCRIPT = 'bash scripts/verifyToolsTerminal.sh';
 const REPORT_POLL_INTERVAL_MS = 4000;
@@ -119,7 +120,7 @@ class MacSetupCheck {
     copyButton.className = 'cs-pathway-mac-check__copy';
     copyButton.textContent = 'Copy';
     // Read the command when clicked: the verify step's command changes once a report code arrives.
-    copyButton.addEventListener('click', () => this.copyCommand(command.textContent, copyButton));
+    copyButton.addEventListener('click', () => copyToClipboard(command.textContent, copyButton));
     commandRow.append(command, copyButton);
 
     const detail = document.createElement('p');
@@ -130,16 +131,6 @@ class MacSetupCheck {
     return item;
   }
 
-  async copyCommand(command, copyButton) {
-    try {
-      await navigator.clipboard.writeText(command);
-      copyButton.textContent = 'Copied!';
-    } catch (error) {
-      // Clipboard access can be blocked; the command is still visible to copy by hand.
-      console.warn('[MacSetupCheck] clipboard unavailable:', error);
-      copyButton.textContent = 'Select & copy';
-    }
-  }
 
   // Switches the verify step to the command that uploads its results, then watches for them.
   // Without a sign-in or a reachable server the paste flow above stays as it is.
