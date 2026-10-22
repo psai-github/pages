@@ -6,92 +6,11 @@ title: "Integra: An AI-Driven Recovery System for the Poway Recovery Center"
 permalink: /capstone/integra/
 ---
 
-<!-- Static snapshot: edit the columns and titles here as the project progresses. -->
-<section class="ocs__card ocs__keypoints" aria-labelledby="integra-board-heading">
-  <h2 id="integra-board-heading">Poway Recovery Center Project Ideation</h2>
-  <ul class="ocs__kanban-board">
-    <li class="ocs__kanban-column" data-stage="todo">
-      <div><strong>To do</strong> <span class="ocs__status-pill ocs__status-pill--neutral">5</span></div>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">Draft</div>
-        <div class="ocs__kanban-name">Deploy backend using .opencodingsociety.com domain</div>
-      </article>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">poway-recovery-center #7</div>
-        <div class="ocs__kanban-name">CSP Create Performance Task Rubric Ideation</div>
-      </article>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">poway-recovery-center #8</div>
-        <div class="ocs__kanban-name">Detailed Ideation Flow - PRC 10/13/26</div>
-      </article>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">Draft</div>
-        <div class="ocs__kanban-name">API for AI-powered support assistant</div>
-      </article>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">Draft</div>
-        <div class="ocs__kanban-name">Side menu</div>
-      </article>
-    </li>
-    <li class="ocs__kanban-column" data-stage="doing">
-      <div><strong>In progress</strong> <span class="ocs__status-pill ocs__status-pill--neutral">5</span></div>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">Draft</div>
-        <div class="ocs__kanban-name">frontend pages</div>
-      </article>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">poway-recovery-center #9</div>
-        <div class="ocs__kanban-name">Interactive calendar/schedule</div>
-      </article>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">poway-recovery-center #3</div>
-        <div class="ocs__kanban-name">Create Chatbot</div>
-      </article>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">Draft</div>
-        <div class="ocs__kanban-name">fix login bugs</div>
-      </article>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">Draft</div>
-        <div class="ocs__kanban-name">Font choose</div>
-      </article>
-    </li>
-    <li class="ocs__kanban-column" data-stage="review">
-      <div><strong>In review</strong> <span class="ocs__status-pill ocs__status-pill--neutral">3</span></div>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">poway-recovery-center #2</div>
-        <div class="ocs__kanban-name">Initial introduction video</div>
-      </article>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">poway-recovery-center #5</div>
-        <div class="ocs__kanban-name">Logo design</div>
-      </article>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">poway-recovery-center #11</div>
-        <div class="ocs__kanban-name">Profile/About us</div>
-      </article>
-    </li>
-    <li class="ocs__kanban-column" data-stage="done">
-      <div><strong>Done</strong> <span class="ocs__status-pill ocs__status-pill--neutral">4</span></div>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">poway-recovery-center #1</div>
-        <div class="ocs__kanban-name">Poway Recovery Center Website Full Build</div>
-      </article>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">Draft</div>
-        <div class="ocs__kanban-name">Create backend on localhost</div>
-      </article>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">poway-recovery-center #4</div>
-        <div class="ocs__kanban-name">create mood room</div>
-      </article>
-      <article class="ocs__kanban-item">
-        <div class="ocs__kanban-kicker">poway-recovery-center #10</div>
-        <div class="ocs__kanban-name">support assistant interface</div>
-      </article>
-    </li>
-  </ul>
-</section>
+<!-- Sprint Board: live from the team's GitHub project, like SFI Foundation -->
+{% assign integra_data = site.data.integra %}
+{% if integra_data.Board %}
+{% include ocs_kanban_board.html url=integra_data.Board.url %}
+{% endif %}
 
 Integra pairs AI-driven support with clear progress tracking to help Poway Recovery Center clients stay engaged and connected.
 
