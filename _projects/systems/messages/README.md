@@ -81,8 +81,9 @@ Flask, for Form groups: `POST /api/persona/evaluate-group`, `POST /api/persona/f
 - Only site admins can delete a group, and never a class group (`canDeleteGroup`).
   Delete isn't in the conversation header with the everyday buttons. It's a "Delete
   group" section at the bottom of the group's Members dialog.
-- "Delete this group" opens a dialog that says what its members lose: the group, its
-  chat and its files. Delete stays off until the group's name is typed
+- "Delete this group" opens a dialog that warns what goes: the group's grades and any
+  assignments it submitted are deleted, and its members lose the group, its chat and its
+  files. Delete stays off until the group's name is typed
   (`confirmsGroupName`: capitals count, extra spaces don't). Only then does the page
   call `DELETE /api/groups/{id}`.
 
@@ -90,11 +91,11 @@ Flask, for Form groups: `POST /api/persona/evaluate-group`, `POST /api/persona/f
 
 - Spring lets any signed-in user delete a group or change its members. The page offers
   Delete only to admins, but the API doesn't check.
-- Deleting a group removes only Spring's record of it. Its chat and files stay in S3
-  under the group's name, and no one can open them, because every chat and file
-  request looks the group up by id first. A new group with the same name starts with
-  an empty chat, since making a group writes a new chat file, but it lists the old
-  group's files.
+- Deleting a group deletes its Spring record: its member list, its grades and, by
+  cascade, any assignments submitted as the group. Its chat and files stay in S3 under
+  the group's name, where this page can't open them, since it looks groups up by id. A
+  new group with the same name starts with an empty chat, since making a group writes a
+  new chat file, but it lists the old group's files.
 - Group names are unique across the site, and group chat history is stored by group
   name.
 

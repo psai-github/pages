@@ -193,11 +193,18 @@ test('confirmsGroupName never confirms a group without a name', () => {
 test('deleteGroupWarning names the group and how many members lose it', () => {
   const team = deleteGroupWarning({ name: 'Fruit Empire', members: [{}, {}, {}, {}] });
   assert.match(team, /Fruit Empire/);
-  assert.match(team, /all 4 members/);
+  assert.match(team, /all 4 members/i);
   const solo = deleteGroupWarning({ name: 'Solo Project', members: [{}] });
   assert.match(solo, /Solo Project/);
-  assert.match(solo, /its only member/);
-  assert.doesNotMatch(solo, /all 1|1 members/);
+  assert.match(solo, /its only member/i);
+  assert.doesNotMatch(solo, /all 1|1 members/i);
+});
+
+test('deleteGroupWarning says the group\'s grades and submitted assignments are deleted too', () => {
+  // Spring deletes a group's grades with it, and its submissions cascade.
+  const warning = deleteGroupWarning({ name: 'Fruit Empire', members: [{}, {}] });
+  assert.match(warning, /grades/);
+  assert.match(warning, /assignments/);
 });
 
 test('sortGroups orders by name with numbers in counting order, without changing the input', () => {

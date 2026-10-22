@@ -130,12 +130,13 @@ export function confirmsGroupName(typed, group) {
   return name !== '' && collapseSpaces(typed) === name;
 }
 
-// Spring keeps a deleted group's chat and files in storage under its name, but no one
-// can open them once the group is gone, so this says they are taken away, not erased.
+// Spring deletes a group's grades with it, and the assignments it submitted cascade. Its
+// chat and files stay in S3 under its name, where this page can't open them, so members
+// lose them, but they aren't erased.
 export function deleteGroupWarning(group) {
   const count = (group.members || []).length;
-  const who = count === 1 ? 'its only member' : `all ${count} members`;
-  return `Deleting ${group.name} takes the group, its chat and its files away from ${who}. This can’t be undone.`;
+  const who = count === 1 ? 'Its only member loses' : `All ${count} members lose`;
+  return `Deleting ${group.name} also deletes its grades and any assignments it submitted. ${who} the group, its chat and its files. This can’t be undone.`;
 }
 
 export function sortGroups(groups) {
