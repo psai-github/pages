@@ -1,6 +1,5 @@
-import { javaURI } from '../api/config.js';
-
-export function initGistConnection(section, request = fetch) {
+// `javaURI` comes from the page, which imports config.js with the site's baseurl.
+export function initGistConnection(section, { javaURI, request = fetch } = {}) {
   if (!section) return;
   const elements = Object.fromEntries(['form', 'token', 'state', 'message', 'save', 'disconnect']
     .map(name => [name, section.querySelector(`#gist-connection-${name}`)]));

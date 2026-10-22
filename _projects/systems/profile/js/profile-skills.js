@@ -1,7 +1,5 @@
-// The skill check-in on /profile/v2: four 1-6 ratings for one project, added to the
+// The skill check-in on /profile: four 1-6 ratings for one project, added to the
 // student's Skill Passport.
-import { pythonURI, fetchOptions } from '../api/config.js';
-
 const SKILLS = [
     { id: 'codingAbility', field: 'coding_ability' },
     { id: 'collaboration', field: 'collaboration' },
@@ -9,7 +7,8 @@ const SKILLS = [
     { id: 'initiative', field: 'initiative' },
 ];
 
-export function initSkillCheckIn({ form, project, status }) {
+export function initSkillCheckIn({ api, form, project, status }) {
+    const { pythonURI, fetchOptions } = api;
     const slider = skill => document.getElementById(skill.id);
     const showValue = skill => { document.getElementById(`${skill.id}Val`).textContent = slider(skill).value; };
     for (const skill of SKILLS) slider(skill).addEventListener('input', () => showValue(skill));

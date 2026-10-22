@@ -1,7 +1,6 @@
-// The persona card on /profile/v2: a summary of the four choices and, for each group
+// The persona card on /profile: a summary of the four choices and, for each group
 // still open (or every group while changing), a row of persona cards. Clicking a card
 // saves that choice right away.
-import { pythonURI, fetchOptions } from '../api/config.js';
 import { firstSentence, personaDescription, personaSections, personaTitle, personaTraits } from './profile-model.js';
 
 function element(tag, className, text) {
@@ -65,7 +64,8 @@ function pickerGroup(section) {
     return group;
 }
 
-export async function initPersonas({ container, progress, editButton, onChange }) {
+export async function initPersonas({ api, container, progress, editButton, onChange }) {
+    const { pythonURI, fetchOptions } = api;
     let personas = [];
     let selected = {};
     let editing = false;
