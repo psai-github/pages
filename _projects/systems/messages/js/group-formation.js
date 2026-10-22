@@ -1,6 +1,6 @@
 // "Form groups" (teachers and admins): the persona-based grouping from the Wayfinding
 // capstone. It takes everyone already in a group for one class and period, asks Flask
-// how many have taken the persona quiz, and has Flask suggest groups when enough have;
+// how many have picked a persona on their Profile, and has Flask suggest groups when enough have;
 // otherwise the groups are random. Students can be moved and groups locked before the
 // unlocked ones are regrouped, and Save makes each group with its members.
 import { button, cell, createDialog } from './dialogs.js';
@@ -165,7 +165,7 @@ export function initGroupFormation({ elements, api, onSaved }) {
       } else {
         elements.method.textContent = enoughPersonas
           ? 'Random groups: Flask could not group by persona just now.'
-          : 'Random groups: fewer than half of the class has taken the persona quiz.';
+          : 'Random groups: too few of these students have picked a persona.';
       }
       elements.status.textContent = `${students.length} students in ${staged.length} groups. Nothing is saved until you press Save groups.`;
     } catch (error) {

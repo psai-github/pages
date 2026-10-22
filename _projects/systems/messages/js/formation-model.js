@@ -32,7 +32,7 @@ export function formationError({ period, course, size }, studentCount) {
   return '';
 }
 
-// Flask's grouping only helps when enough of the class has taken the persona quiz:
+// Flask's grouping only helps when enough of the students have picked a persona:
 // enough for two groups, and at least half the class.
 export const useAiGrouping = (withPersonas, size, total) => withPersonas >= Math.max(size * 2, Math.ceil(total * 0.5));
 

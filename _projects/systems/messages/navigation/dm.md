@@ -204,7 +204,7 @@ messages-page.js at the bottom; README.md in that folder explains how it fits to
       <button type="button" class="ocs__btn small" data-close aria-label="Close">&times;</button>
     </div>
     <form class="ocs__stack" id="formGroupsForm">
-      <p class="ocs__text">This regroups the students already in a group for the class and period, such as the class group. Flask matches personas when at least half of those students, and enough for two groups, have taken the persona quiz; otherwise the groups are random.</p>
+      <p class="ocs__text">This regroups the students already in a group for the class and period, such as the class group. Flask matches personas when at least half of those students, and enough for two groups, have picked a persona on their Profile; otherwise the groups are random.</p>
       <div class="ocs__grid--col2">
         <div class="ocs__field">
           <label class="ocs__label" for="formCourse">Class</label>
