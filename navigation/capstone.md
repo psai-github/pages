@@ -22,9 +22,11 @@ show_reading_time: false
       <button id="show-csh" type="button" class="ocs__btn capstone-filter-btn" aria-pressed="false">CSH</button>
       <button id="show-csa" type="button" class="ocs__btn capstone-filter-btn" aria-pressed="false">CSA</button>
       <button id="show-csp" type="button" class="ocs__btn capstone-filter-btn" aria-pressed="false">CSP</button>
+      <button id="show-csse" type="button" class="ocs__btn capstone-filter-btn" aria-pressed="false">CSSE</button>
       <select id="year-select" class="nc-select" aria-label="Filter projects by school year" style="max-width: 14rem;">
         <option value="2026-2027" selected>2026/2027</option>
         <option value="2025-2026">2025/2026</option>
+        <option value="">All years</option>
       </select>
     </div>
   </div>
@@ -33,7 +35,7 @@ show_reading_time: false
 <div class="ocs__grid">
   <div class="ocs__grid-cell">
     <input id="project-search" type="search" placeholder="Search projects, descriptions, or team members" class="nc-input" />
-    <p id="search-status" class="text-xs text-gray-500" style="margin: 0.25rem 0 0;">Showing all projects.</p>
+    <p id="search-status" role="status" class="text-xs text-gray-500" style="margin: 0.25rem 0 0;">Showing all projects.</p>
   </div>
 </div>
 
@@ -53,12 +55,19 @@ document.addEventListener('DOMContentLoaded', function(){
     all: document.getElementById('show-all'),
     CSA: document.getElementById('show-csa'),
     CSP: document.getElementById('show-csp'),
-    CSH: document.getElementById('show-csh')
+    CSH: document.getElementById('show-csh'),
+    CSSE: document.getElementById('show-csse')
   };
   let currentType = 'all';
   let currentQuery = '';
   const yearSelect = document.getElementById('year-select');
   let currentYear = yearSelect ? yearSelect.value : '';
+  // Old Games links open the complete CSSE catalog, including undated projects.
+  if(new URLSearchParams(window.location.search).get('course') === 'CSSE'){
+    currentType = 'CSSE';
+    if(yearSelect) yearSelect.value = '';
+    currentYear = '';
+  }
 
   const linkMap = {
     "Oasis": {
@@ -106,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function(){
       frontendUrl: "http://sfifoundation.opencodingsociety.com",
       backendUrl: "https://greppers-be.opencodingsociety.com/"
     },
-    "Communication System": {
+    "OCS Communication Systems": {
       pageUrl: "https://pages.opencodingsociety.com/capstone/communication-system/",
       frontendUrl: "https://github.com/UGRC-CSA/Pages",
       backendUrl: "https://github.com/Open-Coding-Society/spring"
@@ -118,33 +127,114 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   };
 
-  function normalize(text){ return text.toLowerCase().trim(); }
+  function fold(text){ return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+  function normalize(text){ return fold(text).trim(); }
+  // Read each card's text once, before the links button and pop-up are added to it.
+  const cardText = new Map(cards.map(card=>[card, normalize(card.textContent)]));
   function matchesType(card){ return currentType === 'all' || card.classList.contains(currentType); }
   function matchesYear(card){ return !currentYear || (card.dataset.year || '2025-2026') === currentYear; }
   function matchesSearch(card){
-    const text = normalize(card.textContent);
-    return !currentQuery || text.includes(currentQuery);
+    // Every word has to be in the card, in any order: "veterans chatbot" finds Poway Veterans.
+    return currentQuery.split(/\s+/).every(word=>cardText.get(card).includes(word));
+  }
+  // Highlight each search word in the card's own text with <mark>, like the Topics page.
+  const markSkip = '.capstone-links-button, .capstone-popup, .capstone-card-placeholder';
+  function clearMarks(card){
+    card.querySelectorAll('mark[data-search-mark]').forEach(mark=>{
+      const parent = mark.parentNode;
+      mark.replaceWith(mark.textContent);
+      parent.normalize();
+    });
+  }
+  function markWords(card, words){
+    const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while(walker.nextNode()){
+      if(!walker.currentNode.parentElement.closest(markSkip)) nodes.push(walker.currentNode);
+    }
+    nodes.forEach(node=>{
+      const text = node.data;
+      // Fold one character at a time and remember where each folded character came from.
+      let folded = '';
+      const from = [];
+      for(let i = 0; i < text.length; i++){
+        const piece = fold(text[i]);
+        folded += piece;
+        for(let k = 0; k < piece.length; k++) from.push(i);
+      }
+      const ranges = [];
+      words.forEach(word=>{
+        for(let at = folded.indexOf(word); at !== -1; at = folded.indexOf(word, at + 1)){
+          let end = from[at + word.length - 1] + 1;
+          while(end < text.length && !fold(text[end])) end++;
+          ranges.push([from[at], end]);
+        }
+      });
+      if(!ranges.length) return;
+      ranges.sort((a, b)=>a[0] - b[0]);
+      const merged = [];
+      ranges.forEach(([start, end])=>{
+        const last = merged[merged.length - 1];
+        if(last && start <= last[1]) last[1] = Math.max(last[1], end);
+        else merged.push([start, end]);
+      });
+      const pieces = [];
+      let cursor = 0;
+      merged.forEach(([start, end])=>{
+        if(start > cursor) pieces.push(text.slice(cursor, start));
+        const mark = document.createElement('mark');
+        mark.dataset.searchMark = '';
+        mark.textContent = text.slice(start, end);
+        pieces.push(mark);
+        cursor = end;
+      });
+      if(cursor < text.length) pieces.push(text.slice(cursor));
+      node.replaceWith(...pieces);
+    });
   }
   
-  function updateStatus(count){
-  const total = getTotalProjects();
-
-  if(currentQuery){
-    status.textContent = count
-      ? `${count} of ${total} project${total === 1 ? '' : 's'} found for "${currentQuery}".`
-      : `No projects match "${currentQuery}".`;
-  } else {
-    status.textContent = `${total} total project${total === 1 ? '' : 's'}.`;
+  function plural(count, word){ return `${count} ${word}${count === 1 ? '' : 's'}`; }
+  function filterLabel(){
+    const parts = [];
+    if(currentType !== 'all') parts.push(currentType);
+    if(currentYear) parts.push(yearSelect.selectedOptions[0].textContent);
+    return parts.join(', ');
   }
-}
+  function updateStatus(count){
+    const total = getTotalProjects();
+    const label = filterLabel();
+    if(!currentQuery){
+      if(!label) status.textContent = `${plural(total, 'project')}.`;
+      else if(count) status.textContent = `Showing ${count} of ${plural(total, 'project')} (${label}).`;
+      else status.textContent = `No projects in ${label}.`;
+      return;
+    }
+    const query = searchInput.value.trim().replace(/\s+/g, ' ');
+    const where = label ? ` in ${label}` : '';
+    let text = count
+      ? `${plural(count, 'project')} ${count === 1 ? 'matches' : 'match'} "${query}"${where}.`
+      : `No projects match "${query}"${where}.`;
+    // Say when the course or year choice hides matches, so a project never looks missing.
+    const hidden = cards.filter(matchesSearch).length - count;
+    if(hidden){
+      const both = currentType !== 'all' && currentYear;
+      const other = both ? 'other courses or years' : currentYear ? 'other years' : 'other courses';
+      const pick = currentType === 'all' ? 'pick All years' : 'pick All';
+      text += ` ${hidden} ${count ? 'more' : hidden === 1 ? 'match' : 'matches'} in ${other}: ${pick}.`;
+    }
+    status.textContent = text;
+  }
   function getTotalProjects(){
   return cards.length;
 }
   function applyFilters(){
     let count = 0;
+    const words = currentQuery.split(/\s+/).filter(Boolean);
     cards.forEach(card=>{
       const visible = matchesType(card) && matchesSearch(card) && matchesYear(card);
       card.style.display = visible ? '' : 'none';
+      clearMarks(card);
+      if(visible && words.length) markWords(card, words);
       if(visible) count++;
     });
     updateStatus(count);
@@ -163,10 +253,20 @@ document.addEventListener('DOMContentLoaded', function(){
     updateTypeButtons();
     applyFilters();
   }
-  document.getElementById('show-all')?.addEventListener('click', ()=> setTypeFilter('all'));
+  // All shows every project: it clears the year too, not just the course.
+  document.getElementById('show-all')?.addEventListener('click', ()=>{
+    if(yearSelect) yearSelect.value = '';
+    currentYear = '';
+    setTypeFilter('all');
+  });
   document.getElementById('show-csa')?.addEventListener('click', ()=> setTypeFilter('CSA'));
   document.getElementById('show-csp')?.addEventListener('click', ()=> setTypeFilter('CSP'));
   document.getElementById('show-csh')?.addEventListener('click', ()=> setTypeFilter('CSH'));
+  document.getElementById('show-csse')?.addEventListener('click', ()=>{
+    if(yearSelect) yearSelect.value = '';
+    currentYear = '';
+    setTypeFilter('CSSE');
+  });
   yearSelect?.addEventListener('change', event=>{
     currentYear = event.target.value;
     applyFilters();
@@ -254,6 +354,15 @@ document.addEventListener('DOMContentLoaded', function(){
   });
   updateTypeButtons();
   applyFilters();
+  // After Back, a browser can refill the search box and year menu once this script has run.
+  window.addEventListener('pageshow', ()=>{
+    const query = normalize(searchInput.value);
+    const year = yearSelect ? yearSelect.value : '';
+    if(query === currentQuery && year === currentYear) return;
+    currentQuery = query;
+    currentYear = year;
+    applyFilters();
+  });
 });
 </script>
 
@@ -326,8 +435,8 @@ document.addEventListener('DOMContentLoaded', function(){
            <div class="ocs__image-frame ocs__image-frame--thumbnail capstone-card-placeholder" style="background: linear-gradient(135deg, #06b6d4, #0f172a);">SUB</div>
        </a>
        <div>
-           <h3><a href="{% post_url capstone/2026-08-31-submissions-capstone %}">OCS Submissions</a></h3>
-           <p>Umbrella capstone covering three groups' work on the assignment/submission system: assignment creator permissions, submission analytics, and AI grading.</p>
+           <h3><a href="{% post_url capstone/2026-08-31-submissions-capstone %}">OCS Assignments System</a></h3>
+           <p>Students are making OCS grading faster and more reliable. The work includes AI grading with a key each user supplies, out of 1 point per assignment, student grades that sit alongside AI grades instead of overwriting them, and admin tools to correct bad submission records. Other pieces are lessons standardized through CRUD operations, data collection for a reworked self-assessment, and teacher and grader screens on the Pages frontend so teachers never need to use the Spring admin views.</p>
            <p>Groups: Assignment Creator Permissions, Submission Analytics, AI Grading</p>
        </div>
    </div>
@@ -358,15 +467,15 @@ document.addEventListener('DOMContentLoaded', function(){
    </div>
 
 
-   <!-- RFID + Camera-Correlated Classroom Presence -->
+   <!-- Classroom Presence System (RFID + QR + Camera) -->
    <div class="ocs__grid-cell CSH" data-year="2026-2027">
-     <a href="{% post_url capstone/RFID/2026-09-12-rfid-presence-capstone %}">
-       <div class="ocs__image-frame ocs__image-frame--thumbnail capstone-card-placeholder" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);">RFID</div>
+     <a href="{% post_url capstone/Presence/2026-09-12-presence-system-capstone %}">
+       <div class="ocs__image-frame ocs__image-frame--thumbnail capstone-card-placeholder" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);">Presence</div>
      </a>
      <div>
-       <h3><a href="{% post_url capstone/RFID/2026-09-12-rfid-presence-capstone %}">RFID + Camera-Correlated Classroom Presence</a></h3>
-       <p>A low-cost Raspberry Pi UHF RFID system that tracks device presence at the doorway and correlates it with an existing face-scanning camera system to determine true student presence, period by period.</p>
-       <p>Team: Ruta Sirdeshmukh, Vibha Mandayam, Kush Shah</p>
+       <h3><a href="{% post_url capstone/Presence/2026-09-12-presence-system-capstone %}">Classroom Presence System</a></h3>
+       <p>A design-based research project asking whether classroom presence can be measured with zero teacher effort. Three low-effort inputs, RFID tap, QR scan, and face scan, are evaluated in parallel against a shared presence engine and the bell schedule to track instructional minutes and show who is missing in real time.</p>
+       <p>Team: Vibha Mandayam (RFID), Ruta Sirdeshmukh (QR), Kush Shah (Camera)</p>
      </div>
    </div>
     <!-- Jarvis Classroom Object Detection -->
@@ -436,7 +545,7 @@ document.addEventListener('DOMContentLoaded', function(){
          <img src="{{ '/images/' | append: site.data.toolchain-trail-capstone.Logo | relative_url }}" alt="{{ site.data.toolchain-trail-capstone.Title }} logo" class="ocs__image-frame ocs__image-frame--thumbnail" />
        </a>
        <div>
-         <h3><a href="{% post_url capstone/2026-08-28-toolchain-trail %}">Toolchain Trail</a></h3>
+         <h3><a href="{% post_url capstone/2026-08-28-toolchain-trail %}"></a>{{ site.data.toolchain-trail-capstone.Title }}</h3>
          <p>{{ site.data.toolchain-trail-capstone.Overview }}</p>
        </div>
    </div>
@@ -779,6 +888,35 @@ document.addEventListener('DOMContentLoaded', function(){
             <p>Team: Nitya, Vivian, Virginia</p>
         </div>
     </div>
+    
+    <!-- Doing Exceptional Deeds Website Redesign (CSP, 2026/2027) -->
+  <div class="ocsgrid-cell CSP"
+      data-year="2026-2027"
+      data-page-url="{{ '/capstone/doingexceptionaldeeds/' | relative_url }}">
+
+      <a href="{{ '/capstone/doingexceptionaldeeds/' | relative_url }}">
+          <div class="ocsimage-frame ocs__image-frame--thumbnail capstone-card-placeholder">
+              D.A.D.
+          </div>
+      </a>
+
+      <div>
+          <h3>
+              <a href="{{ '/capstone/doingexceptionaldeeds/' | relative_url }}">
+                  Doing Exceptional Deeds
+              </a>
+          </h3>
+
+          <p>
+              A website redesign focused on simpler navigation, shorter content,
+              student and teacher accounts, teacher profiles, and an easier
+              events and calendar experience.
+          </p>
+
+          <p>Team: Jake, Noah, Ishaan</p>
+      </div>
+    </div>
+
 
    <!-- FOPS (2026-2027) -->
  <div class="ocs__grid-cell CSP" data-year="2026-2027">
@@ -828,7 +966,34 @@ document.addEventListener('DOMContentLoaded', function(){
            <p>Team: Ruchika Kench, Akshara Shankar, Avantika Chittari</p>
        </div>
    </div>
-   
+
+<!-- Safe Passage Heals V2.0 (CSP, 2026/2027) -->
+<div class="ocs__grid-cell CSP" data-year="2026-2027">
+    <a href="{{ '/capstone/safe-passage-heals-v2/' | relative_url }}">
+        <img src="/images/capstone/sph.png"
+             alt="Safe Passage Heals"
+             class="ocs__image-frame ocs__image-frame--thumbnail" />
+    </a>
+
+    <div>
+        <h3>
+            <a href="{{ '/capstone/safe-passage-heals-v2/' | relative_url }}">
+                Safe Passage Heals - Media Management Tools and Interactive Recovery Simulation V2.0
+            </a>
+        </h3>
+
+        <p>
+            An updated version of the Safe Passage Heals project focused on
+            media management tools and an interactive recovery simulation
+            that builds on the original project.
+        </p>
+
+        <p>
+            Team: Yiming Yin, Noor Saif Bijapur, Luke Sanders
+        </p>
+    </div>
+</div>
+
    <!-- California Center For The Performing Arts Escondido (CSP, 2026/2027) -->
    <div class="ocs__grid-cell CSP" data-year="2026-2027">
        <a href="{% post_url 2026-09-08-ccae-escondido-capstone %}">
@@ -876,27 +1041,15 @@ document.addEventListener('DOMContentLoaded', function(){
        </div>
    </div>
 
-   <!-- OCS Assignment Tracker (CSA) -->
+   <!-- OCS Admin & Security Team (CSA) -->
   <div class="ocs__grid-cell CSA" data-year="2026-2027">
-       <a href="{% post_url capstone/2026-09-03-chuds-capstone %}">
-           <img src="/images/backendboyzgcpiccc.png" alt="Backend Boyz - OCS Assignment Tracker" class="ocs__image-frame ocs__image-frame--thumbnail" />
+       <a href="{% post_url capstone/2026-09-03-ocs-admin-security-team %}">
+           <img src="/images/capstone/cccs-security-logo.png" alt="OCS Admin & Security Team" class="ocs__image-frame ocs__image-frame--thumbnail" />
        </a>
        <div>
-           <h3><a href="{% post_url capstone/2026-09-03-chuds-capstone %}">Backend Boyz</a></h3>
-           <p>Developing an easy way for mentors to access Open Coding Society, featuring Google OAuth-verified signup, a scoped capstone project dashboard, real-time team chat, and role-based permissions between students and admins.</p>
-           <p>Team: Backend Boyz (Shayan B, Darshan S, Rudra J, Dhyan S, Harrish A, Lucas M, Zhengli L, Jacob C, Arnav P)</p>
-       </div>
-   </div>
-
-   <!-- OCS Security (CSA) -->
-  <div class="ocs__grid-cell CSA" data-year="2026-2027">
-       <a href="{% post_url capstone/2026-09-03-cccs-security %}">
-           <img src="/images/capstone/cccs-security-logo.png" alt="CCCS Security" class="ocs__image-frame ocs__image-frame--thumbnail" />
-       </a>
-       <div>
-           <h3><a href="{% post_url capstone/2026-09-03-cccs-security %}">OCS Security</a></h3>
-           <p>These security fixes ensure that new users must create complex passwords to prevent unauthorized access, and ensure code runners execute in individual containers to prevent malicious RCEs from accessing sensitive information.</p>
-           <p>Team: Lucas Masterson, Jacob Chou, Zhengji Li</p>
+           <h3><a href="{% post_url capstone/2026-09-03-ocs-admin-security-team %}">OCS Admin & Security Team</a></h3>
+           <p>The OCS Admin & Security team maintains the systems that keep OCS operational, recoverable, and secure. Administration includes backup and restore, schema upgrades, AWS RDS/S3/EC2 operations, administrative MVC/Thymeleaf tools, user recovery and password services, mentor and parent authorization, and year-to-year system resets and data pruning. Security examines how the OCS application can be compromised, including isolated Code Runner containers, protection against injected or unsafe student code, JWT and cookie security, and security boundaries across the Java/Spring and Python/Flask systems. Together, the work moves students from building application features to maintaining and protecting a production system.</p>
+           <p>Team: Shayan B, Darshan S, Rudra J, Dhyan S, Harrish A, Lucas M, Zhengji L, Jacob C, Arnav P</p>
        </div>
    </div>
 
@@ -912,17 +1065,19 @@ document.addEventListener('DOMContentLoaded', function(){
        </div>
    </div>
 
-   <!-- Communication System (CSA) -->
+   <!-- OCS Communication Systems (CSA) -->
   <div class="ocs__grid-cell CSA" data-year="2026-2027">
        <a href="{% post_url capstone/2026-08-27-communication-system-capstone %}">
-           <img src="/images/csa-chat/announcement-chat.png" alt="Communication System - class announcement chat on the CSA course page" class="ocs__image-frame ocs__image-frame--thumbnail" />
+           <img src="/images/csa-chat/announcement-chat.png" alt="OCS Communication System - class announcement chat on the CSA course page" class="ocs__image-frame ocs__image-frame--thumbnail" />
        </a>
        <div>
-           <h3><a href="{% post_url capstone/2026-08-27-communication-system-capstone %}">Communication System</a></h3>
-           <p>Moving class discussion out of Slack and onto the course site — class-wide announcements, per-week chat, and a rich-text composer with emoji already ship, with per-assignment threads, 1:1 direct messages, GIFs, Slack-style emoji reactions, and teacher moderation still to build.</p>
+           <h3><a href="{% post_url capstone/2026-08-27-communication-system-capstone %}">OCS Communication Systems</a></h3>
+           <p>Students are extending the OCS communication system with chat, announcements, assignment discussions, direct messaging, calendar integration, and reusable presentation components. The work includes maintaining the real-time WebSocket service and connecting these features to the existing course site, backend APIs, security, and data model. Students will also develop the OCS SASS grammar—a small, purpose-built styling system for consistent, responsive, reusable components across the OCS GitHub Pages ecosystem.</p>
            <p>Team: Akhil, Syown, Leon, Perry, Skandan, Sathwik, Akshajh, Tarun, Samarth</p>
        </div>
    </div>
+
+   {% include capstone-games.html %}
 </div>
 
 <!-- Edit Capstone Modal -->

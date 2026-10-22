@@ -38,6 +38,9 @@ show_reading_time: false
             </p>
             <div id="reset-g_id_signin_container" class="support-g-signin-container"></div>
             <div id="reset-oauth-status" class="support-oauth-status"></div>
+            <p id="reset-ticket-row" class="support-ticket-row">
+                <button type="button" class="large secondary submit-button" onclick="requestResetTicket(this)">Request a Ticket Instead</button>
+            </p>
         </div>
         <div id="reset-step-password" class="support-step">
             <div class="form-group">
@@ -60,6 +63,9 @@ show_reading_time: false
 
 <script type="module">
     import { javaURI, pythonURI, fetchOptions, GOOGLE_CLIENT_ID } from '{{site.baseurl}}/assets/js/api/config.js';
+    // Same rule as Spring's Person.checkPassword(). Flask saves the reset first and Spring is
+    // synced after, so a password Spring rejects would leave the two with different passwords.
+    import { SPRING_PASSWORD_RULES, meetsSpringPasswordRules, attachPasswordChecklist } from '{{site.baseurl}}/assets/js/api/passwordRules.js';
 
     // ---- Support topic navigation ----
     window.openSupportTopic = function(topic) {
@@ -92,8 +98,11 @@ show_reading_time: false
         document.getElementById('resetUid').value = '';
         document.getElementById('resetNewPassword').value = '';
         document.getElementById('resetConfirmPassword').value = '';
+        // Setting .value doesn't fire 'input', so refresh the checklist and match message by hand.
+        document.getElementById('resetNewPassword').dispatchEvent(new Event('input'));
         document.getElementById('reset-message').textContent = '';
         document.getElementById('reset-oauth-status').innerHTML = '';
+        document.getElementById('reset-ticket-row').style.display = 'none';
         goToResetStep('reset-step-uid');
     }
 
@@ -171,7 +180,8 @@ show_reading_time: false
         })
         .then(res => {
             if (res.status === 429) {
-                showResetOAuthStatus('❌ Too many reset attempts. Please try again later.', true);
+                showResetOAuthStatus('❌ Too many reset attempts. Please try again later, or request a ticket below.', true);
+                document.getElementById('reset-ticket-row').style.display = 'block';
                 return null;
             }
             if (!res.ok) {
@@ -194,6 +204,32 @@ show_reading_time: false
         });
     }
 
+    // Fires when a rate-limited user asks for admin help instead of waiting out the
+    // window. Creates (or reuses, if one's already open) a ResetTicket for this uid; an
+    // admin resolves it from the Spring person/read portal, granting a batch of 5 extra
+    // attempts. Doesn't require the OAuth step to have succeeded, since the whole point
+    // is to cover the case where the user can't get through it right now.
+    window.requestResetTicket = function(btn) {
+        if (!resetUidValue) return;
+        btn.disabled = true;
+
+        fetch(`${javaURI}/mvc/person/reset/ticket`, {
+            ...fetchOptions,
+            method: 'POST',
+            body: JSON.stringify({ uid: resetUidValue }),
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('ticket-failed');
+            showResetOAuthStatus('✅ Ticket submitted! An admin will grant you more attempts soon.');
+            btn.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Reset ticket request failed:', error);
+            showResetOAuthStatus('❌ Could not submit a ticket. Please try again.', true);
+            btn.disabled = false;
+        });
+    }
+
     function validateResetForm() {
         const password = document.getElementById('resetNewPassword').value;
         const confirmPassword = document.getElementById('resetConfirmPassword').value;
@@ -208,10 +244,10 @@ show_reading_time: false
             return true;
         }
 
-        if (password.length < 8) {
+        if (!meetsSpringPasswordRules(password)) {
             confirmField.classList.add('password-length');
             messageDiv.classList.add('error');
-            messageDiv.textContent = '✗ Passwords must be at least 8 characters long';
+            messageDiv.textContent = `✗ ${SPRING_PASSWORD_RULES}`;
             return false;
         }
 
@@ -233,9 +269,9 @@ show_reading_time: false
         const confirmPassword = document.getElementById('resetConfirmPassword').value;
         const validationMessage = document.getElementById('reset-password-validation-message');
 
-        if (password.length < 8) {
+        if (!meetsSpringPasswordRules(password)) {
             validationMessage.classList.add('error');
-            validationMessage.textContent = 'Password must be at least 8 characters long.';
+            validationMessage.textContent = SPRING_PASSWORD_RULES;
             return;
         }
         if (password !== confirmPassword) {
@@ -304,6 +340,7 @@ show_reading_time: false
     window.addEventListener('load', function() {
         const resetPasswordField = document.getElementById('resetNewPassword');
         const resetConfirmPasswordField = document.getElementById('resetConfirmPassword');
+        attachPasswordChecklist(resetPasswordField);
         if (resetPasswordField && resetConfirmPasswordField) {
             resetPasswordField.addEventListener('input', validateResetForm);
             resetConfirmPasswordField.addEventListener('input', validateResetForm);
@@ -319,3 +356,5 @@ show_reading_time: false
         }
     });
 </script>
+
+<script type="module" src="{{site.baseurl}}/assets/js/api/passwordFields.js"></script>

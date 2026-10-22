@@ -2,13 +2,11 @@
 microblog: true
 toc: false
 layout: post
-title: OCS Submissions
-description: An umbrella capstone tracking three AP CSA groups' work on the assignment/submission system — assignment creator permissions, submission analytics, and AI grading.
+title: OCS Assignments System
+description: Students are making OCS grading faster and more reliable. The work includes AI grading with a key each user supplies, out of 1 point per assignment, student grades that sit alongside AI grades instead of overwriting them, and admin tools to correct bad submission records. Other pieces are lessons standardized through CRUD operations, data collection for a reworked self-assessment, and teacher and grader screens on the Pages frontend so teachers never need to use the Spring admin views.
 permalink: /capstone/submissions/
-courses: {'csa': {'week': 25}}
 type: capstone
 categories: Capstone
-sticky_rank: 1
 ---
 
 {% include submissions-capstone-infograph.html %}

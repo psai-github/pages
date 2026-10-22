@@ -27,6 +27,11 @@ rp_active: research-3
     <p style="font-size:0.8rem;color:var(--jv-text-muted);margin-top:0.5rem;">Individual research by <strong style="color:var(--jv-text);">Sonika Dhenuva Konda</strong></p>
   </div>
 
+  <figure class="jv-figure">
+    <img src="{{ '/images/jarvis/jarvis3000-research-3.png' | relative_url }}" alt="Jarvis3000 spatial-mapping proposal using two camera angles, matched visual features, depth estimation, and a three-dimensional classroom map" width="1774" height="887">
+    <figcaption>Research 3 investigates matching two viewpoints to estimate object positions and distances in a shared 3D room map.</figcaption>
+  </figure>
+
   <!-- Problem Statement -->
   <h2 class="ocs__section-title">Problem Statement</h2>
   <div class="ocs__card">
@@ -59,10 +64,10 @@ Calibration + 3D projection"]
 Metric scale, m / ft"]
     SCALE --> CLOUD["Open3D
 Point cloud / room map"]
-    C1 --> YOLO["YOLOv8
+    C1 --> DETECT["Object detector
 Object boxes"]
-    C2 --> YOLO
-    YOLO --> CLOUD</pre>
+    C2 --> DETECT
+    DETECT --> CLOUD</pre>
     </div>
   </div>
 
@@ -99,7 +104,7 @@ Object boxes"]
         <p class="jv-decision-why">Keypoints matched across wide baselines.</p>
       </div>
       <div class="jv-decision-card">
-        <span class="jv-decision-title">YOLOv8</span>
+        <span class="jv-decision-title">Object Detection</span>
         <p class="jv-decision-why">Boxes people/objects before distancing.</p>
       </div>
     </div>
