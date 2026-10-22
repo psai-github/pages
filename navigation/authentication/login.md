@@ -121,6 +121,7 @@ show_reading_time: false
 
 <script type="module">
     import { login, pythonURI, javaURI, fetchOptions, GOOGLE_CLIENT_ID } from '{{site.baseurl}}/assets/js/api/config.js';
+    import { SPRING_PASSWORD_RULES, meetsSpringPasswordRules, attachPasswordChecklist } from '{{site.baseurl}}/assets/js/api/passwordRules.js';
 
     let signupFormData = {};
     let verifiedSchoolEmail = null;
@@ -193,17 +194,6 @@ show_reading_time: false
         }
 
         return true;
-    }
-
-    // Mirrors Person.checkPassword() in Spring. Flask only needs 8 characters, so a
-    // weaker password used to create the Flask account while Spring silently refused it.
-    const SPRING_PASSWORD_RULES = 'Password needs 8+ characters with an uppercase letter, a lowercase letter, a number, and one of ` ~ ! @ # $ % ^ & * ( )';
-    function meetsSpringPasswordRules(password) {
-        return password.length >= 8
-            && /[A-Z]/.test(password)
-            && /[a-z]/.test(password)
-            && /[0-9]/.test(password)
-            && /[`~!@#$%^&*()]/.test(password);
     }
 
     // Backend status management
@@ -298,8 +288,6 @@ show_reading_time: false
             school: document.getElementById("signupSchool").value,
             email: document.getElementById("signupEmail").value,
             password: document.getElementById("signupPassword").value,
-            kasmServerNeeded: false,
-            kasm_server_needed: false,
             accountType: document.getElementById("signupRole").value,
         };
 
@@ -370,6 +358,8 @@ show_reading_time: false
     window.addEventListener('load', function() {
         const passwordField = document.getElementById('signupPassword');
         const confirmPasswordField = document.getElementById('confirmPassword');
+
+        attachPasswordChecklist(passwordField);
 
         if (passwordField && confirmPasswordField) {
             // Add debounced validation listeners
@@ -501,8 +491,6 @@ show_reading_time: false
             school: document.getElementById("signupSchool").value,
             email: document.getElementById("signupEmail").value,
             password: document.getElementById("signupPassword").value,
-            kasmServerNeeded: false,
-            kasm_server_needed: false,
         };
 
         // Never log `data`: it holds the plaintext password and the Google ID token.
@@ -589,3 +577,5 @@ show_reading_time: false
             });
     }
 </script>
+
+<script type="module" src="{{site.baseurl}}/assets/js/api/passwordFields.js"></script>
