@@ -41,6 +41,8 @@ import TrailPath from './TrailPath.js';
 import PathwayScoreboard from './PathwayScoreboard.js';
 import MacSetupCheck from './MacSetupCheck.js';
 import SystemSetupCheck from './SystemSetupCheck.js';
+import HelpFlag from './HelpFlag.js';
+import { buildHelpRequestMessage } from '../model/helpRequestMessage.js';
 import { sampleSpline, resolveCircle, clampToCorridor, roundedLoop } from '../model/splineBarriers.js';
 import { recordLevelRatio } from '../model/pathwayScores.js';
 import {
@@ -880,6 +882,23 @@ class GameLevelCsPath4Toolchain {
     // existing macOS component above remains separate and unchanged.
     this.systemSetupCheck = new SystemSetupCheck();
     this.systemSetupCheck.setOS(this.selectedOS);
+    // Red flag: the message names the station the student is working on right now.
+    this.helpFlag = new HelpFlag({
+      getRequest: () => {
+        const stationId = this._getActiveStationId();
+        const station = stationId ? this._stationById[stationId] : null;
+        return {
+          levelKey: 'toolchain-trail',
+          station: station?.name || null,
+          message: buildHelpRequestMessage({
+            levelName: 'Toolchain Trail',
+            stationName: station?.name,
+            osLabel: OS_OPTIONS.find((option) => option.id === this.selectedOS)?.label,
+            stuck: stationId ? this.getStationStatus(stationId) === STATION_STATUS.STUCK : false,
+          }),
+        };
+      },
+    });
 
     /**
      * Section: station status derivation + persistence.
@@ -1435,6 +1454,7 @@ class GameLevelCsPath4Toolchain {
     this._barrierCanvas?.remove();
     this.macSetupCheck?.destroy();
     this.systemSetupCheck?.destroy();
+    this.helpFlag?.destroy();
     if (this._stuckCheckInterval) clearInterval(this._stuckCheckInterval);
     this._hideLoading();
     this.clearZoneAlert?.();
