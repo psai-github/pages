@@ -47,6 +47,7 @@ lessons/ds2
 # Systems
 systems/ai-ab-engine
 systems/calendar
+systems/profile:dev
 systems/blogs:dev
 systems/topics:dev
 systems/courses:dev

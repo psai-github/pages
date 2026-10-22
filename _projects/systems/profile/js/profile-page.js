@@ -1,5 +1,8 @@
-// Starts every part of /profile/v2 (_layouts/profile-v2.html) and keeps the identity
-// card and the setup checklist at the top of the page in step with them.
+// Starts every part of /profile (layouts/profile.html in this system) and keeps the
+// identity card and the setup checklist at the top of the page in step with them.
+// `api` holds the shared helpers the layout imports with the site's baseurl
+// ({ pythonURI, javaURI, fetchOptions, putUpdate, postUpdate }), so these modules
+// only import each other, with ./ paths.
 import { initAccountForm } from './profile-account.js';
 import { initClasses } from './profile-classes.js';
 import { initFaceRegistration } from './profile-face.js';
@@ -67,11 +70,12 @@ function readCourses() {
     }
 }
 
-export function initProfilePage() {
+export function initProfilePage(api) {
     const updateSetup = createSetupChecklist(byId('profileSetup'));
     const report = part => error => console.error(`Error starting the ${part}:`, error);
 
     initAccountForm({
+        api,
         form: byId('profileSettingsForm'),
         saveButton: byId('saveChangesBtn'),
         status: byId('saveStatus'),
@@ -81,6 +85,7 @@ export function initProfilePage() {
     }).catch(report('account form'));
 
     initClasses({
+        api,
         list: byId('classesContainer'),
         form: byId('addClassForm'),
         select: byId('addClassSelect'),
@@ -90,6 +95,7 @@ export function initProfilePage() {
     }).catch(report('classes'));
 
     initPersonas({
+        api,
         container: byId('personaSelectionContainer'),
         progress: byId('personaProgress'),
         editButton: byId('personaEditBtn'),
@@ -100,12 +106,14 @@ export function initProfilePage() {
     }).catch(report('personas'));
 
     initSkillCheckIn({
+        api,
         form: byId('skillSnapshotForm'),
         project: byId('snapshotProjectName'),
         status: byId('snapshotStatus'),
     });
 
     initFaceRegistration({
+        api,
         pill: byId('regStatusText'),
         openButton: byId('openScannerBtn'),
         modal: byId('webcamOverlay'),

@@ -4,10 +4,10 @@ layout: aesthetihawk
 active_tab: profile
 ---
 {%- comment -%}
-/profile/v2: profile settings built only from the ocs__ grammar
-(_sass/open-coding/README.md), with no page stylesheet. The page's behavior is in
-assets/js/profile/: profile-page.js starts the account form, classes, personas,
-skill check-in and Face ID, and keeps the setup checklist at the top current.
+/profile: profile settings built only from the ocs__ grammar
+(_sass/open-coding/README.md), with no page stylesheet. Source: _projects/systems/profile
+(see its README). profile-page.js starts the account form, classes, personas, skill
+check-in and Face ID, and keeps the setup checklist at the top current.
 {%- endcomment -%}
 {%- assign profile_course_codes = "csse,csp,csa,csh" | split: "," -%}
 <script type="application/json" id="profileCourses">
@@ -191,6 +191,10 @@ skill check-in and Face ID, and keeps the setup checklist at the top current.
 </div>
 
 <script type="module">
+    // The shared helpers are imported here, where Jekyll fills in the site's baseurl, and
+    // handed to the profile modules, which import each other only with ./ paths.
+    import { fetchOptions, javaURI, pythonURI } from '{{ site.baseurl }}/assets/js/api/config.js';
+    import { postUpdate, putUpdate } from '{{ site.baseurl }}/assets/js/api/profile.js';
     import { initProfilePage } from '{{ site.baseurl }}/assets/js/profile/profile-page.js';
-    initProfilePage();
+    initProfilePage({ fetchOptions, javaURI, pythonURI, postUpdate, putUpdate });
 </script>

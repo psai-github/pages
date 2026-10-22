@@ -1,8 +1,7 @@
-// Face ID on /profile/v2: whether the student's face is registered, and the camera
+// Face ID on /profile: whether the student's face is registered, and the camera
 // scanner that registers it. The Bathroom Pass identifies students with it.
-import { javaURI, fetchOptions } from '../api/config.js';
-
-export async function initFaceRegistration({ pill, openButton, modal, video, canvas, status, captureButton, onChange }) {
+export async function initFaceRegistration({ api, pill, openButton, modal, video, canvas, status, captureButton, onChange }) {
+    const { javaURI, fetchOptions } = api;
     let stream = null;
     let uid = null;
 

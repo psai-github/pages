@@ -202,7 +202,7 @@ and [`grids.md`](../../_projects/lessons/sass/navigation/grids.md).
 - A range slider in a field fills it and takes the accent color.
 
 See [`elements/forms/fields`](elements/forms/fields). The Profile page
-(`/profile/v2`) lays out its account form and skill check-in this way.
+(`/profile`) lays out its account form and skill check-in this way.
 
 ### Avatars
 
