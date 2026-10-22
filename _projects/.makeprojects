@@ -54,7 +54,7 @@ systems/gamebuilder:dev
 systems/auto-generator
 systems/auto-generator-ui
 systems/scraper
-systems/student-management-groups
+systems/messages:dev
 systems/test-project
 
 # === FLAT STRUCTURE (legacy/uncategorized) ===
