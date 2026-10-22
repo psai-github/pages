@@ -279,5 +279,5 @@ export async function startMessagesPage({ config, richText }) {
   openFromUrl();
   const connected = await socket.connect();
   setStatus(connected ? 'connected' : 'offline', connected ? 'is-live' : 'is-error');
-  thread.follow();
+  thread.resume();
 }

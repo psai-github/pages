@@ -95,6 +95,13 @@ test('classifyDmEvent reads an edit, including a known message sent again with a
     { type: 'edit', id: '12', body: 'v4' });
 });
 
+test('classifyDmEvent does not mistake a typed new-message frame for an edit when it was already drawn', () => {
+  // A catch-up fetch can draw a message before its live frame arrives.
+  const event = classifyDmEvent({ conversationId: 4, id: 12, type: 'message', senderUid: 'grace', body: 'hi' }, 4, () => true);
+  assert.equal(event.type, 'message');
+  assert.equal(event.message.key, '12');
+});
+
 test('classifyDmEvent turns a new message into a message', () => {
   const event = classifyDmEvent({ conversationId: 4, id: 13, senderUid: 'grace', senderName: 'Grace', body: 'yo' }, 4, () => false);
   assert.equal(event.type, 'message');

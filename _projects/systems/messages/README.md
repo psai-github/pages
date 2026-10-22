@@ -33,9 +33,14 @@ module needs a `../` path that breaks when files move.
 - **Sending** goes over REST: `POST /api/dm/conversations/{id}/messages` with `{ body }`,
   or `POST /api/groups/chat/{id}/messages` with `{ name, message }`.
 - **Receiving** goes over the socket: the page follows `/topic/dm/{id}` or
-  `/topic/group/{id}` for the open conversation. Your own message shows when it comes
-  back on the topic, so it is never drawn twice. Offline, the page reloads the
-  conversation after a send instead.
+  `/topic/group/{id}` for the open conversation. It follows the topic before asking
+  for the history, and holds any frame that arrives first until the history is drawn,
+  so nothing posted in between is lost. If the socket connects after a conversation
+  opened (a `?group=` link), the page fetches what was posted in the meantime. The
+  message list skips anything it has already drawn.
+- **Your own message** shows when it comes back on the topic, so it is never drawn
+  twice. Offline, the page fetches the conversation after a send instead. The send
+  already succeeded, so a failed fetch isn't reported as a failed send.
 - **Edits and deletes** are `PATCH` and `DELETE` on the message; Spring sends the change
   to everyone on the topic.
 - **Which messages are yours:** a DM carries the sender's uid. A saved group message

@@ -38,19 +38,22 @@ export function createChatSocket(socketBaseUri, { onClose }) {
       const socket = new window.SockJS(`${new URL(socketBaseUri).origin}/ws-chat`);
       client = window.Stomp.over(socket);
       client.debug = null;
+      // stomp.js calls the error callback from its own ws.onclose, before and after
+      // CONNECTED, so a close is handled here and ws.onclose is left alone.
+      // disconnect() clears that handler, so leaving the page reports nothing.
       client.connect({}, () => {
         connected = true;
         resolve(true);
       }, error => {
-        console.warn('Messages: the chat connection failed', error);
-        resolve(false);
-      });
-      socket.onclose = () => {
-        if (!connected) return;
+        if (!connected) {
+          console.warn('Messages: the chat connection failed', error);
+          resolve(false);
+          return;
+        }
         connected = false;
         subscription = null;
         onClose();
-      };
+      });
     });
   }
 

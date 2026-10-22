@@ -66,8 +66,8 @@ export function classifyGroupEvent(event) {
 }
 
 // A frame from /topic/dm/{id}. The DM backend has marked edits and deletes in several
-// ways over time, so this accepts each of them. A known message sent again with a body
-// is an edit.
+// ways over time, so this accepts each of them. Spring now types every frame ("message"
+// or "edited"); only an untyped frame for a message already shown counts as an edit.
 export function classifyDmEvent(event, activeConversationId, isKnown) {
   if (!event || event.conversationId !== activeConversationId) return { type: 'other' };
   const id = asId(event.id);
@@ -78,7 +78,7 @@ export function classifyDmEvent(event, activeConversationId, isKnown) {
   const body = event.body ?? event.messageBody;
   const isEdit = ['edited', 'message-edited'].includes(type)
     || ['update', 'edited'].includes(event.editType)
-    || (isKnown(id) && body !== undefined);
+    || (!type && isKnown(id) && body !== undefined);
   if (isEdit) return { type: 'edit', id, body: body ?? '' };
   return { type: 'message', message: dmMessage(event) };
 }
