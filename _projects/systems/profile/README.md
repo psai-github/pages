@@ -42,10 +42,10 @@ What Profile does in each:
 | Setup list | Classes, Persona | Classes, Persona, Face ID, GitHub |
 
 The setting covers Profile, the login page's sign-up and sign-in, logout and the
-navbar's DM bell (its unread count). Sign-up still asks for Spring's stricter password
-rule, though Flask alone needs only 8 characters. Other pages that use Spring, such as
-DMs, the calendar and announcements, don't read the setting, and the toolkit sidebar
-still links to Calendar and Bathroom Pass.
+navbar's DM bell (its unread count). Other pages that use Spring, such as DMs, the
+calendar and announcements, don't read it, and some links still lead to them:
+Profile's Reset password and Skill Passport, and the toolkit sidebar's View Grades,
+Calendar and Bathroom Pass.
 
 ### Try it
 
@@ -76,7 +76,8 @@ The layout's starter script imports the shared helpers (`assets/js/api/config.js
 and `assets/js/api/profile.js`) with `{{ site.baseurl }}` and passes them to
 `initProfilePage(api)`, `springEnabled` included. The Gist include does the same for
 `javaURI`. The modules import each other only with `./` paths, so moving this folder
-can't break them.
+can't break them. A site that uses Profile needs a `config.js` that exports
+`springEnabled`.
 
 ## Tests
 
