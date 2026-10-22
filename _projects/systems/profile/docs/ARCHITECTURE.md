@@ -59,6 +59,9 @@ Each part saves on its own, so no single Save button covers the whole page:
 - The layout reads `site.spring` and the modules read `springEnabled` from `config.js`.
   Both treat a missing setting as Spring on, so the cards on the page and the calls
   the modules make always agree.
+- `config.js` and `pages/profile.md` have `regenerate: true` in their front matter.
+  Incremental builds don't notice a change to `_config.yml`, so without it they would
+  keep the old `springEnabled` after `spring` changes.
 - Text that must keep an accent color is in an element preset themes don't recolor,
   such as the avatar's `<abbr>` (see "Avatars" in `_sass/open-coding/README.md`).
 

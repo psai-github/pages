@@ -1,4 +1,6 @@
 ---
+# Rebuilt on every build: incremental builds don't notice _config.yml changes, such as spring.
+regenerate: true
 ---
 
 // ^^ Do not remove the above front matter, it is required for Jekyll processing
@@ -25,8 +27,9 @@ if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
 // support.md) so the client_id only needs updating in one place.
 export const GOOGLE_CLIENT_ID = "{{ site.google_client_id }}";
 
-// Whether this site runs Spring next to Flask (`spring` in _config.yml). Login and
-// /profile skip Spring when it is false; a site without the setting keeps Spring on.
+// Whether this site runs Spring next to Flask (`spring` in _config.yml). Login, logout,
+// the navbar's DM bell and /profile skip Spring when it is false; a site without the
+// setting keeps Spring on.
 export const springEnabled = "{{ site.spring }}" !== "false";
 
 export var javaWebSocketURI;
