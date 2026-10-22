@@ -1343,6 +1343,11 @@ class GameLevelCsPath4Toolchain {
     this.profilePanelView.ensureMounted();
     this._recomputeStationStates(false);
 
+    // Debug: proves this version of the file is the one running, and lets you
+    // inspect the level from the browser console as window.__toolchainTrail.
+    console.info('[Toolchain Trail] failure lock v6 loaded');
+    window.__toolchainTrail = this;
+
     // Restore the failure warning if the student refreshed while locked.
     if (this.failureState) this._showFailureBanner();
 
@@ -1381,6 +1386,7 @@ class GameLevelCsPath4Toolchain {
     // kind of box the Practice Check (offline) panel uses.
     this._onTerminalPaste = (event) => {
       const text = event.clipboardData?.getData('text') || '';
+      console.info(`[Toolchain Trail] paste seen (${text.length} chars), panel open: ${!!this._stationTrialOpen}`);
       checkText(text, event.composedPath?.() || [event.target]);
     };
     document.addEventListener('paste', this._onTerminalPaste, true);
@@ -1629,6 +1635,7 @@ class GameLevelCsPath4Toolchain {
   }
 
   _setFailure(stationId, line, source) {
+    console.warn(`[Toolchain Trail] failure detected at ${stationId} (${source}): ${line}`);
     this.failureState = { stationId, line, source, at: new Date().toISOString() };
     try { localStorage.setItem(FAILURE_STORAGE_KEY, JSON.stringify(this.failureState)); } catch (err) { /* storage unavailable */ }
     this._recomputeStationStates(false);
@@ -1838,6 +1845,7 @@ class GameLevelCsPath4Toolchain {
 
   destroy() {
     console.log(`[${this.logPrefix}] tearing down level...`);
+    if (window.__toolchainTrail === this) delete window.__toolchainTrail;
     this.scoreboard?.destroy();
     this._barrierCanvas?.remove();
     this.macSetupCheck?.destroy();
