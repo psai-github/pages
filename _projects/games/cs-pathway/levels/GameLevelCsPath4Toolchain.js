@@ -1350,19 +1350,40 @@ class GameLevelCsPath4Toolchain {
     // panel, the setup-check panels, etc.). Capture phase, so it still fires
     // even if a panel stops the event from bubbling. The failure is charged
     // to the open station, or the current active station if none is open.
-    this._onTerminalTextInput = (event) => {
-      const el = event.target;
-      const isTextBox = el instanceof HTMLTextAreaElement
-        || (el instanceof HTMLInputElement && (el.type === 'text' || el.type === ''));
-      if (!isTextBox) return;
-      if (el.closest?.(`#${PROFILE_PANEL_ID}`)) return;
-      const text = el.value || '';
+    const checkText = (text, path) => {
+      if (!text) return;
+      if (path.some((n) => n?.id === PROFILE_PANEL_ID)) return;
       if (this._stationTrialOpen) this._lastPastedOutput = text;
       if (this.failureState) return; // already locked; clears on a clean verify
       const stationId = this._openTrialStationId || this._getActiveStationId();
       if (stationId) this._handleTerminalOutput(stationId, text);
     };
+
+    // Typing/pasting into a textarea, text input, or contenteditable editor.
+    // composedPath()[0] reaches the real element even inside a shadow DOM.
+    this._onTerminalTextInput = (event) => {
+      const path = event.composedPath?.() || [event.target];
+      const el = path[0];
+      let text = '';
+      if (el instanceof HTMLTextAreaElement
+        || (el instanceof HTMLInputElement && (el.type === 'text' || el.type === ''))) {
+        text = el.value || '';
+      } else if (el?.isContentEditable) {
+        text = el.innerText || '';
+      } else {
+        return;
+      }
+      checkText(text, path);
+    };
     document.addEventListener('input', this._onTerminalTextInput, true);
+
+    // Paste: read the clipboard text directly, so it works no matter what
+    // kind of box the Practice Check (offline) panel uses.
+    this._onTerminalPaste = (event) => {
+      const text = event.clipboardData?.getData('text') || '';
+      checkText(text, event.composedPath?.() || [event.target]);
+    };
+    document.addEventListener('paste', this._onTerminalPaste, true);
 
     // Client-side stuck fallback: re-check every 30s (see stationStatus.js note
     // that the backend's authoritative flag should win once it exists).
@@ -1381,7 +1402,7 @@ class GameLevelCsPath4Toolchain {
     // station panel is open (so it doesn't cover the panel's controls).
     if (this.failureState) {
       this._syncLockOverlays();
-      if (this._failureBannerEl) this._failureBannerEl.style.display = this._stationTrialOpen ? 'none' : 'block';
+      this._positionFailureBanner();
     }
 
     const player = this.gameEnv?.gameObjects?.find((obj) => obj?.constructor?.name === 'Player' || obj?.constructor?.name === 'CsPathwayPlayer');
@@ -1700,7 +1721,7 @@ class GameLevelCsPath4Toolchain {
       el.setAttribute('role', 'alert');
       el.style.cssText = `
         position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
-        z-index: 100030; pointer-events: none;
+        z-index: 2147483000; pointer-events: none;
         width: min(640px, 92vw); box-sizing: border-box;
         background: linear-gradient(180deg, #ff1744 0%, #b00020 100%);
         border: 3px solid #ffcdd2; border-radius: 10px;
@@ -1742,6 +1763,14 @@ class GameLevelCsPath4Toolchain {
     fix.style.cssText = 'font-size:0.85em;margin-top:6px;opacity:0.95;';
 
     el.append(title, where, errLine, grade, fix);
+    this._positionFailureBanner();
+  }
+
+  // Hidden while a station panel is open; shown as soon as it closes, and it
+  // stays up until the failing station is verified with clean output.
+  _positionFailureBanner() {
+    const el = this._failureBannerEl;
+    if (!el) return;
     el.style.display = this._stationTrialOpen ? 'none' : 'block';
   }
 
@@ -1819,6 +1848,7 @@ class GameLevelCsPath4Toolchain {
     this._hideFailureBanner();
     this._removeLockOverlays();
     if (this._onTerminalTextInput) document.removeEventListener('input', this._onTerminalTextInput, true);
+    if (this._onTerminalPaste) document.removeEventListener('paste', this._onTerminalPaste, true);
     this.clearZoneAlert?.();
     if (this._toastEl?.parentNode) this._toastEl.parentNode.removeChild(this._toastEl);
     if (this.levelDialogueSystem) {
