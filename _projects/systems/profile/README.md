@@ -17,11 +17,18 @@ a site needs. `spring` in `_config.yml` says which:
 - `spring: true` is OCS for Education: Flask and Spring, with dual login. This site
   uses it.
 
-Each backend keeps its own sign-in. Single login signs in to and out of Flask alone
-(`POST` and `DELETE /api/authenticate`). Dual login, the login page's `loginBoth`,
-signs in to Flask and to Spring (`POST /authenticate`) at the same time, and logout
-signs out of both. If the Spring sign-in fails, the login page says that DMs, calendar
-and announcements won't work and offers Continue anyway.
+Each backend keeps its own account and sign-in. Single login uses Flask alone; dual
+login does each step on Spring too:
+
+| Step | Single login (Flask only) | Dual login (Flask + Spring) |
+|---|---|---|
+| Sign-up | Flask `POST /api/user` | then Spring `POST /api/person/create` |
+| Sign-in | Flask `POST /api/authenticate` | and Spring `POST /authenticate`, at the same time (`loginBoth`) |
+| Logout | Flask `DELETE /api/authenticate` | then Spring `POST /api/logout` |
+
+In dual login, Flask's step must work. If only Spring's step fails, sign-up and sign-in
+still work in Flask, and the login page warns that DMs, calendar and announcements
+won't; at sign-in it also offers Continue anyway.
 
 What Profile does in each:
 
@@ -34,10 +41,11 @@ What Profile does in each:
 | Face ID and GitHub Gist cards | left out | shown; both save in Spring |
 | Setup list | Classes, Persona | Classes, Persona, Face ID, GitHub |
 
-The setting covers Profile, sign-in, logout and the navbar's DM bell (its unread
-count). Sign-up still creates the account in Flask and then tries Spring. Other pages
-that use Spring, such as DMs, the calendar and announcements, don't read the setting,
-and the toolkit sidebar still links to Calendar and Bathroom Pass.
+The setting covers Profile, the login page's sign-up and sign-in, logout and the
+navbar's DM bell (its unread count). Sign-up still asks for Spring's stricter password
+rule, though Flask alone needs only 8 characters. Other pages that use Spring, such as
+DMs, the calendar and announcements, don't read the setting, and the toolkit sidebar
+still links to Calendar and Bathroom Pass.
 
 ### Try it
 

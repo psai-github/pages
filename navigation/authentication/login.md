@@ -236,6 +236,14 @@ show_reading_time: false
 
         overallEl.classList.remove('hidden', 'success', 'partial', 'error');
 
+        // A Flask-only site (spring: false in _config.yml) creates the account in Flask alone.
+        if (!springEnabled) {
+            overallEl.classList.add(flaskSuccess ? 'success' : 'error');
+            overallEl.textContent = flaskSuccess
+                ? '🎉 Account created! You can now login.'
+                : '💥 Signup failed. Please check your information and try again.';
+            return;
+        }
         if (flaskSuccess && springSuccess) {
             overallEl.classList.add('success');
             overallEl.textContent = '🎉 Account created on both backends! You can now login.';
@@ -254,6 +262,9 @@ show_reading_time: false
             overallEl.textContent = '💥 Both backends failed. Please check your information and try again.';
         }
     }
+
+    // A Flask-only site has no Spring account, so sign-up shows only Flask's status.
+    if (!springEnabled) document.getElementById('springStatus').style.display = 'none';
 
     // A mentor has no student ID or school, so those fields are hidden and not required.
     document.getElementById('signupRole').addEventListener('change', function () {
@@ -486,7 +497,7 @@ show_reading_time: false
         signupButton.classList.add("disabled");
         // Reset status indicators
         updateBackendStatus('flask', 'pending');
-        updateBackendStatus('spring', 'pending');
+        if (springEnabled) updateBackendStatus('spring', 'pending');
         document.getElementById('overallStatus').classList.add('hidden');
 
         const data = signupFormData && Object.keys(signupFormData).length > 0 ? signupFormData : {
@@ -530,6 +541,10 @@ show_reading_time: false
             }
 
             updateBackendStatus('flask', 'success');
+            if (!springEnabled) {
+                setTimeout(updateOverallStatus, 500);
+                return;
+            }
 
             // Spring is best-effort; do not block signup success on this path.
             fetch(`${javaURI}/api/person/create`, springRequest)
@@ -553,7 +568,7 @@ show_reading_time: false
         } catch (error) {
             console.error("Flask signup error:", error);
             updateBackendStatus('flask', 'error');
-            updateBackendStatus('spring', 'error');
+            if (springEnabled) updateBackendStatus('spring', 'error');
             setTimeout(updateOverallStatus, 500);
         } finally {
             signupButton.disabled = false;
