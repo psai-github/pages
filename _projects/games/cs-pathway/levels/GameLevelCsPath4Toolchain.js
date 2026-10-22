@@ -137,10 +137,26 @@ const TERMINAL_FAILURE_PATTERNS = [
 function detectTerminalFailure(output) {
   if (!output || typeof output !== 'string') return null;
   const lines = output.split(/\r?\n/);
+  const clip = (l) => {
+    const line = l.trim();
+    return { line: line.length > 160 ? `${line.slice(0, 157)}...` : line };
+  };
+
+  // Setup-check reports (verifyToolsTerminal.sh / mac_setup_agent.py) mark
+  // each check PASS, WARN, or FAIL. For those, only FAIL counts: WARN lines
+  // for optional tools can say "not found" and must not lock the trail.
+  // Summary counts like "0 FAIL" or "FAIL: 0" are ignored.
+  const statusLines = lines.filter((l) => /\b(PASS|WARN|FAIL)\b/.test(l));
+  if (statusLines.length >= 2) {
+    const failLine = statusLines.find((l) => /\bFAIL\b/.test(l)
+      && !/\b0\s*FAIL/.test(l)
+      && !/FAIL\w*\s*[:=]?\s*0\b/.test(l));
+    return failLine ? clip(failLine) : null;
+  }
+
   for (const re of TERMINAL_FAILURE_PATTERNS) {
     if (!re.test(output)) continue;
-    const line = (lines.find((l) => re.test(l)) || output).trim();
-    return { line: line.length > 160 ? `${line.slice(0, 157)}...` : line };
+    return clip(lines.find((l) => re.test(l)) || output);
   }
   return null;
 }
@@ -1638,10 +1654,14 @@ class GameLevelCsPath4Toolchain {
         this.showToast('✦ Setup check passed. Trail unlocked.');
       }
     } catch (err) {
-      if (!this._reportCheckWarned) {
-        console.warn(`${this.logPrefix}: setup report check failed`, err);
-        this._reportCheckWarned = true;
+      // Network/CORS failure: the backend isn't reachable from this site, so
+      // stop polling instead of logging an error every 5 seconds. Pasted-output
+      // detection keeps working without the backend.
+      if (this._setupReportInterval) {
+        clearInterval(this._setupReportInterval);
+        this._setupReportInterval = null;
       }
+      console.warn(`${this.logPrefix}: setup report check unavailable (backend unreachable or CORS); polling stopped.`, err);
     } finally {
       this._reportCheckBusy = false;
     }
