@@ -67,6 +67,7 @@ while preserving all critical instructions. The agent must still communicate wit
 * 以 [Makefile](Makefile) 为唯一指令来源；常用目标 `make`/`make serve-current`、`make dev`、`make stop`、`make convert`、`make convert-single`（细节见 [README.md](README.md)）。
 * 顺序很关键：stop → build projects → convert notebooks/docx → split courses → jekyll serve（以 [Makefile](Makefile) 为准）。
 * 项目构建后必须运行 [SASS 导入生成器](scripts/generate_sass_imports.py)，以创建 `_sass/projects/_all.scss`；`build-registered-projects` 负责此依赖，避免 Jekyll 的 `projects/all` 导入失败。
+* 已删除的项目：旧检出会保留已删除项目被 git 忽略的生成物，而 `clean-registered-projects` 只清理 `.makeprojects` 中登记的项目。因此 `build-registered-projects`、`build-dev-projects` 和 `make clean` 都会运行 `clean-removed-projects`（[scripts/clean_removed_projects.rb](scripts/clean_removed_projects.rb)）。若 git 在项目文件夹 `_projects/<category>/<name>/` 中列不出任何文件（已跟踪或新增），它会删除以该名称命名的生成物：`_posts/projects/<name>/` 及其索引帖、`assets/js/projects/<name>/` 等其他 `projects/<name>/` 副本、生成的 `Makefile`，以及 `.project-distribution-cache/<name>.json` 和其中记录的文件。Jupyter 的 `.ipynb_checkpoints` 不算源文件。它绝不删除已跟踪文件或现有项目的生成物，所以删除项目的 PR 可以一并删除只被其生成物使用的文件。测试：`bundle exec ruby scripts/test_clean_removed_projects.rb`。
 * 项目 Makefile 使用模板生成；不要为共享浏览器库添加本地 npm 清单、`.gitignore` 或 Makefile 覆盖。共享运行时库放在 `assets/js/vendor/`，保留许可证和版本说明；常规构建无需 npm 安装。
 
 ### 源文件与生成文件
