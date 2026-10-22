@@ -9,7 +9,8 @@ search_exclude: true
 Messages (/dm): your groups and direct messages, side by side. Groups moved here from
 /student/groups. The layout is OCS grammar (_sass/open-coding/README.md); the message
 list and composer use the chat classes the course chats share (.announcement-chat), so
-the page adds no CSS. The behavior is in _projects/systems/messages/js/, started by
+the page has no stylesheet of its own; its one layout class, ocs__split--aside, is in
+the grammar. The behavior is in _projects/systems/messages/js/, started by
 messages-page.js at the bottom; README.md in that folder explains how it fits together.
 {%- endcomment -%}
 {%- assign message_courses = "csse,csp,csa,csh" | split: "," -%}
@@ -89,7 +90,7 @@ messages-page.js at the bottom; README.md in that folder explains how it fits to
     </div>
     <div class="ocs__field">
       <label class="ocs__label" for="newChatSearch">Search people</label>
-      <input class="ocs__input" id="newChatSearch" type="search" autocomplete="off" placeholder="Name or User ID" data-focus>
+      <input class="ocs__input" id="newChatSearch" type="search" autocomplete="off" placeholder="Name or email" data-focus>
     </div>
     <div class="ocs__links" id="newChatResults"></div>
     <p class="ocs__text" id="newChatSelected"></p>
@@ -164,7 +165,7 @@ messages-page.js at the bottom; README.md in that folder explains how it fits to
     </div>
     <div class="ocs__field">
       <label class="ocs__label" for="membersSearch">Add a classmate</label>
-      <input class="ocs__input" id="membersSearch" type="search" autocomplete="off" placeholder="Name or User ID" data-focus>
+      <input class="ocs__input" id="membersSearch" type="search" autocomplete="off" placeholder="Name or email" data-focus>
     </div>
     <div class="ocs__links" id="membersResults"></div>
     <p class="ocs__text" id="membersStatus" role="status"></p>
@@ -203,7 +204,7 @@ messages-page.js at the bottom; README.md in that folder explains how it fits to
       <button type="button" class="ocs__btn small" data-close aria-label="Close">&times;</button>
     </div>
     <form class="ocs__stack" id="formGroupsForm">
-      <p class="ocs__text">This regroups the students already in a group for the class and period, such as the class group. Flask matches personas when at least half the class has taken the persona quiz; otherwise the groups are random.</p>
+      <p class="ocs__text">This regroups the students already in a group for the class and period, such as the class group. Flask matches personas when at least half of those students, and enough for two groups, have taken the persona quiz; otherwise the groups are random.</p>
       <div class="ocs__grid--col2">
         <div class="ocs__field">
           <label class="ocs__label" for="formCourse">Class</label>

@@ -80,6 +80,10 @@ export function moveMember(staged, fromIndex, uid, toIndex) {
   });
 }
 
+// A taken name blocks a save (group names are unique), so a new prefix renames every
+// staged group without regrouping anyone.
+export const renameGroups = (staged, prefix) => staged.map((group, index) => ({ ...group, name: teamName(prefix, index) }));
+
 export const toggleLock = (staged, index) => staged.map((group, i) => (i === index ? { ...group, locked: !group.locked } : group));
 
 export const unlockedStudents = staged => staged.filter(group => !group.locked).flatMap(group => group.members);

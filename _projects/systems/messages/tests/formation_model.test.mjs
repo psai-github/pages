@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  createRequests, formationError, moveMember, priorExperienceRow, randomGroups, replaceUnlocked, stagedGroups,
-  studentsInClass, teamName, toggleLock, unlockedStudents, useAiGrouping,
+  createRequests, formationError, moveMember, priorExperienceRow, randomGroups, renameGroups, replaceUnlocked,
+  stagedGroups, studentsInClass, teamName, toggleLock, unlockedStudents, useAiGrouping,
 } from '../js/formation-model.js';
 
 const ada = { id: 1, uid: 'ada', name: 'Ada' };
@@ -124,6 +124,17 @@ test('replaceUnlocked adds a newly named group when the new grouping has more gr
 
   const fewer = { groups: [] };
   assert.deepEqual(replaceUnlocked(staged, fewer, [], 'Team').map(group => group.name), ['Team B']);
+});
+
+test('renameGroups letters the staged groups again under a new prefix, keeping students and locks', () => {
+  const staged = [
+    { name: 'CSA P3 Team A', locked: true, members: [ada] },
+    { name: 'CSA P3 Team C', locked: false, members: [grace] },
+  ];
+  const renamed = renameGroups(staged, 'CSA P3 Sprint 4');
+  assert.deepEqual(renamed.map(group => group.name), ['CSA P3 Sprint 4 A', 'CSA P3 Sprint 4 B']);
+  assert.deepEqual(renamed.map(group => [group.locked, group.members]), [[true, [ada]], [false, [grace]]]);
+  assert.equal(staged[0].name, 'CSA P3 Team A');
 });
 
 test('createRequests sends each non-empty group with the ids of the students found', () => {

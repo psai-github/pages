@@ -72,7 +72,8 @@ Flask, for Form groups: `POST /api/persona/evaluate-group`, `POST /api/persona/f
   the groups the course pages chat in. They never show in Find a group.
 - **Class groups** (`CSSE`, `CSP`, `CSA`, `CSH`, Spring's `courses.class-groups`) follow
   the classes on a student's Profile, and the calendar reads them. They show under
-  Groups, but have no Leave button.
+  Groups, but have no Leave button, and Find a group points to the Profile instead of
+  offering Join.
 
 ## Things to know
 

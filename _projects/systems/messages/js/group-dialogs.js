@@ -2,7 +2,7 @@
 // members, and share files with a group. Leaving and deleting a group are buttons in
 // the conversation header (messages-page.js).
 import { button, cell, createDialog } from './dialogs.js';
-import { downloadName, groupSubtitle, isCourseChannel, isGroupMember, sortGroups } from './messages-model.js';
+import { downloadName, groupSubtitle, isClassGroup, isCourseChannel, isGroupMember, sortGroups } from './messages-model.js';
 
 const byName = (a, b) => String(a.name).localeCompare(String(b.name));
 
@@ -27,6 +27,9 @@ export function initFindGroup({ elements, api, me, onJoined }) {
         dialog.close();
         onJoined(group);
       }));
+    } else if (isClassGroup(group)) {
+      // Profile classes add these, and a class group has no Leave button here.
+      action.textContent = 'Add the class on your Profile';
     } else {
       action.appendChild(button('Join', 'ocs__btn small accent fill', async control => {
         control.disabled = true;

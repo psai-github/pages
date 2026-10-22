@@ -5,7 +5,7 @@
 // unlocked ones are regrouped, and Save makes each group with its members.
 import { button, cell, createDialog } from './dialogs.js';
 import {
-  PERSONAS, createRequests, formationError, moveMember, priorExperienceRow, randomGroups, replaceUnlocked,
+  PERSONAS, createRequests, formationError, moveMember, priorExperienceRow, randomGroups, renameGroups, replaceUnlocked,
   stagedGroups, studentsInClass, toggleLock, unlockedStudents, useAiGrouping,
 } from './formation-model.js';
 
@@ -217,6 +217,16 @@ export function initGroupFormation({ elements, api, onSaved }) {
       : `Made ${made.length} groups. Students see them under Groups.`);
     if (made.length) onSaved();
   }
+
+  // Editing the name renames the staged groups in place, so a save that hit a taken
+  // name can be tried again without regrouping anyone.
+  elements.prefix.addEventListener('input', () => {
+    if (busy || !staged.length) return;
+    const { prefix } = readPlan();
+    staged = renameGroups(staged, prefix);
+    if (plan) plan.prefix = prefix;
+    render();
+  });
 
   const dialog = createDialog(elements.dialog);
   elements.form.addEventListener('submit', suggest);
