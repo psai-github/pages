@@ -177,6 +177,9 @@ Common layout classes:
 - `ocs__stack`: a vertical stack with a 1rem gap between its children, so they
   need no margins; `ocs__stack--wide` uses the 1.5rem gap between cards.
   Children stretch to the full width, so put buttons in an `ocs__links` row.
+- `ocs__split`: two equal columns; `ocs__split ocs__split--aside` makes the first
+  a narrow list (14 to 18rem) beside a wide pane. Both become one column at 768px
+  and below. Messages (`/dm`) puts its conversation list beside the open chat this way.
 
 See [`elements/containers`](elements/containers), [`elements/grids`](elements/grids),
 and [`grids.md`](../../_projects/lessons/sass/navigation/grids.md).
