@@ -1,0 +1,157 @@
+# San Diego Lab Rats Capstone Infographic
+# Rendered by _includes/sdlabrats-infograph.html. All styling comes from the shared,
+# theme-aware capstone infograph SASS (_sass/capstone/infograph.scss), so there is no
+# page-specific CSS. Replace "TBD" under each topic's team with the real names.
+Title: "San Diego Lab Rats"
+Description: "Lab Rats teaches hands-on science to grades K through 8 with actual scientists, out of a discovery center in Carlsbad. Their programs and proof are strong, but the site lacks structure. The same content repeats across pages, and the things a parent needs most are the hardest to find. Students are rebuilding the site's architecture, navigation, and styling so every piece of content has one home and a parent can find programs, pricing, and support quickly."
+
+# The team's GitHub project board, shown live under the header (_includes/ocs_kanban_board.html)
+Board:
+  url: "https://github.com/orgs/SDLabRats-Team/projects/3"
+
+Topics:
+  - title: "Architecture and Navigation"
+    phase: "Round 1"
+    link: "https://github.com/pkdev0101/apcsp-portfolio/issues/8"
+    linkLabel: "Follow Issue #8"
+    subtitle: "Give every piece of content exactly one home, then cut the menu down to match"
+    keyPoints:
+      - "One Home Each: every block of content gets a single owning page, and the copies are replaced with links"
+      - "The center address currently appears in three separate blocks, and the philosophy section runs more than once"
+      - "Five Item Menu: the top bar drops every entry that lands on a page another entry already reaches"
+      - "Nothing appears twice under two names, and Enroll stays the loudest thing in the bar"
+      - "The new layout has six destinations: Home, Programs, Schedule and Pricing, Support, About, and Donate and Contact"
+      - "Everything else gets nested underneath one of those six"
+    tech:
+      - "Page inventory"
+      - "Six-destination site map"
+      - "Five item navigation bar"
+      - "Links instead of copies"
+    description: "This round is the structure everything else sits on. Right now the same content is repeated across pages because the site grew instead of being planned. Giving each piece of content one owning page is what stops the repeated blocks from coming back, and it lets the navigation shrink to a short, clear list."
+    impact:
+      - "A parent sees each fact once, in one place, instead of three slightly different versions"
+      - "A shorter menu makes Enroll easy to find"
+      - "Future edits only have to happen on one page"
+    status: "Planned"
+    team:
+      - "TBD"
+
+  - title: "Style Layer and Program Pages"
+    phase: "Round 2"
+    link: "https://github.com/pkdev0101/apcsp-portfolio/issues/8"
+    linkLabel: "Follow Issue #8"
+    subtitle: "Write the styles once, and build the program page once"
+    keyPoints:
+      - "One Style Layer: styles are written once and applied everywhere, instead of each page making its own choices"
+      - "A real type scale, content grouped into cards, and clean semantic markup so every page has a proper outline"
+      - "One Program Layout: the program page is built once and used four times, so parents can compare programs"
+      - "Shape The Text: long plain stretches are broken into sections with headings, cards, and room to breathe"
+      - "Money At A Glance: pricing, schedule, scholarships, and charter funding sit where a parent can read them quickly"
+    tech:
+      - "Shared style layer"
+      - "Type scale"
+      - "Semantic HTML"
+      - "Reusable program page template"
+      - "Card-based sections"
+    description: "Once the structure is settled, this round makes the pages consistent. Afterschool labs, camps, school assemblies, and at-home activities all get the same page layout, so the differences between them are easy to see. Scholarships, which are currently mentioned in passing and never explained, get a clear spot next to pricing and charter funding."
+    impact:
+      - "Every page looks like it belongs to the same site"
+      - "Parents can compare programs side by side using the same layout"
+      - "Families who need scholarships or charter funding can actually find them"
+    status: "Planned"
+    team:
+      - "TBD"
+
+  - title: "Fluid Layout and Motion"
+    phase: "Round 3"
+    link: "https://github.com/pkdev0101/apcsp-portfolio/issues/8"
+    linkLabel: "Follow Issue #8"
+    subtitle: "A layout that flexes at every width, with quiet motion that never gets in the way"
+    keyPoints:
+      - "Layout flexes smoothly at every screen width"
+      - "Real space between sections instead of long, crowded stretches"
+      - "Quiet motion that never makes anyone wait to read"
+      - "Built on top of the shared style layer from Round 2, so it applies to every page at once"
+    tech:
+      - "Responsive layout"
+      - "Section spacing"
+      - "Subtle transitions"
+    description: "The last round makes the site feel fluid. It only starts after the structure and style layer hold up on their own, so the motion and spacing get added once and reach every page instead of being patched in page by page."
+    impact:
+      - "The site reads well on a phone, a tablet, or a laptop"
+      - "Motion adds polish without slowing anyone down"
+    status: "Planned"
+    team:
+      - "TBD"
+
+  - title: "New Ideas We Want To Try"
+    phase: "Exploring"
+    link: "https://github.com/pkdev0101/apcsp-portfolio/issues/8"
+    linkLabel: "Follow Issue #8"
+    subtitle: "Not committed yet, but worth building a rough version to see how it feels"
+    keyPoints:
+      - "Comparison Row: a strip across the programs index so two programs can be weighed side by side"
+      - "This Month Strip: a thin band showing what is currently running, so nobody has to call to find out"
+      - "Program Accents: a light color per program, so afterschool and camps are easy to tell apart"
+      - "Three Step Path: a short route for a first-time visitor that runs from curious to enrolled"
+    tech:
+      - "Programs index"
+      - "Current programs band"
+      - "Per-program accent colors"
+      - "First-visit path"
+    description: "This is the speculative half of the plan. Each idea gets a rough version first, and only the ones that feel right in practice move into the main build."
+    impact:
+      - "Gives parents faster ways to compare and decide"
+      - "Answers the 'what is running right now' question without a phone call"
+    status: "Exploring"
+    team:
+      - "TBD"
+
+Sections:
+  - title: "What Already Works"
+    subtitle: "The strengths the redesign keeps and makes easier to see"
+    items:
+      - "Program Variety: afterschool labs, camps, school assemblies, and at-home activities all run under one organization."
+      - "Published Impact: a real impact report for the 2023 to 2024 school year is posted, alongside a parent testimonial."
+      - "Charter Funding Accepted: charter school funds are taken for classes, which makes the programs reachable for a lot more families."
+
+  - title: "What Gets in a Parent's Way"
+    subtitle: "The problems the redesign is built to fix"
+    items:
+      - "Repeated Content: the center address appears in three separate blocks, and the philosophy section runs more than once."
+      - "Press Without Links: news outlet logos are shown but point to no article, so the strongest proof on the site goes nowhere."
+      - "Scholarships Hard To Find: scholarships are mentioned in passing and never explained, so the families who need them most miss them."
+
+  - title: "The Direction"
+    subtitle: "Four things guide every change we make"
+    items:
+      - "Fluid: layout that flexes smoothly at every width, with real space between sections and quiet motion that never makes anyone wait to read."
+      - "Better CSS and HTML: one shared style layer, a real type scale, content grouped into cards, and clean semantic markup so every page has a proper outline."
+      - "Less Cluttered Navigation: five items at the top, nothing appearing twice under two names, and Enroll kept as the loudest thing in the bar."
+      - "New Architecture: every piece of content gets exactly one home, which is what stops the repeated blocks from coming back."
+
+  - title: "How We Would Work It"
+    subtitle: "Three rounds. Each one has to hold up on its own before the next one starts."
+    items:
+      - "Round 1: Architecture and navigation."
+      - "Round 2: Style layer and program pages."
+      - "Round 3: Fluid layout and motion."
+
+Links:
+  title: "Following Along"
+  subtitle: "Where this work is tracked"
+  items:
+    - label: "Live Site"
+      url: "https://www.sdlabrats.org/"
+    - label: "Their Programs"
+      url: "https://www.sdlabrats.org/courses-workshops/"
+    - label: "Impact Report 2023–24"
+      url: "https://www.sdlabrats.org/wp-content/uploads/2025/08/Impact-report-23-24.pdf"
+    - label: "GitHub Issues — issue #8"
+      url: "https://github.com/pkdev0101/apcsp-portfolio/issues/8"
+    - label: "Frontend Repo"
+      url: "https://github.com/pkdev0101/sdlabrats_frontend"
+    - label: "Backend Repo"
+      url: "https://github.com/pkdev0101/sdlabrats_backend"
+    - label: "Sprint Board"
+      url: "https://github.com/orgs/SDLabRats-Team/projects/3"
