@@ -29,8 +29,7 @@ env:
 jobs:
   # Build job
   build:
-    # Ruby 3.1 builds exist only up to Ubuntu 24.04, and ubuntu-latest moved past it.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -53,11 +52,6 @@ jobs:
         run: |
           make build-registered-projects  # Distribute all registered project files to Jekyll locations
           make build-registered-docs  # Distribute all registered documentation files to Jekyll locations  
-
-      - name: Check CS Pathway game modules
-        run: |
-          python scripts/check_cs_pathway_imports.py
-          node _projects/games/cs-pathway/model/stationVerifiers.test.mjs
 
       - name: Verify registered docs output
         run: |

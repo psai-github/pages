@@ -577,15 +577,7 @@ class ProfileManager {
   }
 
   /**
-   * Save Toolchain Trail (Level 2) station progress.
-   * Mirrors saveTheme/saveAvatar pattern: write-through to localStorage,
-   * best-effort async sync to backend if authenticated.
-   *
-   * @param {Object} stationsMap - { [stationId]: 'locked'|'active'|'stuck'|'complete' }
-   * @param {string|null} activeStationId - currently active/required station id
-   * @param {number} score - 0..1 overall level score
-   * @param {string|null} completedAt - ISO timestamp once the whole trail (incl. boss) is done
-   * @returns {Promise<{ success: boolean, code: number, body: Object|null }>}
+   * Save Toolchain Trail station progress to local storage and the backend.
    */
   async saveToolchainProgress(stationsMap = {}, activeStationId = null, score = 0, completedAt = null) {
     try {
