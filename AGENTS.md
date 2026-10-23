@@ -176,18 +176,6 @@ while preserving all critical instructions. The agent must still communicate wit
 * **代码重复警告：** 课程聊天在 [_projects/systems/courses/_includes/](_projects/systems/courses/_includes/) 的 `announcement_chat.html`、`week_chat.html`、`lesson_chat.html` 中各有一份，并仍硬编码 8589 端口（待改用 `javaWebSocketURI`）；修改协议时同步这些 include 与 Messages 的 `thread.js`。
 * **课程聊天约定：** lesson 页面通过 frontmatter `chat: true` 启用，共享 backbone 群组 `"lessons"`，以 `[[lesson:<url>]]` 标记按页面隔离。
 
-## CS Pathway 关卡分数
-
-* **数据流：** 每个关卡的分数 = 完成百分比（0–100）。前端由 [model/pathwayScores.js](_projects/games/cs-pathway/model/pathwayScores.js) 统一记录（`completeLevelTask` 用于任务型关卡，`recordLevelRatio` 用于 Mission Tools/Toolchain Trail 这类比例型关卡），并通过 [services/PathwayScoreApi.js](_projects/games/cs-pathway/services/PathwayScoreApi.js) 写入 Spring `PUT /api/cs-pathway/scores/{levelKey}`；学生身份取自 Spring JWT cookie，不在请求体里传 uid。
-* **存储：** Spring（blueprint-spring `mvc/cspathway`）复用现有 `stats` 表：`module = "cs-pathway"`，`submodule` 0–4 对应五个关卡，`grades` = 百分比，`finished` = 达到 100%。不要改 `stats` 表结构，也不要重新编号 submodule。分数只增不减（前后端都如此）。
-* **新增任务/关卡：** 在 `PATHWAY_LEVELS` 中添加任务 id，并保持 levelKey 与 Spring 的 `CsPathwayLevel` 枚举一致。每个关卡页顶部居中的 `PathwayScoreboard` 分数条会自动显示（右上角留给各关卡的 toast/“Press E” 提示，左上角是状态面板）。教师视图：Spring `/mvc/cs-pathway/read`。
-* **Mac 设置检查：** Toolchain Trail 选择 macOS 时显示“Set up & check my Mac”按钮（[levels/MacSetupCheck.js](_projects/games/cs-pathway/levels/MacSetupCheck.js)）。网页无法在学生电脑上运行程序，所以面板按顺序给出要粘贴到学生自己 Terminal 的命令：`source scripts/mac_setup_agent.zsh`（开启 agent）→ `bash scripts/activate_macos.sh`（安装）→ `source ~/.zshrc` → `bash scripts/verifyToolsTerminal.sh`（验证）。学生把验证输出粘贴回来，由 [model/verifyToolsReport.js](_projects/games/cs-pathway/model/verifyToolsReport.js) 解析；修改 verifyToolsTerminal.sh 的输出格式时要同步更新解析器（`tests/test_verify_tools_report.mjs` 会运行真实脚本做契约测试）。脚本没有可执行位，所以一律用 `bash scripts/...` 运行。
-* **工作站验证（一次配对）：** 每个 Toolchain Trail 工作站由 [levels/StationVerificationTrial.js](_projects/games/cs-pathway/levels/StationVerificationTrial.js) 通过 Spring `/api/toolchain` 验证。学生在整个关卡只需运行一次 `python3 scripts/toolchain_agent.py --server <后端>`（macOS/Windows/Linux 通用，只用标准库），输入一次配对码；之后 agent 转到后台运行（`--stop` 停止，`--foreground` 留在前台），每次检查前重新读取新终端的 PATH，所以学生在同一个终端安装工具后无需重新配对；之后游戏到每个工作站时调用 `POST /sessions/{id}/check`，agent 轮询 `GET /sessions/{id}/next`（Bearer token，4 小时有效）自动检查并回传结果。配对的 sessionId 存在 localStorage `ocs-toolchain-agent-session`。检查失败时显示的精确修复命令在 [data/toolchainTrailFixes.js](_projects/games/cs-pathway/data/toolchainTrailFixes.js)（按检查 id 和操作系统）；新增检查时要同时加修复步骤（`tests/toolchain_trail_fixes.test.mjs` 会检查）。游戏的轮询间隔等时间设置在 [data/toolchainTrailSettings.js](_projects/games/cs-pathway/data/toolchainTrailSettings.js)，agent 的轮询间隔用 `--poll-seconds`，不要写死在代码里。检查 id 必须与 Spring `ToolchainStations` 一致；修改 agent 时运行 `python3 scripts/test_toolchain_agent.py`。
-* **Mac 结果自动上传：** Terminal 没有登录 cookie，所以已登录时面板先向 Spring 要一个 30 分钟有效的配对码（`POST /api/cs-pathway/setup-report/pairing-code`，[services/SetupReportApi.js](_projects/games/cs-pathway/services/SetupReportApi.js)），并把验证命令换成 `bash scripts/verifyToolsTerminal.sh --report <上传 URL>`。脚本把结果写入仓库根目录的 `setup-report.md`（已 gitignore）并 POST 原始文本到该 URL；面板每 4 秒轮询 `GET /api/cs-pathway/setup-report` 并自动显示。未登录或上传失败时退回粘贴流程（粘贴的结果只显示，不保存）。Spring 存在独立的 `cs_pathway_setup_report` 表（每个学生一行，仅保留最新报告，不动 `stats` 表），教师视图多一列“Setup check”。上传端点是公开的、报告是学生自报的，所以不要用它来自动加分。Spring 端用正则读取 `Overall:`/`Summary:` 行，修改脚本输出格式时也要同步。脚本还输出 `Started: <日期 时间 时区>` 和 `Duration: N seconds`（检查耗时），解析器读作 `startedAt`/`durationSeconds`（旧脚本输出时为 null）。
-* **Linux/Windows 结果自动上传：** Linux/Kasm/Windows 面板（[levels/SystemSetupCheck.js](_projects/games/cs-pathway/levels/SystemSetupCheck.js)）复用同一配对码、上传端点和 4 秒轮询，命令换成 `python3 scripts/linux_setup_agent.py --check --report <上传 URL>`（Windows 在 WSL 中用 `windows_setup_agent.py`）。agent 写入 `setup-report.md` 并用 urllib POST。`=== ... SETUP CHECK v1 ===` 标记内还有 `Started:`、`Duration:`、`Summary: N passed, 0 warned, M failed` 和 `Overall:` 行，Spring 保存时必须有 `Summary:`/`Overall:`；[model/systemSetupReport.js](_projects/games/cs-pathway/model/systemSetupReport.js) 读取 `startedAt`/`durationSeconds`。每个学生只保留最新一份报告（不分系统），所以面板会忽略其他系统的上传报告。Spring 的 AI 审核也读取 `FAIL <id> | <label>` 行。测试：`tests/test_system_setup_report.mjs` 与 `scripts/test_linux_setup_agent.py`。
-* **求助红旗：** Toolchain Trail 右下角的红旗按钮（[levels/HelpFlag.js](_projects/games/cs-pathway/levels/HelpFlag.js)）一键发送预写消息（[model/helpRequestMessage.js](_projects/games/cs-pathway/model/helpRequestMessage.js)，含当前工作站、系统和是否卡住）到 Spring `POST /api/cs-pathway/help-requests`；学生身份取自 JWT cookie。Spring 存在独立的 `cs_pathway_help_request` 表（每次求助一行，不覆盖），同一学生 1 分钟内重复发送返回 429，教师在 `/mvc/cs-pathway/read` 顶部的 Help requests 表查看。消息长度上限 500，前后端须一致。测试：`node --test tests/test_help_request_message.mjs` 与 Spring `CsPathwayHelpRequestServiceTest`。
-* **嵌套项目注意：** `make` 的 `watch-projects` 对 `games/cs-pathway` 这类嵌套项目取错目录名，不会自动重建；修改后手动运行 `make -C _projects/games/cs-pathway build` 并重启 `make`。
-
 ## 反模式
 
 ### 上帝函数
@@ -202,10 +190,3 @@ while preserving all critical instructions. The agent must still communicate wit
 
 * **你需要它吗 (YAGNI)：** 除非现在需要，否则不要构建功能。避免推测性的泛化。
 * 仅在保证正确性后才进行优化（优化前进行性能分析）。
-
-## Linux terminal setup assistance
-
-For Linux tool installation or virtual-environment troubleshooting, follow
-[the Linux setup assistant guide](docs/linux-setup-agent.md). Run
-`scripts/linux_setup_agent.py` in the affected Linux terminal; local Mac
-checks are not evidence about another user's Linux system.
